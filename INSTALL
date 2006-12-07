@@ -1,0 +1,10 @@
+To install the module execute the following steps:
+
+   perl Makefile.PL
+   make
+   make test
+
+"make test" do some tests. If you get some failed messages then you shouldn't install the module.
+Take a look into the README if you want to report BUGS. Otherwise your last step is:
+
+   make install
