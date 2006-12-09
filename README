@@ -1,6 +1,5 @@
 NAME
-    Sys::Statistics::Linux - Main package to collect linux system
-    statistics.
+    Sys::Statistics::Linux - Collect linux system statistics.
 
 SYNOPSIS
        use Sys::Statistics::Linux;
@@ -33,6 +32,18 @@ DESCRIPTION
     other system informations. Refer to the documentation of the
     distribution modules to get more informations about all possible
     statistics and system informations.
+
+TECHNICAL NOTE
+    This distribution collects statistics by the virtual /proc filesystem
+    (procfs) and is developed on default vanilla kernels. It is tested on
+    x86 hardware with the distributions SuSE (SuSE on s390 and s390x
+    architecture as well), Red Hat, Debian, Asianux, Slackware and Mandrake
+    on kernel versions 2.4 and 2.6 and should run on all linux kernels with
+    a default vanilla kernel as well. It is possible that this module
+    doesn't run on all distributions if the procfs is too much modified.
+
+    Further it is necessary to run it as a user with the authorization to
+    read the /proc filesystem.
 
 DELTAS
     The options "CpuStats", "ProcStats", "PgSwStats", "NetStats",
@@ -85,13 +96,6 @@ OPTIONS
        Processes   -  Collect process statistics              with L<Sys::Statistics::Linux::Processes>.
 
 METHODS
-  All methods
-       C<new()>
-       C<set()>
-       C<get()>
-       C<settime()>
-       C<gettime()>
-
   new()
     Call "new()" to create a new Statistic object. Necessary statistics will
     be initialized.
@@ -161,19 +165,20 @@ METHODS
     of POSIX.pm or the manpage strftime(3).
 
   gettime()
-    Call "gettime()" returns the POSIX formatted time stamp. If a time
-    format isn't set then the default time stamp will be set automatically.
-    You can also set a timeformat with "gettime()".
+    "gettime()" returns a POSIX formatted time stamp, @foo in list and $bar
+    in scalar context. If the time format isn't set then the default format
+    "%Y-%m-%d %H:%M:%S" will be set automatically. You can also set a time
+    format with "gettime()".
 
-             my $time_stamp = $lxs->gettime;
+             my $date_time = $lxs->gettime;
 
     Or
 
-             my $time_stamp = $lxs->gettime('Date: %Y/%m/%d, Time: %H:%M:%S');
+             my ($date, $time) = $lxs->gettime;
 
-    Or print it.
+    Or
 
-             print $lxs->gettime, "\n";
+             my ($date, $time) = $lxs->gettime('%Y/%m/%d %H:%M:%S');
 
 EXAMPLES
     A very simple perl script could looks like this:

@@ -12,6 +12,7 @@ examples/ProcStats.pl
 examples/SockStats.pl
 examples/SysInfo.pl
 INSTALL
+lib/Sys/Statistics/linux.man
 lib/Sys/Statistics/Linux.pm
 lib/Sys/Statistics/Linux/CpuStats.pm
 lib/Sys/Statistics/Linux/DiskStats.pm
@@ -37,6 +38,7 @@ t/LoadAVG.t
 t/MemStats.t
 t/NetStats.t
 t/PgSwStats.t
+t/Pod.t
 t/Processes.t
 t/ProcStats.t
 t/SockStats.t

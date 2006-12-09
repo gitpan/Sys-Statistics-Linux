@@ -4,7 +4,9 @@ To install the module execute the following steps:
    make
    make test
 
-"make test" do some tests. If you get some failed messages then you shouldn't install the module.
-Take a look into the README if you want to report BUGS. Otherwise your last step is:
+"make test" do some tests. If you get failed messages then you shouldn't install the module.
+Take a look into the README if you want to report a bug. Otherwise your last step is:
 
    make install
+
+and have a lot of fun with Sys::Statistics::Linux.

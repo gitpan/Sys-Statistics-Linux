@@ -1,6 +1,6 @@
 =head1 NAME
 
-Sys::Statistics::Linux - Main package to collect linux system statistics.
+Sys::Statistics::Linux - Collect linux system statistics.
 
 =head1 SYNOPSIS
 
@@ -33,6 +33,16 @@ This module is the main package from the distribution Sys::Statistics::Linux and
 different linux system informations like processor workload, memory usage, network and
 disk statisitcs and other system informations. Refer to the documentation of the distribution
 modules to get more informations about all possible statistics and system informations.
+
+=head1 TECHNICAL NOTE
+
+This distribution collects statistics by the virtual F</proc> filesystem (procfs) and is developed
+on default vanilla kernels. It is tested on x86 hardware with the distributions SuSE (SuSE on s390
+and s390x architecture as well), Red Hat, Debian, Asianux, Slackware and Mandrake on kernel versions
+2.4 and 2.6 and should run on all linux kernels with a default vanilla kernel as well. It is possible
+that this module doesn't run on all distributions if the procfs is too much modified.
+
+Further it is necessary to run it as a user with the authorization to read the F</proc> filesystem.
 
 =head1 DELTAS
 
@@ -80,14 +90,6 @@ To get more informations about each option refer the different modules of the di
    Processes   -  Collect process statistics              with L<Sys::Statistics::Linux::Processes>.
 
 =head1 METHODS
-
-=head2 All methods
-
-   C<new()>
-   C<set()>
-   C<get()>
-   C<settime()>
-   C<gettime()>
 
 =head2 new()
 
@@ -160,18 +162,19 @@ or the manpage C<strftime(3)>.
 
 =head2 gettime()
 
-Call C<gettime()> returns the POSIX formatted time stamp. If a time format isn't set then the default
-time stamp will be set automatically. You can also set a timeformat with C<gettime()>.
+C<gettime()> returns a POSIX formatted time stamp, @foo in list and $bar in scalar context.
+If the time format isn't set then the default format "%Y-%m-%d %H:%M:%S" will be set automatically.
+You can also set a time format with C<gettime()>.
 
-         my $time_stamp = $lxs->gettime;
+         my $date_time = $lxs->gettime;
 
 Or
 
-         my $time_stamp = $lxs->gettime('Date: %Y/%m/%d, Time: %H:%M:%S');
+         my ($date, $time) = $lxs->gettime;
 
-Or print it.
+Or
 
-         print $lxs->gettime, "\n";
+         my ($date, $time) = $lxs->gettime('%Y/%m/%d %H:%M:%S');
 
 =head1 EXAMPLES
 
@@ -308,7 +311,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use strict;
 use warnings;

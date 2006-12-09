@@ -69,17 +69,11 @@ Note that if F</etc/passwd> isn't readable, the key owner is set to F<N/a>.
 
 =head1 METHODS
 
-=head2 All methods
-
-   C<new()>
-   C<init()>
-   C<get()>
-
 =head2 new()
 
 Call C<new()> to create a new object.
 
-   my $lxs = new Sys::Statistics::Linux::CpuStats;
+   my $lxs = new Sys::Statistics::Linux::Processes;
 
 =head2 init()
 
@@ -120,7 +114,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use strict;
 use warnings;
