@@ -1,6 +1,6 @@
 ---
 name: Sys-Statistics-Linux
-version: 0.02
+version: 0.03
 author:
   - Jonny Schulz
 abstract: Collect linux system statistics.
@@ -14,10 +14,10 @@ requires:
 provides:
   Sys::Statistics::Linux:
     file: lib/Sys/Statistics/Linux.pm
-    version: 0.02
+    version: 0.03
   Sys::Statistics::Linux::CpuStats:
     file: lib/Sys/Statistics/Linux/CpuStats.pm
-    version: 0.02
+    version: 0.03
   Sys::Statistics::Linux::DiskStats:
     file: lib/Sys/Statistics/Linux/DiskStats.pm
     version: 0.02
@@ -41,7 +41,7 @@ provides:
     version: 0.02
   Sys::Statistics::Linux::ProcStats:
     file: lib/Sys/Statistics/Linux/ProcStats.pm
-    version: 0.01
+    version: 0.02
   Sys::Statistics::Linux::Processes:
     file: lib/Sys/Statistics/Linux/Processes.pm
     version: 0.02
@@ -51,7 +51,7 @@ provides:
   Sys::Statistics::Linux::SysInfo:
     file: lib/Sys/Statistics/Linux/SysInfo.pm
     version: 0.02
-generated_by: Module::Build version 0.2805
+generated_by: Module::Build version 0.2806
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2

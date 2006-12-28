@@ -276,7 +276,7 @@ EXAMPLES
 
              my $lxs = new Sys::Statistics::Linux;
              $lxs->settime('%Y/%m/%d %H:%M:%S');
-             print $lxs->gettime, "\n";
+             print "$lxs->gettime\n";
 
     If you're not sure you can use the the "Data::Dumper" module to learn
     more about the hash structure:

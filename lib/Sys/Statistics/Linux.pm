@@ -273,7 +273,7 @@ Set and get a time stamp:
 
          my $lxs = new Sys::Statistics::Linux;
          $lxs->settime('%Y/%m/%d %H:%M:%S');
-         print $lxs->gettime, "\n";
+         print "$lxs->gettime\n";
 
 If you're not sure you can use the the C<Data::Dumper> module to learn more about the hash structure:
 
@@ -311,7 +311,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use strict;
 use warnings;
