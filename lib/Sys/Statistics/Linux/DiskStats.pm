@@ -87,7 +87,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::DiskStats;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use strict;
 use warnings;
@@ -163,8 +163,6 @@ sub _load {
                $x->{ttreq}  += $x->{rdreq} + $x->{wrtreq};
                $x->{ttbyt}  += $x->{rdbyt} + $x->{wrtbyt};
             }
-         } else {
-            next;
          }
       }
       $fh->close;
@@ -187,6 +185,9 @@ sub _load {
    } else {
       croak "$class: unable to open $file->{diskstats} or $file->{partitions} ($!)";
    }
+
+   croak "$class: no diskstats found! your system seems not to be compiled with CONFIG_BLK_STATS=y"
+      unless -e $file->{diskstats} && %stats;
 
    return \%stats;
 }
