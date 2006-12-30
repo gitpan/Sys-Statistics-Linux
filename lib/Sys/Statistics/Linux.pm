@@ -39,8 +39,13 @@ modules to get more informations about all possible statistics and system inform
 This distribution collects statistics by the virtual F</proc> filesystem (procfs) and is developed
 on default vanilla kernels. It is tested on x86 hardware with the distributions SuSE (SuSE on s390
 and s390x architecture as well), Red Hat, Debian, Asianux, Slackware and Mandrake on kernel versions
-2.4 and 2.6 and should run on all linux kernels with a default vanilla kernel as well. It is possible
-that this module doesn't run on all distributions if the procfs is too much modified.
+2.4 and 2.6 and should run on all linux kernels with a default vanilla kernel as well.
+It is possible that this module doesn't run on all distributions if the procfs is too much modified.
+
+For example the linux kernel 2.4 can compiled with the option "CONFIG_BLK_STATS". It is possible to
+activate or deactivate the block statistics for devices with this option. These statistics doesn't
+exist in /proc/partitions if this option isn't activated. Since linux kernel 2.5 these statistics are
+in /proc/diskstats.
 
 Further it is necessary to run it as a user with the authorization to read the F</proc> filesystem.
 
@@ -294,6 +299,13 @@ Take a look into the the F<examples> directory of the distribution for some exam
 
 No exports.
 
+=head1 TODOS
+
+   * Dynamic loader for options/modules.
+   * Maybe Sys::Statistics::Linux::Formatter to format statistics
+     for inserts into a database or a nice output to files.
+   * Are there any wishs from your side? Send me a mail!
+
 =head1 REPORTING BUGS
 
 Please report all bugs to <jschulz.cpan(at)bloonix.de>.
@@ -311,7 +323,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use strict;
 use warnings;

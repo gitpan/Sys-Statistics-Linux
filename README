@@ -42,6 +42,12 @@ TECHNICAL NOTE
     a default vanilla kernel as well. It is possible that this module
     doesn't run on all distributions if the procfs is too much modified.
 
+    For example the linux kernel 2.4 can compiled with the option
+    "CONFIG_BLK_STATS". It is possible to activate or deactivate the block
+    statistics for devices with this option. These statistics doesn't exist
+    in /proc/partitions if this option isn't activated. Since linux kernel
+    2.5 these statistics are in /proc/diskstats.
+
     Further it is necessary to run it as a user with the authorization to
     read the /proc filesystem.
 
@@ -297,6 +303,12 @@ EXAMPLES
 
 EXPORTS
     No exports.
+
+TODOS
+       * Dynamic loader for options/modules.
+       * Maybe Sys::Statistics::Linux::Formatter to format statistics
+         for inserts into a database or a nice output to files.
+       * Are there any wishs from your side? Send me a mail!
 
 REPORTING BUGS
     Please report all bugs to <jschulz.cpan(at)bloonix.de>.
