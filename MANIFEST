@@ -38,6 +38,7 @@ t/LoadAVG.t
 t/MemStats.t
 t/NetStats.t
 t/PgSwStats.t
+t/Pod-Coverage.t
 t/Pod.t
 t/Processes.t
 t/ProcStats.t

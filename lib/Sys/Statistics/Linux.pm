@@ -305,6 +305,7 @@ No exports.
    * Maybe Sys::Statistics::Linux::Formatter to format statistics
      for inserts into a database or a nice output to files.
    * Are there any wishs from your side? Send me a mail!
+   * Add a find-method to find special processes and values
 
 =head1 REPORTING BUGS
 
@@ -323,7 +324,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use strict;
 use warnings;

@@ -104,7 +104,7 @@ sub _load {
    ( $lavg{avg_1}
    , $lavg{avg_5}
    , $lavg{avg_15}
-   ) = (split /\s+|\//, <$fh>);
+   ) = (split /\s+/, <$fh>)[0..2];
 
    $fh->close;
    return \%lavg;

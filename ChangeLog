@@ -1,3 +1,6 @@
+0.06    Released at 2007-01-22.
+        Bugfix in ProcStats.pm. "count" statistics fixed.
+        Added t/Pod-Coverage.t.
 0.05    Released at 2006-12-30.
         Updated t/DiskStats.t.
         Updated POD and README.
