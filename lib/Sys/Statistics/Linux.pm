@@ -324,7 +324,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use strict;
 use warnings;
@@ -361,12 +361,13 @@ use constant STATISTICS => {
 };
 
 sub new {
+   my $class = shift;
    my $self = bless {
       opts  => {},
       init  => {},
       stats => {},
-      obj   => {},
-   }, shift;
+      obj   => {}
+   }, $class; 
    $self->set(@_) if @_;
    return $self;
 }
