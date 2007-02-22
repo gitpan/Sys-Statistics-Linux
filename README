@@ -76,35 +76,38 @@ DELTAS
 OPTIONS
     All options are identical with the package names of the distribution. To
     activate the gathering of statistics you have to set the options by the
-    call of "new()" or "set()". In addition you can deactivate -
-    respectively delete - statistics with "set()" and re-init all statistics
-    with "init()".
+    call of "new()" or "set()". In addition you can delete, set pause or
+    create new statistics with "set()" and re-init all statistics with
+    "init()".
 
-    The options must be set with a BOOLEAN value (1|0).
+    The options must be set with on of the following values:
 
-       1 - activate (initialize)
-       0 - deactivate (delete)
+       -1 - set pause on statistics but wouldn't delete them
+        0 - delete statistics and destroy the object
+        1 - create a new object and init statistics if necessary
+        2 - create a new object if not exists but wouldn't init statistics
 
-    To get more informations about each option refer the different modules
-    of the distribution.
+    To get more informations about the statistics refer the different
+    modules of the distribution.
 
-       SysInfo     -  Collect system informations             with L<Sys::Statistics::Linux::SysInfo>.
-       CpuStats    -  Collect cpu statistics                  with L<Sys::Statistics::Linux::CpuStats>.
-       ProcStats   -  Collect process statistics              with L<Sys::Statistics::Linux::ProcStats>.
-       MemStats    -  Collect memory statistics               with L<Sys::Statistics::Linux::MemStats>.
-       PgSwStats   -  Collect paging and swapping statistics  with L<Sys::Statistics::Linux::PgSwStats>.
-       NetStats    -  Collect net statistics                  with L<Sys::Statistics::Linux::NetStats>.
-       SockStats   -  Collect socket statistics               with L<Sys::Statistics::Linux::SockStats>.
-       DiskStats   -  Collect disk statistics                 with L<Sys::Statistics::Linux::DiskStats>.
-       DiskUsage   -  Collect the disk usage                  with L<Sys::Statistics::Linux::DiskUsage>.
-       LoadAVG     -  Collect the load average                with L<Sys::Statistics::Linux::LoadAVG>.
-       FileStats   -  Collect inode statistics                with L<Sys::Statistics::Linux::FileStats>.
-       Processes   -  Collect process statistics              with L<Sys::Statistics::Linux::Processes>.
+       SysInfo     -  Collect system informations             with Sys::Statistics::Linux::SysInfo.
+       CpuStats    -  Collect cpu statistics                  with Sys::Statistics::Linux::CpuStats.
+       ProcStats   -  Collect process statistics              with Sys::Statistics::Linux::ProcStats.
+       MemStats    -  Collect memory statistics               with Sys::Statistics::Linux::MemStats.
+       PgSwStats   -  Collect paging and swapping statistics  with Sys::Statistics::Linux::PgSwStats.
+       NetStats    -  Collect net statistics                  with Sys::Statistics::Linux::NetStats.
+       SockStats   -  Collect socket statistics               with Sys::Statistics::Linux::SockStats.
+       DiskStats   -  Collect disk statistics                 with Sys::Statistics::Linux::DiskStats.
+       DiskUsage   -  Collect the disk usage                  with Sys::Statistics::Linux::DiskUsage.
+       LoadAVG     -  Collect the load average                with Sys::Statistics::Linux::LoadAVG.
+       FileStats   -  Collect inode statistics                with Sys::Statistics::Linux::FileStats.
+       Processes   -  Collect process statistics              with Sys::Statistics::Linux::Processes.
 
 METHODS
   new()
-    Call "new()" to create a new Statistic object. Necessary statistics will
-    be initialized.
+    Call "new()" to create a new Sys::Statistics::Linux object. You can call
+    "new()" with options. This options would be hand off to the "set()"
+    method.
 
     Without options
 
@@ -114,7 +117,7 @@ METHODS
 
              my $lxs = Sys::Statistics::Linux->new(CpuStats => 1);
 
-    Will do nothing
+    Would do nothing
 
              my $lxs = Sys::Statistics::Linux->new(CpuStats => 0);
 
@@ -127,27 +130,28 @@ METHODS
 
              my $lxs = Sys::Statistics::Linux->new(\%options);
 
+    Take a look to "set()" for more informations.
+
   set()
-    Call "set()" to activate (initialize) or deactivate (delete) options.
+    Call "set()" to activate or deactivate options. The following example
+    would call "new()" and "init()" of "Sys::Statistics::Linux::CpuStats"
+    and delete the object of "Sys::Statistics::Linux::SysInfo":
 
              $lxs->set(
-                CpuStats => 1, # activate
-                SysInfo  => 0, # deactivate
+                CpuStats  => -1, # activated, but paused, wouldn't delete the object
+                Processes =>  0, # deactivate - would delete the statistics and destroy the object
+                PgSwStats =>  1, # activate the statistic and calls C<new()> and C<init()> if necessary
+                NetStats  =>  2, # activate the statistic and call C<new()> if necessary but not C<init()>
              );
 
     It's possible to call "set()" with a hash reference of options.
 
              my %options = (
-                CpuStats => 1,
-                MemStats => 1
+                CpuStats => 2,
+                MemStats => 2
              );
 
              $lxs->set(\%options);
-
-    Activate options with "set()" will initialize necessary statistics.
-
-             $lxs->set(CpuStats => 1); # initialize it
-             $lxs->set(CpuStats => 1); # initialize it again
 
   get()
     Call "get()" to get the collected statistics. "get()" returns the
@@ -157,9 +161,43 @@ METHODS
 
   init()
     The call of "init()" re-init all statistics that are necessary for
-    deltas and if the option is set to 1.
+    deltas and if the option is higher than 0.
 
              $lxs->init;
+
+  search()
+    Call "search()" to search for statistics special statistics. This method
+    return a hash reference that contains the hits.
+
+            my $hits = $lxs->search(
+               Processes => {
+                  cmd   => qr/\[su\]/,
+                  owner => qr/root/
+               },
+               CpuStats => {
+                  total  => 'gt:50',
+                  iowait => '>10'
+               },
+            );
+
+    This would return all matches like
+
+        * processes with command that matches C<[su]>
+        * processes with owner that matches C<root>
+        * all cpu where the total usage is grather than 50
+        * all cpu where iowait is grather than 10
+
+    There are different filter that you can use:
+
+        * gt (>) - grather than
+        * lt (<) - less than
+        * eq (=) - is equal
+
+    Notation examples:
+
+        gt:50 or >50
+        lt:50 or <50
+        eq:50 or =50
 
   settime()
     Call "settime()" to define a POSIX formatted time stamp, generated with
@@ -268,9 +306,10 @@ EXAMPLES
              print Dumper($stats);
 
              # we deactivate CpuStats
-             $lxs->set(CpuStats => 0);
+             $lxs->set(SysStats => 0);
 
-             # $stats contains SysInfo and MemStats
+             # $stats contains CpuStats and MemStats
+             sleep(1);
              $stats = $lxs->get;
              print Dumper($stats);
 
@@ -309,7 +348,6 @@ TODOS
        * Maybe Sys::Statistics::Linux::Formatter to format statistics
          for inserts into a database or a nice output to files.
        * Are there any wishs from your side? Send me a mail!
-       * Add a find-method to find special processes and values
 
 REPORTING BUGS
     Please report all bugs to <jschulz.cpan(at)bloonix.de>.

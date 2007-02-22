@@ -202,7 +202,7 @@ sub _load {
 
    foreach my $pid (grep /^\d+$/, readdir $pdir) {
 
-      #  memory usage for each process
+      # memory usage for each process
       if ($fh->open("$file->{basedir}/$pid/$file->{p_statm}", 'r')) {
          @{$stats{$pid}}{qw(size resident share trs drs lrs dtp)} = split /\s+/, <$fh>;
          $fh->close;
@@ -211,7 +211,7 @@ sub _load {
          next;
       }
 
-      #  different other informations for each process
+      # different other informations for each process
       if ($fh->open("$file->{basedir}/$pid/$file->{p_stat}", 'r')) {
          @{$stats{$pid}}{qw(
             pid cmd state ppid pgrp session ttynr minflt

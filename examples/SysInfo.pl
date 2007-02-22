@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use Sys::Statistics::Linux;
 
-$| = 1;
+$|++;
 
 my $column  = 20;
 my $options = { SysInfo => 1 };

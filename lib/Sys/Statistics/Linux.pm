@@ -71,34 +71,37 @@ statistics. The inital statistics will be updated. You can turn on and off optio
 
 All options are identical with the package names of the distribution. To activate the gathering
 of statistics you have to set the options by the call of C<new()> or C<set()>. In addition you
-can deactivate - respectively delete - statistics with C<set()> and re-init all statistics with
+can delete, set pause or create new statistics with C<set()> and re-init all statistics with
 C<init()>.
 
-The options must be set with a BOOLEAN value (1|0).
+The options must be set with on of the following values:
 
-   1 - activate (initialize)
-   0 - deactivate (delete)
+   -1 - set pause on statistics but wouldn't delete them
+    0 - delete statistics and destroy the object
+    1 - create a new object and init statistics if necessary
+    2 - create a new object if not exists but wouldn't init statistics
 
-To get more informations about each option refer the different modules of the distribution.
+To get more informations about the statistics refer the different modules of the distribution.
 
-   SysInfo     -  Collect system informations             with L<Sys::Statistics::Linux::SysInfo>.
-   CpuStats    -  Collect cpu statistics                  with L<Sys::Statistics::Linux::CpuStats>.
-   ProcStats   -  Collect process statistics              with L<Sys::Statistics::Linux::ProcStats>.
-   MemStats    -  Collect memory statistics               with L<Sys::Statistics::Linux::MemStats>.
-   PgSwStats   -  Collect paging and swapping statistics  with L<Sys::Statistics::Linux::PgSwStats>.
-   NetStats    -  Collect net statistics                  with L<Sys::Statistics::Linux::NetStats>.
-   SockStats   -  Collect socket statistics               with L<Sys::Statistics::Linux::SockStats>.
-   DiskStats   -  Collect disk statistics                 with L<Sys::Statistics::Linux::DiskStats>.
-   DiskUsage   -  Collect the disk usage                  with L<Sys::Statistics::Linux::DiskUsage>.
-   LoadAVG     -  Collect the load average                with L<Sys::Statistics::Linux::LoadAVG>.
-   FileStats   -  Collect inode statistics                with L<Sys::Statistics::Linux::FileStats>.
-   Processes   -  Collect process statistics              with L<Sys::Statistics::Linux::Processes>.
+   SysInfo     -  Collect system informations             with Sys::Statistics::Linux::SysInfo.
+   CpuStats    -  Collect cpu statistics                  with Sys::Statistics::Linux::CpuStats.
+   ProcStats   -  Collect process statistics              with Sys::Statistics::Linux::ProcStats.
+   MemStats    -  Collect memory statistics               with Sys::Statistics::Linux::MemStats.
+   PgSwStats   -  Collect paging and swapping statistics  with Sys::Statistics::Linux::PgSwStats.
+   NetStats    -  Collect net statistics                  with Sys::Statistics::Linux::NetStats.
+   SockStats   -  Collect socket statistics               with Sys::Statistics::Linux::SockStats.
+   DiskStats   -  Collect disk statistics                 with Sys::Statistics::Linux::DiskStats.
+   DiskUsage   -  Collect the disk usage                  with Sys::Statistics::Linux::DiskUsage.
+   LoadAVG     -  Collect the load average                with Sys::Statistics::Linux::LoadAVG.
+   FileStats   -  Collect inode statistics                with Sys::Statistics::Linux::FileStats.
+   Processes   -  Collect process statistics              with Sys::Statistics::Linux::Processes.
 
 =head1 METHODS
 
 =head2 new()
 
-Call C<new()> to create a new Statistic object. Necessary statistics will be initialized.
+Call C<new()> to create a new Sys::Statistics::Linux object. You can call C<new()> with options.
+This options would be hand off to the C<set()> method.
 
 Without options
 
@@ -108,7 +111,7 @@ Or with options
 
          my $lxs = Sys::Statistics::Linux->new(CpuStats => 1);
 
-Will do nothing
+Would do nothing
 
          my $lxs = Sys::Statistics::Linux->new(CpuStats => 0);
 
@@ -121,28 +124,28 @@ It's possible to call C<new()> with a hash reference of options.
 
          my $lxs = Sys::Statistics::Linux->new(\%options);
 
+Take a look to C<set()> for more informations.
+
 =head2 set()
 
-Call C<set()> to activate (initialize) or deactivate (delete) options.
+Call C<set()> to activate or deactivate options. The following example would call C<new()> and C<init()>
+of C<Sys::Statistics::Linux::CpuStats> and delete the object of C<Sys::Statistics::Linux::SysInfo>:
 
          $lxs->set(
-            CpuStats => 1, # activate
-            SysInfo  => 0, # deactivate
+            CpuStats  => -1, # activated, but paused, wouldn't delete the object
+            Processes =>  0, # deactivate - would delete the statistics and destroy the object
+            PgSwStats =>  1, # activate the statistic and calls C<new()> and C<init()> if necessary
+            NetStats  =>  2, # activate the statistic and call C<new()> if necessary but not C<init()>
          );
 
 It's possible to call C<set()> with a hash reference of options.
 
          my %options = (
-            CpuStats => 1,
-            MemStats => 1
+            CpuStats => 2,
+            MemStats => 2
          );
 
          $lxs->set(\%options);
-
-Activate options with C<set()> will initialize necessary statistics.
-
-         $lxs->set(CpuStats => 1); # initialize it
-         $lxs->set(CpuStats => 1); # initialize it again
 
 =head2 get()
 
@@ -152,9 +155,43 @@ Call C<get()> to get the collected statistics. C<get()> returns the statistics a
 
 =head2 init()
 
-The call of C<init()> re-init all statistics that are necessary for deltas and if the option is set to 1.
+The call of C<init()> re-init all statistics that are necessary for deltas and if the option is higher than 0.
 
          $lxs->init;
+
+=head2 search()
+
+Call C<search()> to search for statistics special statistics. This method return a hash reference that contains the hits.
+
+        my $hits = $lxs->search(
+           Processes => {
+              cmd   => qr/\[su\]/,
+              owner => qr/root/
+           },
+           CpuStats => {
+              total  => 'gt:50',
+              iowait => '>10'
+           },
+        );
+
+This would return all matches like
+
+    * processes with command that matches C<[su]>
+    * processes with owner that matches C<root>
+    * all cpu where the total usage is grather than 50
+    * all cpu where iowait is grather than 10
+
+There are different filter that you can use:
+
+    * gt (>) - grather than
+    * lt (<) - less than
+    * eq (=) - is equal
+
+Notation examples:
+
+    gt:50 or >50
+    lt:50 or <50
+    eq:50 or =50
 
 =head2 settime()
 
@@ -264,9 +301,10 @@ Activate and deactivate statistics:
          print Dumper($stats);
 
          # we deactivate CpuStats
-         $lxs->set(CpuStats => 0);
+         $lxs->set(SysStats => 0);
 
-         # $stats contains SysInfo and MemStats
+         # $stats contains CpuStats and MemStats
+         sleep(1);
          $stats = $lxs->get;
          print Dumper($stats);
 
@@ -305,7 +343,6 @@ No exports.
    * Maybe Sys::Statistics::Linux::Formatter to format statistics
      for inserts into a database or a nice output to files.
    * Are there any wishs from your side? Send me a mail!
-   * Add a find-method to find special processes and values
 
 =head1 REPORTING BUGS
 
@@ -324,51 +361,36 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.08';
+our $VERSION = '0.09_01';
 
 use strict;
 use warnings;
 use Carp qw(croak);
 use POSIX qw(strftime);
-
-use Sys::Statistics::Linux::SysInfo;
-use Sys::Statistics::Linux::CpuStats;
-use Sys::Statistics::Linux::ProcStats;
-use Sys::Statistics::Linux::MemStats;
-use Sys::Statistics::Linux::PgSwStats;
-use Sys::Statistics::Linux::NetStats;
-use Sys::Statistics::Linux::SockStats;
-use Sys::Statistics::Linux::DiskStats;
-use Sys::Statistics::Linux::DiskUsage;
-use Sys::Statistics::Linux::LoadAVG;
-use Sys::Statistics::Linux::FileStats;
-use Sys::Statistics::Linux::Processes;
-
-use constant BOOLEAN => qr/^(0|1)$/;
-use constant STATISTICS => {
-   SysInfo   => BOOLEAN,
-   CpuStats  => BOOLEAN,
-   ProcStats => BOOLEAN,
-   MemStats  => BOOLEAN,
-   PgSwStats => BOOLEAN,
-   NetStats  => BOOLEAN,
-   SockStats => BOOLEAN,
-   DiskStats => BOOLEAN,
-   DiskUsage => BOOLEAN,
-   LoadAVG   => BOOLEAN,
-   FileStats => BOOLEAN,
-   Processes => BOOLEAN,
-};
+use constant RXOPTION => qr/^[0-2\-1]$/;
 
 sub new {
    my $class = shift;
    my $self = bless {
-      opts  => {},
+      opts  => {
+         SysInfo   =>  0,
+         CpuStats  =>  0,
+         ProcStats =>  0,
+         MemStats  =>  0,
+         PgSwStats =>  0,
+         NetStats  =>  0,
+         SockStats =>  0,
+         DiskStats =>  0,
+         DiskUsage =>  0,
+         LoadAVG   =>  0,
+         FileStats =>  0,
+         Processes =>  0,
+      },
       init  => {},
       stats => {},
-      obj   => {}
+      obj   => {},
    }, $class; 
-   $self->set(@_) if @_;
+   $class->set(@_) if @_;
    return $self;
 }
 
@@ -383,24 +405,34 @@ sub set {
    foreach my $opt (keys %{$sets}) {
 
       # validate the options
-      croak "$class: wrong option '$opt'"
-         unless exists STATISTICS->{$opt};
-      croak "$class: wrong value for '$opt'"
-         unless $sets->{$opt} =~ /${\STATISTICS->{$opt}}/;
+      croak "$class: invalid option '$opt'"
+         unless exists $opts->{$opt};
+      croak "$class: invalid value for '$opt'"
+         unless $sets->{$opt} =~ RXOPTION;
 
       $opts->{$opt} = $sets->{$opt};
 
-      if ($opts->{$opt} == 1) {
+      if ($opts->{$opt} > 0) {
          my $package = $class."::".$opt;
 
+         # require mod if not loaded
+         unless (defined &{$package.'::new'}) {
+            my $require = $package;
+            $require =~ s/::/\//g;
+            require "$require.pm";
+         }
+
          # create a new object if the object doesn't exist
-         $obj->{$opt} = $package->new() unless $obj->{$opt};
+         $obj->{$opt} = $package->new()
+            unless $obj->{$opt};
 
-         # get initial statistics if init() is defined
-         $obj->{$opt}->init() if defined &{$package.'::init'};
+         # get initial statistics if init() is defined and the
+         # option is set to 1
+         $obj->{$opt}->init() 
+            if $opts->{$opt} == 1
+            && defined &{$package.'::init'};
 
-      } else {
-         # if $opts->{$opt} == 0
+      } elsif ($opts->{$opt} == 0) {
          delete $obj->{$opt}   if $obj->{$opt};
          delete $stats->{$opt} if $stats->{$opt};
       }
@@ -417,7 +449,7 @@ sub init {
       my $package = $class."::".$opt;
       $obj->{$opt}->init()
          if defined &{$package.'::init'}
-         && $opts->{$opt} == 1;
+         && $opts->{$opt} > 0;
    }
 }
 
@@ -440,21 +472,69 @@ sub get {
    my $stats  = $self->{stats};
    my $obj    = $self->{obj};
    my $format = $self->{timeformat};
+   my $return = shift;
 
    foreach my $opt (keys %{$opts}) {
       $stats->{$opt} = $obj->{$opt}->get()
-         if $opts->{$opt} == 1;
+         if $opts->{$opt} > 0;
    }
 
    return $stats;
+}
+
+sub search {
+   my $self   = shift;
+   my $class  = ref($self);
+   my $filter = $class->_struct(@_);
+   my $opts   = $self->{opts};
+   my $obj    = $self->{obj};
+   my $stats  = $self->{stats};
+   my %hits   = ();
+
+   for my $opt (keys %{$filter}) {
+      croak "$class: not a hash ref opt '$opt'"
+         unless ref($filter->{$opt}) eq 'HASH';
+      croak "$class: invalid option '$opt'"
+         unless exists $opts->{$opt};
+      croak "$class: statistic '$opt' not loaded"
+         unless exists $obj->{$opt};
+
+      while ( my ($name, $value) = each %{$filter->{$opt}} ) {
+         for my $key (keys %{$stats->{$opt}}) {
+            if (ref($stats->{$opt}->{$key}) eq 'HASH') {
+               next if exists $hits{$opt} && $hits{$opt}{$key};
+               $hits{$opt}{$key} = $stats->{$opt}->{$key}
+                  if $class->_diff($stats->{$opt}->{$key}->{$name}, $value);
+            } else {
+               $hits{$opt}{$name} = $stats->{$opt}->{$name}
+                  if $class->_diff($stats->{$opt}->{$name}, $value);
+               last;
+            }
+         }
+      }
+   }
+
+   return %hits ? \%hits : undef;
 }
 
 #
 # private stuff
 #
 
+sub _diff {
+   my ($c, $x, $y) = @_;
+
+   return 1
+      if ( ref($y) eq 'Regexp'  &&  $x =~ $y )
+      || ( $y =~ s/^(eq:|=)//   &&  $x eq $y )
+      || ( $y =~ s/^(gt:|>)//   &&  $y =~ /^\d+$/  &&  $x > $y )
+      || ( $y =~ s/^(lt:|<)//   &&  $y =~ /^\d+$/  &&  $x < $y );
+
+   return undef;
+}
+
 sub _struct {
-   my $self = shift;
+   my $class = shift;
 
    return
       ref($_[0])

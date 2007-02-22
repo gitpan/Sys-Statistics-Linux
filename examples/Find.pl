@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use Sys::Statistics::Linux;
 
-$| = 1;
+$|++;
 
 use Sys::Statistics::Linux;
 
@@ -36,7 +36,7 @@ my $stat = $lxs->get;
 #$lxs->find({
 find({
    Processes => { owner => qr/^root$/ },
-   CpuStats  => { cpu => 'gt 80' },
+   CpuStats  => { cpu => 'gt:80' },
 });
 
 sub find {

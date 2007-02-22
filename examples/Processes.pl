@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use Sys::Statistics::Linux;
 
-$| = 1;
+$|++;
 
 my $header  = 20;
 my $average = 1;
@@ -13,14 +13,14 @@ my $options = { Processes => 1 };
 
 # you need a very very width screen for this output :-)
 
-my @order   = qw(
+my @order = qw(
    pid ppid owner pgrp state session ttynr minflt cminflt mayflt cmayflt
    stime utime cstime cutime prior nice sttime actime vsize nswap cnswap
    cpu size resident share trs drs lrs dtp cmd cmdline
 );
 
-my $lxs     = Sys::Statistics::Linux->new( $options );
-my $h       = $header;
+my $lxs = Sys::Statistics::Linux->new( $options );
+my $h   = $header;
 
 while (1) {
    sleep($average);
@@ -28,7 +28,7 @@ while (1) {
 
    if ($h == $header) {
       printf "%${tcolumn}s", $_ for ('date', 'time');
-      printf "%${dcolumn}s", $_ for ('iface', @order);
+      printf "%${dcolumn}s", $_ for @order;
       print "\n";
    }
 
@@ -38,7 +38,6 @@ while (1) {
       next unless $pid == 1;
       my $pstat = $stats->{Processes}->{$pid};
       printf "%${tcolumn}s", $_ for ($date, $time);
-      printf "%${dcolumn}s", $pid;
       printf "%${dcolumn}s", $pstat->{$_} for @order;
       print "\n";
    }

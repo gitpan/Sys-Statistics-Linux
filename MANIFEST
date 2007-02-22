@@ -43,6 +43,6 @@ t/Pod-Coverage.t
 t/Pod.t
 t/Processes.t
 t/ProcStats.t
+t/Search.t
 t/SockStats.t
 t/SysInfo.t
-TODOS

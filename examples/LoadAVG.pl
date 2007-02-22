@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use Sys::Statistics::Linux;
 
-$| = 1;
+$|++;
 
 my $header  = 20;
 my $average = 1;

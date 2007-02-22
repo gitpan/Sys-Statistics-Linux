@@ -1,3 +1,10 @@
+0.09_01 Released at 2007-02-19.
+        A lot of changes in Linux.pm.
+        Sub modules will only be loaded if they are needed now.
+        Added a search() method to search for values in statistics.
+        Now there are different options (-1, 0, 1, 2) available
+          for the statistics.
+        Added key ttbyt to NetStats (total bytes rx + tx).
 0.08    Released at 2007-02-13.
         Added key writeback to MemStats and actualize the
           documentation. The new keys dirty, slab, mapped
