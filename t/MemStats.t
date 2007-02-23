@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More tests => 12;
 use Sys::Statistics::Linux;
 
 my %MemStats = (
@@ -10,6 +10,8 @@ my %MemStats = (
    memtotal => undef,
    buffers => undef,
    cached => undef,
+   realfree => undef,
+   realfreeper => undef,
 #   mapped => undef,
 #   slab => undef,
 #   dirty => undef,

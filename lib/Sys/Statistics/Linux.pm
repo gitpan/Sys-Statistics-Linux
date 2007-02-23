@@ -361,7 +361,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_04';
+our $VERSION = '0.09_05';
 
 use strict;
 use warnings;
@@ -419,7 +419,8 @@ sub set {
          unless (defined &{$package.'::new'}) {
             my $require = $package;
             $require =~ s/::/\//g;
-            require "$require.pm";
+            require "$require.pm"
+               or croak "$class: unable to load $require.pm";
          }
 
          # create a new object if the object doesn't exist
