@@ -1,3 +1,6 @@
+0.09_04 Released at 2007-02-23.
+        The next release today. :)
+        Added key realfree to MemStats (free + buffers + cached).
 0.09_03 Released at 2007-02-23.
         Added key ttime to Processes (stime + utime).
         Fixed NetStats.t and Processes.t - missed ttbyt and ttime.
