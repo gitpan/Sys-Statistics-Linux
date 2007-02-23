@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 32;
+use Test::More tests => 33;
 use Sys::Statistics::Linux;
 
 my %Processes = (
@@ -17,6 +17,7 @@ my %Processes = (
    cmayflt => undef,
    stime => undef,
    utime => undef,
+   ttime => undef,
    cstime => undef,
    cutime => undef,
    prior => undef,

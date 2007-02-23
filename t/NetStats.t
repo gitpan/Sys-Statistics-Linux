@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 16;
+use Test::More tests => 17;
 use Sys::Statistics::Linux;
 
 my %NetStats = (
@@ -20,6 +20,7 @@ my %NetStats = (
    txcolls => undef,
    txcarr => undef,
    txcompr => undef,
+   ttbyt => undef,
 );
 
 my $lxs = new Sys::Statistics::Linux;

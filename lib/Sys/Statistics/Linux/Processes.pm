@@ -47,6 +47,7 @@ Note that if F</etc/passwd> isn't readable, the key owner is set to F<N/a>.
    cmayflt   -  The number of mayor faults the child process made.
    stime     -  The number of jiffies the process have beed scheduled in kernel mode.
    utime     -  The number of jiffies the process have beed scheduled in user mode.
+   ttime     -  The number of jiffies the process have beed scheduled (user + kernel).
    cstime    -  The number of jiffies the process waited for childrens have been scheduled in kernel mode.
    cutime    -  The number of jiffies the process waited for childrens have been scheduled in user mode.
    prior     -  The priority of the process (+15).
@@ -288,6 +289,8 @@ sub _deltas {
             $lpid->{$k}  = sprintf('%.2f', $lpid->{$k} / $uptime) if $lpid->{$k} > 0 && $uptime > 0;
             $ipid->{$k}  = $tmp;
          }
+         # total workload
+         $lpid->{ttime}  = sprintf('%.2f', $lpid->{stime} + $lpid->{utime});
       } else {
          # we initialize the new process
          for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime sttime)) {

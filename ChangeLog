@@ -1,3 +1,6 @@
+0.09_03 Released at 2007-02-23.
+        Added key ttime to Processes (stime + utime).
+        Fixed NetStats.t and Processes.t - missed ttbyt and ttime.
 0.09_02 Released at 2007-02-23.
         Fixed search(). Now it returns only that statistics that
           matched the search string.
