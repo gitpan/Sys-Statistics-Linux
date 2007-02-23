@@ -361,7 +361,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_01';
+our $VERSION = '0.09_02';
 
 use strict;
 use warnings;
@@ -502,8 +502,7 @@ sub search {
       while ( my ($name, $value) = each %{$filter->{$opt}} ) {
          for my $key (keys %{$stats->{$opt}}) {
             if (ref($stats->{$opt}->{$key}) eq 'HASH') {
-               next if exists $hits{$opt} && $hits{$opt}{$key};
-               $hits{$opt}{$key} = $stats->{$opt}->{$key}
+               $hits{$opt}{$key}{$name} = $stats->{$opt}->{$key}->{$name}
                   if $class->_diff($stats->{$opt}->{$key}->{$name}, $value);
             } else {
                $hits{$opt}{$name} = $stats->{$opt}->{$name}
