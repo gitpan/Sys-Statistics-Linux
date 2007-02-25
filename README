@@ -178,14 +178,20 @@ METHODS
                   total  => 'gt:50',
                   iowait => '>10'
                },
+               DiskUsage => {
+                  '/dev/sda1' => {
+                     usageper => 'gt:80'
+                  }
+               }
             );
 
-    This would return all matches like
+    This would return the following searched and matched keys:
 
-        * processes with command that matches C<[su]>
-        * processes with owner that matches C<root>
-        * all cpu where the total usage is grather than 50
-        * all cpu where iowait is grather than 10
+        * processes with the command C<[su]>
+        * processes with the owner C<root>
+        * all cpu where the C<total> usage is grather than 50
+        * all cpu where C<iowait> is grather than 10
+        * only that disk where C<usageper> is higher than 80
 
     There are different filter that you can use:
 

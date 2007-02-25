@@ -172,14 +172,20 @@ Call C<search()> to search for statistics special statistics. This method return
               total  => 'gt:50',
               iowait => '>10'
            },
+           DiskUsage => {
+              '/dev/sda1' => {
+                 usageper => 'gt:80'
+              }
+           }
         );
 
-This would return all matches like
+This would return the following searched and matched keys:
 
-    * processes with command that matches C<[su]>
-    * processes with owner that matches C<root>
-    * all cpu where the total usage is grather than 50
-    * all cpu where iowait is grather than 10
+    * processes with the command C<[su]>
+    * processes with the owner C<root>
+    * all cpu where the C<total> usage is grather than 50
+    * all cpu where C<iowait> is grather than 10
+    * only that disk where C<usageper> is higher than 80
 
 There are different filter that you can use:
 
@@ -361,7 +367,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_05';
+our $VERSION = '0.09_06';
 
 use strict;
 use warnings;
@@ -488,27 +494,40 @@ sub search {
    my $class  = ref($self);
    my $filter = $class->_struct(@_);
    my $opts   = $self->{opts};
-   my $obj    = $self->{obj};
    my $stats  = $self->{stats};
    my %hits   = ();
 
-   for my $opt (keys %{$filter}) {
+   foreach my $opt (keys %{$filter}) {
       croak "$class: not a hash ref opt '$opt'"
          unless ref($filter->{$opt}) eq 'HASH';
       croak "$class: invalid option '$opt'"
          unless exists $opts->{$opt};
-      croak "$class: statistic '$opt' not loaded"
-         unless exists $obj->{$opt};
 
-      while ( my ($name, $value) = each %{$filter->{$opt}} ) {
-         for my $key (keys %{$stats->{$opt}}) {
-            if (ref($stats->{$opt}->{$key}) eq 'HASH') {
-               $hits{$opt}{$key}{$name} = $stats->{$opt}->{$key}->{$name}
-                  if $class->_diff($stats->{$opt}->{$key}->{$name}, $value);
-            } else {
-               $hits{$opt}{$name} = $stats->{$opt}->{$name}
-                  if $class->_diff($stats->{$opt}->{$name}, $value);
-               last;
+      # next if the object isn't loaded
+      next unless exists $stats->{$opt};
+
+      my $fref = $filter->{$opt};
+      my $sref = $stats->{$opt};
+
+      foreach my $x (keys %{$fref}) {
+         if (ref($fref->{$x}) eq 'HASH' && exists $sref->{$x}) {
+            while ( my ($name, $value) = each %{$fref->{$x}} ) {
+               $hits{$opt}{$x}{$name} = $sref->{$x}->{$name}
+                  if exists $sref->{$x}->{$name}
+                  && $class->_diff($sref->{$x}->{$name}, $value);
+            }
+         } elsif (ref($fref->{$x}) =~ /^(Regexp|)$/) {
+            foreach my $key (keys %{$sref}) {
+               if (ref($sref->{$key}) eq 'HASH') {
+                  $hits{$opt}{$key}{$x} = $sref->{$key}->{$x}
+                     if exists $sref->{$key}->{$x}
+                     && $class->_diff($sref->{$key}->{$x}, $fref->{$x});
+               } else {
+                  $hits{$opt}{$x} = $sref->{$x}
+                     if exists $sref->{$x}
+                     && $class->_diff($sref->{$x}, $fref->{$x});
+                  last;
+               }
             }
          }
       }
