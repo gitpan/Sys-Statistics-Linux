@@ -159,9 +159,10 @@ The call of C<init()> re-init all statistics that are necessary for deltas and i
 
          $lxs->init;
 
-=head2 search()
+=head2 search(), fproc()
 
-Call C<search()> to search for statistics special statistics. This method return a hash reference that contains the hits.
+Call C<search()> to search for statistics. This method rebuilds the hash tree until that keys that the searched
+values and returns the hits as a hash reference. Example:
 
         my $hits = $lxs->search(
            Processes => {
@@ -179,7 +180,7 @@ Call C<search()> to search for statistics special statistics. This method return
            }
         );
 
-This would return the following searched and matched keys:
+This would return the following matches:
 
     * processes with the command C<[su]>
     * processes with the owner C<root>
@@ -187,17 +188,29 @@ This would return the following searched and matched keys:
     * all cpu where C<iowait> is grather than 10
     * only that disk where C<usageper> is higher than 80
 
-There are different filter that you can use:
+Call C<fproc()> to search for processes (only). This method returns a array reference with all process IDs that
+matched the searched string. Example:
 
-    * gt (>) - grather than
-    * lt (<) - less than
-    * eq (=) - is equal
+        my $pids = $lxs->fproc( cmd => qr/init/, owner => 'eq:apache' );
+
+This would return the following process ids:
+
+    * processes that matched the command C<init>
+    * processes with the owner C<apache>
+
+There are different match operators available:
+
+    * gt or > - grather than
+    * lt or < - less than
+    * eq or = - is equal
+    * ne or ! - is not equal
 
 Notation examples:
 
-    gt:50 or >50
-    lt:50 or <50
-    eq:50 or =50
+    gt:50  or  >50
+    lt:50  or  <50
+    eq:50  or  =50
+    ne:50  or  !50
 
 =head2 settime()
 
@@ -367,7 +380,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_06';
+our $VERSION = '0.09_07';
 
 use strict;
 use warnings;
@@ -498,6 +511,8 @@ sub search {
    my %hits   = ();
 
    foreach my $opt (keys %{$filter}) {
+
+      # this 2 croaks are the only croaks in this loop
       croak "$class: not a hash ref opt '$opt'"
          unless ref($filter->{$opt}) eq 'HASH';
       croak "$class: invalid option '$opt'"
@@ -506,16 +521,46 @@ sub search {
       # next if the object isn't loaded
       next unless exists $stats->{$opt};
 
+      # some sub refs
       my $fref = $filter->{$opt};
       my $sref = $stats->{$opt};
 
+      # we search for matches for each key that is defined
+      # in %filter and rebuild the tree until that key that
+      # matched the searched string
+
       foreach my $x (keys %{$fref}) {
-         if (ref($fref->{$x}) eq 'HASH' && exists $sref->{$x}) {
+
+         # if $fref->{$x} is a hash ref than the next key have to
+         # match the statistic key. this is used for statistics
+         # like NetStats or Processes that uses a hash key for the
+         # device name or process id. NetStats example:
+         #
+         # if
+         #
+         #    $fref->{eth0}->{ttbyt}
+         #
+         # is defined as filter, than the key "eth0" have to match
+         #
+         #    $sref->{eth0}
+         #
+         # than we look if "ttbyt" matched the searched string
+
+         if (ref($fref->{$x}) eq 'HASH') {
+
+            # if the key $sref->{eth0} doesn't exists
+            # than we continue with the next defined filter
+            next unless exists $sref->{$x};
+
             while ( my ($name, $value) = each %{$fref->{$x}} ) {
                $hits{$opt}{$x}{$name} = $sref->{$x}->{$name}
                   if exists $sref->{$x}->{$name}
                   && $class->_diff($sref->{$x}->{$name}, $value);
             }
+
+         # if ref($fref->{$x}) is return a regexp or 'nothing' than we
+         # search for matches in all key-value pairs that matched
+
          } elsif (ref($fref->{$x}) =~ /^(Regexp|)$/) {
             foreach my $key (keys %{$sref}) {
                if (ref($sref->{$key}) eq 'HASH') {
@@ -536,6 +581,33 @@ sub search {
    return %hits ? \%hits : undef;
 }
 
+sub fproc {
+   my $self   = shift;
+   my $class  = ref($self);
+   my $filter = $class->_struct(@_);
+   my $opts   = $self->{opts};
+   my $stats  = $self->{stats};
+   my @hits   = ();
+
+   return undef
+      unless exists $stats->{Processes}
+          && %{$filter};
+
+   my $sref = $stats->{Processes};
+
+   foreach my $pid (keys %{$sref}) {
+      my $proc = $sref->{$pid};
+
+      while ( my ($key, $value) = each %{$filter} ) {
+         push @hits, $pid
+            if exists $proc->{$key}
+            && $class->_diff($proc->{$key}, $value);
+      }
+   }
+
+   return @hits ? \@hits : undef;
+}
+
 #
 # private stuff
 #
@@ -546,6 +618,7 @@ sub _diff {
    return 1
       if ( ref($y) eq 'Regexp'  &&  $x =~ $y )
       || ( $y =~ s/^(eq:|=)//   &&  $x eq $y )
+      || ( $y =~ s/^(ne:|!)//   &&  $x ne $y )
       || ( $y =~ s/^(gt:|>)//   &&  $y =~ /^\d+$/  &&  $x > $y )
       || ( $y =~ s/^(lt:|<)//   &&  $y =~ /^\d+$/  &&  $x < $y );
 

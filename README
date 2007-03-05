@@ -165,9 +165,10 @@ METHODS
 
              $lxs->init;
 
-  search()
-    Call "search()" to search for statistics special statistics. This method
-    return a hash reference that contains the hits.
+  search(), fproc()
+    Call "search()" to search for statistics. This method rebuilds the hash
+    tree until that keys that the searched values and returns the hits as a
+    hash reference. Example:
 
             my $hits = $lxs->search(
                Processes => {
@@ -185,7 +186,7 @@ METHODS
                }
             );
 
-    This would return the following searched and matched keys:
+    This would return the following matches:
 
         * processes with the command C<[su]>
         * processes with the owner C<root>
@@ -193,17 +194,30 @@ METHODS
         * all cpu where C<iowait> is grather than 10
         * only that disk where C<usageper> is higher than 80
 
-    There are different filter that you can use:
+    Call "fproc()" to search for processes (only). This method returns a
+    array reference with all process IDs that matched the searched string.
+    Example:
 
-        * gt (>) - grather than
-        * lt (<) - less than
-        * eq (=) - is equal
+            my $pids = $lxs->fproc( cmd => qr/init/, owner => 'eq:apache' );
+
+    This would return the following process ids:
+
+        * processes that matched the command C<init>
+        * processes with the owner C<apache>
+
+    There are different match operators available:
+
+        * gt or > - grather than
+        * lt or < - less than
+        * eq or = - is equal
+        * ne or ! - is not equal
 
     Notation examples:
 
-        gt:50 or >50
-        lt:50 or <50
-        eq:50 or =50
+        gt:50  or  >50
+        lt:50  or  <50
+        eq:50  or  =50
+        ne:50  or  !50
 
   settime()
     Call "settime()" to define a POSIX formatted time stamp, generated with
