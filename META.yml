@@ -1,6 +1,6 @@
 ---
 name: Sys-Statistics-Linux
-version: 0.09_07
+version: 0.09_08
 author:
   - Jonny Schulz
 abstract: Collect linux system statistics.
@@ -14,7 +14,7 @@ requires:
 provides:
   Sys::Statistics::Linux:
     file: lib/Sys/Statistics/Linux.pm
-    version: 0.09_07
+    version: 0.09_08
   Sys::Statistics::Linux::CpuStats:
     file: lib/Sys/Statistics/Linux/CpuStats.pm
     version: 0.03

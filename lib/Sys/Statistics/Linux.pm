@@ -380,7 +380,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_07';
+our $VERSION = '0.09_08';
 
 use strict;
 use warnings;

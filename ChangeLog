@@ -1,3 +1,7 @@
+0.09_08 Released at 2007-03-05.
+        Add the method fproc() to search for processes.
+        Add t/14fproc.t and changed other test file names.
+        Improve the search() method and add a bit documentation.
 0.09_06 Released at 2007-02-25.
         Improve the search() method. Now it's possible to search()
           for special devices and more.
