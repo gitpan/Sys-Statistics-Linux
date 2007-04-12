@@ -73,55 +73,50 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::FileStats;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          file_nr    => '/proc/sys/fs/file-nr',
          inode_nr   => '/proc/sys/fs/inode-nr',
          dentries   => '/proc/sys/fs/dentry-state',
-      },
-      stats => {},
-   }, shift;
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub get {
    my $self  = shift;
-   $self->{stats} = $self->_load;
-   return $self->{stats};
-}
-
-#
-# private stuff
-#
-
-sub _load {
-   my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
-   my %fstats;
+   my %stats = ();
 
-   $fh->open($file->{file_nr}, 'r') or croak "$class: unable to open $file->{file_nr} ($!)";
-   @fstats{qw(fhalloc fhfree fhmax)} = (split /\s+/, <$fh>)[0..2];
-   $fh->close;
+   {
+      open my $fh, '<', $file->{file_nr} or croak "$class: unable to open $file->{file_nr} ($!)";
+      @stats{qw(fhalloc fhfree fhmax)} = (split /\s+/, <$fh>)[0..2];
+      close($fh);
+   }
 
-   $fh->open($file->{inode_nr}, 'r') or croak "$class: unable to open $file->{inode_nr} ($!)";
-   @fstats{qw(inalloc infree)} = (split /\s+/, <$fh>)[0..1];
-   $fstats{inmax} = $fstats{inalloc} + $fstats{infree};
-   $fh->close;
+   {
+      open my $fh, '<', $file->{inode_nr} or croak "$class: unable to open $file->{inode_nr} ($!)";
+      @stats{qw(inalloc infree)} = (split /\s+/, <$fh>)[0..1];
+      $stats{inmax} = $stats{inalloc} + $stats{infree};
+      close($fh);
+   }
 
-   $fh->open($file->{dentries}, 'r') or croak "$class: unable to open $file->{dentries} ($!)";
-   @fstats{qw(dentries unused agelimit wantpages)} = (split /\s+/, <$fh>)[0..3];
-   $fh->close;
+   {
+      open my $fh, '<', $file->{dentries} or croak "$class: unable to open $file->{dentries} ($!)";
+      @stats{qw(dentries unused agelimit wantpages)} = (split /\s+/, <$fh>)[0..3];
+      close($fh);
+   }
 
-   return \%fstats;
+   return \%stats;
 }
 
 1;

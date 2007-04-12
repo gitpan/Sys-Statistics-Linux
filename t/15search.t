@@ -20,7 +20,7 @@ my $foo = $lxs->search(
    CpuStats  => { total => 'lt:101' },
    MemStats  => { memtotal => 'gt:1' },
    DiskUsage => { usageper => qr/\d+/ },
-   Processes => { 1 => { pid => 'eq:1' } },
+   Processes => { 1 => { ppid => 'eq:0' } },
 );
 
 ok(defined %{$foo->{$_}}, "checking $_") for keys %{$foo};

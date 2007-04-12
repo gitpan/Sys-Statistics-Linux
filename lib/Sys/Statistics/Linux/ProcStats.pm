@@ -80,26 +80,27 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::ProcStats;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          loadavg => '/proc/loadavg',
          stat => '/proc/stat',
-      },
-      init  => {},
-      stats => {},
-   }, shift;
+         uptime => '/proc/uptime',
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub init {
    my $self = shift;
+   $self->{uptime} = $self->_uptime;
    $self->{init}->{new} = $self->_newproc;
 }
 
@@ -123,16 +124,15 @@ sub _load {
    my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
-   my %lavg;
+   my %lavg  = ();
 
-   $fh->open($file->{loadavg}, 'r') or croak "$class: unable to open $file->{loadavg} ($!)";
+   open my $fh, '<', $file->{loadavg} or croak "$class: unable to open $file->{loadavg} ($!)";
 
    ( $lavg{runqueue}
    , $lavg{count}
    ) = (split m@/@, (split /\s+/, <$fh>)[3]);
 
-   $fh->close;
+   close($fh);
 
    $lavg{new} = $self->_newproc;
 
@@ -143,35 +143,52 @@ sub _newproc {
    my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
-   my $stat;
+   my $stat  = ();
 
-   $fh->open($file->{stat}, 'r') or croak "$class: unable to open $file->{stat} ($!)";
+   open my $fh, '<', $file->{stat} or croak "$class: unable to open $file->{stat} ($!)";
 
    while (my $line = <$fh>) {
-      if ($line =~ /^processes (.*)/) {
+      if ($line =~ /^processes\s+(\d+)/) {
          $stat = $1;
          last;
       }
    }
 
-   $fh->close;
+   close($fh);
    return $stat;
 }
 
 sub _deltas {
-   my $self  = shift;
-   my $class = ref $self;
-   my $istat = $self->{init};
-   my $lstat = $self->{stats};
+   my $self   = shift;
+   my $class  = ref $self;
+   my $istat  = $self->{init};
+   my $lstat  = $self->{stats};
+   my $uptime = $self->_uptime;
+   my $delta  = $uptime - $self->{uptime};
+   $self->{uptime} = $uptime;
 
    croak "$class: different keys in statistics"
       unless defined $istat->{new} && defined $lstat->{new};
    croak "$class: value of 'new' is not a number"
       unless $istat->{new} =~ /^\d+$/ && $lstat->{new} =~ /^\d+$/;
+
    my $new_init   = $lstat->{new};
-   $lstat->{new} -= $istat->{new};
-   $istat->{new}  = $new_init;
+
+   if ($lstat->{new} == $istat->{new}) {
+      $lstat->{new} -= $istat->{new};
+   } else {
+      $istat->{new} = int($new_init/$delta);
+   }
+}
+
+sub _uptime {
+   my $self  = shift;
+   my $class = ref $self;
+   my $file  = $self->{files};
+   open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
+   my ($up, $idle) = split /\s+/, <$fh>;
+   close($fh);
+   return $up;
 }
 
 1;

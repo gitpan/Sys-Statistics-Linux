@@ -87,21 +87,20 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::CpuStats;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          stat => '/proc/stat',
-      },
-      init  => {},
-      stats => {},
-   }, shift;
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub init {
@@ -129,10 +128,9 @@ sub _load {
    my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
    my (%stats, $iowait, $irq, $softirq);
 
-   $fh->open($file->{stat}, 'r') or croak "$class: unable to open $file->{stat} ($!)";
+   open my $fh, '<', $file->{stat} or croak "$class: unable to open $file->{stat} ($!)";
 
    while (my $line = <$fh>) {
       if ($line =~ /^(cpu.*?)\s+(.*)$/) {
@@ -146,7 +144,7 @@ sub _load {
       }
    }
 
-   $fh->close;
+   close($fh);
    return \%stats;
 }
 

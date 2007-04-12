@@ -1,3 +1,12 @@
+0.09_09 Released at 2007-04-12.
+        Delete key "pid" from Processes() because it exists double
+          times: $stats->{Processes}->{$pid}->{pid} = $pid
+        Now all values of PgSwStats, NetStats, DiskStats and ProcStats
+          (here only the key "new") are values per second. I break
+          this down because it's very confusing if the statistics are
+          just add together. Now there are all rxbyt/s or pgpgin/s or new/s.
+        I kicked IO::File and the _load() Method from some modules
+          because they wasn't really necessary.
 0.09_08 Released at 2007-03-05.
         Add the method fproc() to search for processes.
         Add t/14fproc.t and changed other test file names.

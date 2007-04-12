@@ -68,40 +68,29 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::DiskUsage;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          df => '/bin/df -k',
-      },
-      stats => {},
-   }, shift; 
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub get {
    my $self  = shift;
-   $self->{stats} = $self->_load;
-   return $self->{stats};
-}
-
-#
-# private stuff
-#
-
-sub _load {
-   my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
    my (%disk_usage, $disk_name);
 
-   $fh->open("$file->{df}|") or croak "$class: unable to execute $file->{df} ($!)";
+   open my $fh, "$file->{df}|" or croak "$class: unable to execute $file->{df} ($!)";
 
    # filter the header
    {my $null = <$fh>;}
@@ -128,7 +117,7 @@ sub _load {
       }
    }
 
-   $fh->close;
+   close($fh);
    return \%disk_usage;
 }
 

@@ -68,40 +68,29 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::SockStats;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          sockstats  => '/proc/net/sockstat',
-      },
-      stats => {},
-   }, shift;
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub get {
    my $self = shift;
-   $self->{stats} = $self->_load;
-   return $self->{stats};
-}
-
-#
-# private stuff
-#
-
-sub _load {
-   my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
-   my %socks;
+   my %socks = ();
 
-   $fh->open($file->{sockstats}, 'r') or croak "$class: unable to open $file->{sockstats} ($!)";
+   open my $fh, '<', $file->{sockstats} or croak "$class: unable to open $file->{sockstats} ($!)";
 
    while (my $line = <$fh>) {
       if ($line =~ /sockets: used (\d+)/) {
@@ -117,7 +106,8 @@ sub _load {
       }
    }
 
-   $fh->close;
+   close($fh);
+
    return \%socks;
 }
 

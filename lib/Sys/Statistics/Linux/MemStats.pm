@@ -7,7 +7,7 @@ Sys::Statistics::Linux::MemStats - Collect linux memory informations.
    use Sys::Statistics::Linux::MemStats;
 
    my $lxs   = new Sys::Statistics::Linux::MemStats;
-   my $stats = $lxs->get;
+   my $meminfo = $lxs->get;
 
 =head1 DESCRIPTION
 
@@ -55,7 +55,7 @@ Call C<new()> to create a new object.
 
 Call C<get()> to get the statistics. C<get()> returns the statistics as a hash reference.
 
-   my $stats = $lxs->get;
+   my $meminfo = $lxs->get;
 
 =head1 EXPORTS
 
@@ -82,40 +82,30 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::MemStats;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          meminfo => '/proc/meminfo',
-      },
-      stats => {},
-   }, shift;
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub get {
-   my $self  = shift;
-   $self->{stats} = $self->_load;
-   return $self->{stats};
-}
+   my $self    = shift;
+   my $class   = ref($self);
+   my $file    = $self->{files};
+   my %meminfo = ();
 
-#
-# private stuff
-#
+   open my $fh, '<', $file->{meminfo} or croak "$class: unable to open $file->{meminfo} ($!)";
 
-sub _load {
-   my $self  = shift;
-   my $class = ref $self;
-   my $file  = $self->{files};
-   my $fh    = new IO::File;
-   my %meminfo;
-
-   $fh->open($file->{meminfo}, 'r') or croak "$class: unable to open $file->{meminfo} ($!)";
    while (my $line = <$fh>) {
       if ($line =~ /^(MemTotal|MemFree|Buffers|Cached|SwapTotal|SwapFree|Slab|Dirty|Mapped|Writeback):\s*(\d+)/) {
          my ($n, $v) = ($1, $2);
@@ -123,7 +113,8 @@ sub _load {
          $meminfo{$n} = $v;
       }
    }
-   $fh->close;
+
+   close($fh);
 
    $meminfo{memused}     = sprintf('%u', $meminfo{memtotal} - $meminfo{memfree});
    $meminfo{memusedper}  = sprintf('%.2f', 100 * $meminfo{memused} / $meminfo{memtotal});

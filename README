@@ -1,5 +1,5 @@
 NAME
-    Sys::Statistics::Linux - Collect linux system statistics.
+    Sys::Statistics::Linux - Front-end module to collect system statistics
 
 SYNOPSIS
        use Sys::Statistics::Linux;
@@ -26,12 +26,11 @@ SYNOPSIS
        my $stat = $lxs->get;
 
 DESCRIPTION
-    This module is the main package from the distribution
-    Sys::Statistics::Linux and collects different linux system informations
-    like processor workload, memory usage, network and disk statisitcs and
-    other system informations. Refer to the documentation of the
-    distribution modules to get more informations about all possible
-    statistics and system informations.
+    Sys::Statistics::Linux is the front-end module to Sys-Statistics-Linux
+    and collects different linux system informations like processor
+    workload, memory usage, network and disk statistics and a lot more.
+    Refer to the documentation of the distribution modules to get
+    informations about all possible statistics.
 
 TECHNICAL NOTE
     This distribution collects statistics by the virtual /proc filesystem
@@ -48,14 +47,11 @@ TECHNICAL NOTE
     in /proc/partitions if this option isn't activated. Since linux kernel
     2.5 these statistics are in /proc/diskstats.
 
-    Further it is necessary to run it as a user with the authorization to
-    read the /proc filesystem.
-
 DELTAS
     The options "CpuStats", "ProcStats", "PgSwStats", "NetStats",
     "DiskStats" and "Processes" are deltas, for this reason it's necessary
-    to initialize the statistics first, before the data be generated with
-    "get()". The statistics can be initialized with the methods "new()",
+    to initialize the statistics first before the data be generated with
+    "get()". These statistics can be initialized with the methods "new()",
     "set()" and "init()". Each option that is set to TRUE (1) will be
     initialized by the call of "new()" or "set()". The call of "init()"
     reinitialize all statistics that are set to 1. By the call of "get()"

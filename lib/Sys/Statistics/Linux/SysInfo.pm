@@ -74,15 +74,15 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::SysInfo;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          meminfo    => '/proc/meminfo',
          sysinfo    => '/proc/sysinfo',
@@ -93,68 +93,70 @@ sub new {
          kernel     => '/proc/sys/kernel/ostype',
          release    => '/proc/sys/kernel/osrelease',
          version    => '/proc/sys/kernel/version',
-      },
-      stats => {},
-   }, shift;
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub get {
    my $self = shift;
-   $self->{stats} = $self->_load;
-   return $self->{stats};
-}
-
-#
-# private stuff
-#
-
-sub _load {
-   my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
    my $stats = $self->{stats};
-   my $fh    = new IO::File;
 
    for my $x (qw(hostname domain kernel release version)) {
-      $fh->open($file->{$x}, 'r') or croak "$class: unable to open $file->{$x} ($!)";
+      open my $fh, '<', $file->{$x} or croak "$class: unable to open $file->{$x} ($!)";
       $stats->{$x} = <$fh>;
-      $fh->close;
+      close($fh);
    }
 
-   $fh->open($file->{meminfo}, 'r') or croak "$class: unable to open $file->{meminfo} ($!)";
-   while (my $line = <$fh>) {
-      if ($line =~ /^MemTotal:\s+(\d+ \w+)/) {
-         $stats->{memtotal} = $1;
-      } elsif ($line =~ /^SwapTotal:\s+(\d+ \w+)/) {
-         $stats->{swaptotal} = $1;
-      }
-   }
-   $fh->close;
+   {  # memory and swap info
+      open my $fh, '<', $file->{meminfo} or croak "$class: unable to open $file->{meminfo} ($!)";
 
-   $stats->{countcpus} = 0;
-   $fh->open($file->{cpuinfo}, 'r') or croak "$class: unable to open $file->{cpuinfo} ($!)";
-   while (my $line = <$fh>) {
-      if ($line =~ /^processor\s*:\s*\d+/) {            # x86
-         $stats->{countcpus}++;
-      } elsif ($line =~ /^# processors\s*:\s*(\d+)/) {  # s390
-         $stats->{countcpus} = $1;
-         last;
-      }
-   }
-   $fh->close;
-
-   $fh->open($file->{uptime}, 'r') or croak "$class: unable to open $file->{uptime} ($!)";
-   foreach my $x (split /\s+/, <$fh>) {
-      my ($d, $h, $m, $s) = $class->_calsec(sprintf('%li', $x));
-
-      unless (defined $stats->{uptime}) {
-         $stats->{uptime} = "${d}d ${h}h ${m}m ${s}s";
-         next;
+      while (my $line = <$fh>) {
+         if ($line =~ /^MemTotal:\s+(\d+ \w+)/) {
+            $stats->{memtotal} = $1;
+         } elsif ($line =~ /^SwapTotal:\s+(\d+ \w+)/) {
+            $stats->{swaptotal} = $1;
+         }
       }
 
-      $stats->{idletime} = "${d}d ${h}h ${m}m ${s}s";
+      close($fh);
    }
-   $fh->close;
+
+   {  # cpu info
+      $stats->{countcpus} = 0;
+
+      open my $fh, '<', $file->{cpuinfo} or croak "$class: unable to open $file->{cpuinfo} ($!)";
+
+      while (my $line = <$fh>) {
+         if ($line =~ /^processor\s*:\s*\d+/) {            # x86
+            $stats->{countcpus}++;
+         } elsif ($line =~ /^# processors\s*:\s*(\d+)/) {  # s390
+            $stats->{countcpus} = $1;
+            last;
+         }
+      }
+
+      close($fh);
+   }
+
+   {  # up- and idletime
+      open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
+
+      foreach my $x (split /\s+/, <$fh>) {
+         my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $x));
+
+         unless (defined $stats->{uptime}) {
+            $stats->{uptime} = "${d}d ${h}h ${m}m ${s}s";
+            next;
+         }
+
+         $stats->{idletime} = "${d}d ${h}h ${m}m ${s}s";
+      }
+
+      close($fh);
+   }
 
    foreach my $key (keys %{$stats}) {
       chomp $stats->{$key};
@@ -166,7 +168,7 @@ sub _load {
 }
 
 sub _calsec {
-   my $class = shift;
+   my $self = shift;
    my ($s, $m, $h, $d) = (shift, 0, 0, 0);
    $s >= 86400 and $d = sprintf('%i',$s / 86400) and $s = $s % 86400;
    $s >= 3600  and $h = sprintf('%i',$s / 3600)  and $s = $s % 3600;

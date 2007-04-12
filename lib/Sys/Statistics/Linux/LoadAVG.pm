@@ -66,47 +66,36 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::LoadAVG;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          loadavg => '/proc/loadavg',
-      },
-      stats => {},
-   }, shift;
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub get {
    my $self  = shift;
-   $self->{stats} = $self->_load;
-   return $self->{stats};
-}
-
-#
-# private stuff
-#
-
-sub _load {
-   my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
-   my %lavg;
+   my %lavg  = ();
 
-   $fh->open($file->{loadavg}, 'r') or croak "$class: unable to open $file->{loadavg} ($!)";
+   open my $fh, '<', $file->{loadavg} or croak "$class: unable to open $file->{loadavg} ($!)";
 
    ( $lavg{avg_1}
    , $lavg{avg_5}
    , $lavg{avg_15}
    ) = (split /\s+/, <$fh>)[0..2];
 
-   $fh->close;
+   close($fh);
    return \%lavg;
 }
 

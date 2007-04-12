@@ -34,7 +34,6 @@ F</proc/E<lt>numberE<gt>/status>, F</proc/E<lt>numberE<gt>/cmdline> and F<getpwu
 
 Note that if F</etc/passwd> isn't readable, the key owner is set to F<N/a>.
 
-   pid       -  The process ID.
    ppid      -  The parent process ID of the process.
    owner     -  The owner name of the process.
    pgrp      -  The group ID of the process.
@@ -115,15 +114,15 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use strict;
 use warnings;
-use IO::File;
 use Carp qw(croak);
 
 sub new {
-   return bless {
+   my $class = shift;
+   my %self = (
       files => {
          basedir   => '/proc',
          uptime    => '/proc/uptime',
@@ -131,10 +130,9 @@ sub new {
          p_statm   => 'statm',
          p_status  => 'status',
          p_cmdline => 'cmdline',
-      },
-      init  => {},
-      stats => {},
-   }, shift;
+      }
+   );
+   return bless \%self, $class;
 }
 
 sub init {
@@ -162,7 +160,6 @@ sub _init {
    my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
    my %stats;
 
    $stats{uptime} = $self->_uptime;
@@ -171,12 +168,12 @@ sub _init {
       or croak "$class: unable to open directory $file->{basedir}";
 
    foreach my $pid ( grep /^\d+$/, readdir $pdir ) {
-      if ($fh->open("$file->{basedir}/$pid/$file->{p_stat}", 'r')) {
+      if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_stat}") {
          @{$stats{$pid}}{qw(
             minflt cminflt mayflt cmayflt utime
             stime cutime cstime sttime
          )} = (split /\s+/, <$fh>)[9..16,21];
-         $fh->close;
+         close($fh);
       } else {
          delete $stats{$pid};
          next;
@@ -191,7 +188,6 @@ sub _load {
    my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
    my (%stats, %userids);
 
    $stats{uptime} = $self->_uptime;
@@ -204,51 +200,51 @@ sub _load {
    foreach my $pid (grep /^\d+$/, readdir $pdir) {
 
       # memory usage for each process
-      if ($fh->open("$file->{basedir}/$pid/$file->{p_statm}", 'r')) {
+      if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_statm}") {
          @{$stats{$pid}}{qw(size resident share trs drs lrs dtp)} = split /\s+/, <$fh>;
-         $fh->close;
+         close($fh);
       } else {
          delete $stats{$pid};
          next;
       }
 
       # different other informations for each process
-      if ($fh->open("$file->{basedir}/$pid/$file->{p_stat}", 'r')) {
+      if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_stat}") {
          @{$stats{$pid}}{qw(
-            pid cmd state ppid pgrp session ttynr minflt
+            cmd state ppid pgrp session ttynr minflt
             cminflt mayflt cmayflt utime stime cutime cstime
             prior nice sttime vsize nswap cnswap cpu
-         )} = (split /\s+/, <$fh>)[0..6,9..18,21..22,35..36,38];
-         $fh->close;
+         )} = (split /\s+/, <$fh>)[1..6,9..18,21..22,35..36,38];
+         close($fh);
       } else {
          delete $stats{$pid};
          next;
       }
 
       # calculate the active time of each process
-      my ($d, $h, $m, $s) = $class->_calsec(sprintf('%li', $stats{uptime} - $stats{$pid}{sttime} / 100));
+      my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $stats{uptime} - $stats{$pid}{sttime} / 100));
       $stats{$pid}{actime} = "$d:".sprintf('%02d:%02d:%02d', $h, $m, $s);
 
       # determine the owner of the process
-      if ($fh->open("$file->{basedir}/$pid/$file->{p_status}", 'r')) {
+      if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_status}") {
          while (my $line = <$fh>) {
             next unless $line =~ /^Uid:(\s+|\t+)(\d+)/;
             $stats{$pid}{owner} = getpwuid($2) || 'N/a';
             last;
          }
-         $fh->close;
+         close($fh);
       } else {
          delete $stats{$pid};
          next;
       }
 
       #  command line for each process
-      if ($fh->open("$file->{basedir}/$pid/$file->{p_cmdline}", 'r')) {
+      if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_cmdline}") {
          $stats{$pid}{cmdline} =  <$fh>;
          $stats{$pid}{cmdline} =~ s/\0/ /g if $stats{$pid}{cmdline};
          $stats{$pid}{cmdline} =  'N/a' unless $stats{$pid}{cmdline};
          chomp $stats{$pid}{cmdline};
-         $fh->close;
+         close($fh);
       }
    }
 
@@ -305,14 +301,14 @@ sub _uptime {
    my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
-   my $fh    = new IO::File;
-   $fh->open($file->{uptime}, 'r') or croak "$class: unable to open $file->{uptime} ($!)";
+   open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
    my ($up, $idle) = split /\s+/, <$fh>;
+   close($fh);
    return ($up, $idle);
 }
 
 sub _calsec {
-   my $class = shift;
+   my $self = shift;
    my ($s, $m, $h, $d) = (shift, 0, 0, 0);
    $s >= 86400 and $d = sprintf('%i', $s / 86400) and $s = $s % 86400;
    $s >= 3600  and $h = sprintf('%i', $s / 3600)  and $s = $s % 3600;

@@ -1,6 +1,6 @@
 =head1 NAME
 
-Sys::Statistics::Linux - Collect linux system statistics.
+Sys::Statistics::Linux - Front-end module to collect system statistics
 
 =head1 SYNOPSIS
 
@@ -29,10 +29,10 @@ Sys::Statistics::Linux - Collect linux system statistics.
 
 =head1 DESCRIPTION
 
-This module is the main package from the distribution Sys::Statistics::Linux and collects
+Sys::Statistics::Linux is the front-end module to Sys-Statistics-Linux and collects
 different linux system informations like processor workload, memory usage, network and
-disk statisitcs and other system informations. Refer to the documentation of the distribution
-modules to get more informations about all possible statistics and system informations.
+disk statistics and a lot more. Refer to the documentation of the distribution
+modules to get informations about all possible statistics.
 
 =head1 TECHNICAL NOTE
 
@@ -47,13 +47,11 @@ activate or deactivate the block statistics for devices with this option. These 
 exist in /proc/partitions if this option isn't activated. Since linux kernel 2.5 these statistics are
 in /proc/diskstats.
 
-Further it is necessary to run it as a user with the authorization to read the F</proc> filesystem.
-
 =head1 DELTAS
 
 The options C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
-are deltas, for this reason it's necessary to initialize the statistics first, before the data
-be generated with C<get()>. The statistics can be initialized with the methods C<new()>, C<set()>
+are deltas, for this reason it's necessary to initialize the statistics first before the data
+be generated with C<get()>. These statistics can be initialized with the methods C<new()>, C<set()>
 and C<init()>. Each option that is set to TRUE (1) will be initialized by the call of C<new()>
 or C<set()>. The call of C<init()> reinitialize all statistics that are set to 1. By the call
 of C<get()> the initial statistics will be updated automatically. Please refer the METHOD section
@@ -380,7 +378,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_08';
+our $VERSION = '0.09_09';
 
 use strict;
 use warnings;
@@ -492,7 +490,6 @@ sub get {
    my $stats  = $self->{stats};
    my $obj    = $self->{obj};
    my $format = $self->{timeformat};
-   my $return = shift;
 
    foreach my $opt (keys %{$opts}) {
       $stats->{$opt} = $obj->{$opt}->get()
