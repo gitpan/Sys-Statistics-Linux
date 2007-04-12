@@ -1,3 +1,7 @@
+0.09_12 Released at 2007-04-12.
+        Changed search() and fproc(). Now statistics can be set
+          as second argument. The first argument have to be the
+          search filter. Both arguments have to be a hash refrence.
 0.09_11 Released at 2007-04-12.
         To much files uploaded. :-)
 0.09_10 Released at 2007-04-12.

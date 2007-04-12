@@ -159,10 +159,15 @@ The call of C<init()> re-init all statistics that are necessary for deltas and i
 
 =head2 search(), fproc()
 
-Call C<search()> to search for statistics. This method rebuilds the hash tree until that keys that the searched
-values and returns the hits as a hash reference. Example:
+Both methods provides a simple search engine to find special statistics. Both methods except a filter
+as a hash reference as the first argument. If your data comes from extern - maybe from a client that
+send his statistics to the server - you can set the statistics as the second argument. The second
+argument have to be a hash reference as well.
 
-        my $hits = $lxs->search(
+The C<search()> method search for statistics and rebuilds the hash tree until that keys that matched
+your filter and returns the hits as a hash reference.
+
+        my $hits = $lxs->search({
            Processes => {
               cmd   => qr/\[su\]/,
               owner => qr/root/
@@ -176,7 +181,7 @@ values and returns the hits as a hash reference. Example:
                  usageper => 'gt:80'
               }
            }
-        );
+        });
 
 This would return the following matches:
 
@@ -186,10 +191,37 @@ This would return the following matches:
     * all cpu where C<iowait> is grather than 10
     * only that disk where C<usageper> is higher than 80
 
-Call C<fproc()> to search for processes (only). This method returns a array reference with all process IDs that
-matched the searched string. Example:
+If your statistics comes from extern, than you can set the full statistics as the second argument.
 
-        my $pids = $lxs->fproc( cmd => qr/init/, owner => 'eq:apache' );
+        my %stats = (
+           CpuStats => {
+              cpu => {
+                 system => '51.00',
+                 total  => '51.00',
+                 idle   => '49.00',
+                 nice   => '0.00',
+                 user   => '0.00',
+                 iowait => '0.00'
+              }
+           }
+        );
+               
+        my %filter = (
+           CpuStats => {
+              total => 'gt:50'
+           }
+        );
+
+        my $hits = $lxs->search(\%filter, \%stats);
+
+The C<fproc()> method search for processes only and returns a array reference with all process IDs that
+matched the filter. Example:
+
+        my $pids = $lxs->fproc({ cmd => qr/init/, owner => 'eq:apache' });
+
+You can set the statistics as second argument as well if your statistics comes from extern.
+
+        my $pids = $lxs->fproc(\%filter, \%stats);
 
 This would return the following process ids:
 
@@ -209,6 +241,8 @@ Notation examples:
     lt:50  or  <50
     eq:50  or  =50
     ne:50  or  !50
+
+Both argumnents have to be set as a hash reference.
 
 =head2 settime()
 
@@ -350,6 +384,11 @@ If you're not sure you can use the the C<Data::Dumper> module to learn more abou
 
 Take a look into the the F<examples> directory of the distribution for some examples with a nice output. :-)
 
+=head1 DEPENDENCIED
+
+    Test::More
+    Carp
+
 =head1 EXPORTS
 
 No exports.
@@ -378,7 +417,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_11';
+our $VERSION = '0.09_12';
 
 use strict;
 use warnings;
@@ -502,9 +541,17 @@ sub get {
 sub search {
    my $self   = shift;
    my $class  = ref($self);
-   my $filter = $class->_struct(@_);
+
+   croak "$class: first argument have to be a hash ref"
+     unless @_ || ref($_[0]) eq 'HASH';
+   croak "$class: second argument have to be a hash ref"
+     if $_[1] && ref($_[1]) ne 'HASH';
+
+   my ($filter, $stats) = @_ == 2 ? @_ : (shift, $self->{stats});
+
+   return undef unless %{$stats} || %{$filter};
+
    my $opts   = $self->{opts};
-   my $stats  = $self->{stats};
    my %hits   = ();
 
    foreach my $opt (keys %{$filter}) {
@@ -581,9 +628,17 @@ sub search {
 sub fproc {
    my $self   = shift;
    my $class  = ref($self);
-   my $filter = $class->_struct(@_);
+
+   croak "$class: first argument have to be a hash ref"
+     unless @_ || ref($_[0]) eq 'HASH';
+   croak "$class: second argument have to be a hash ref"
+     if $_[1] && ref($_[1]) ne 'HASH';
+
+   my ($filter, $stats) = @_ == 2 ? @_ : (shift, $self->{stats});
+
+   return undef unless %{$stats->{Processes}} || %{$filter};
+
    my $opts   = $self->{opts};
-   my $stats  = $self->{stats};
    my @hits   = ();
 
    return undef
