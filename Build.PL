@@ -10,7 +10,6 @@ my $build = Module::Build->new(
     dist_author        => 'Jonny Schulz',
     requires => {
         'Test::More'     => 0,
-        'IO::File'       => 0,
         Carp             => 0,
     },
     recommends         => {},

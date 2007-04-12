@@ -14,7 +14,7 @@ my $options = { Processes => 1 };
 # you need a very very width screen for this output :-)
 
 my @order = qw(
-   pid ppid owner pgrp state session ttynr minflt cminflt mayflt cmayflt
+   ppid owner pgrp state session ttynr minflt cminflt mayflt cmayflt
    stime utime cstime cutime prior nice sttime actime vsize nswap cnswap
    cpu size resident share trs drs lrs dtp cmd cmdline
 );
@@ -27,7 +27,7 @@ while (1) {
    my $stats = $lxs->get;
 
    if ($h == $header) {
-      printf "%${tcolumn}s", $_ for ('date', 'time');
+      printf "%${tcolumn}s", $_ for ('date', 'time', 'pid');
       printf "%${dcolumn}s", $_ for @order;
       print "\n";
    }
@@ -38,6 +38,7 @@ while (1) {
       next unless $pid == 1;
       my $pstat = $stats->{Processes}->{$pid};
       printf "%${tcolumn}s", $_ for ($date, $time);
+      printf "%${dcolumn}s", $pid;
       printf "%${dcolumn}s", $pstat->{$_} for @order;
       print "\n";
    }

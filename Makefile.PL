@@ -10,7 +10,6 @@ WriteMakefile
           'VERSION_FROM' => 'lib/Sys/Statistics/Linux.pm',
           'PREREQ_PM' => {
                            'Test::More' => 0,
-                           'IO::File' => 0,
                            'Carp' => 0
                          }
         )

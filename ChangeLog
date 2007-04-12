@@ -1,3 +1,7 @@
+0.09_10 Released at 2007-04-12.
+        Fixed the "Can't call method _struct" bug in Linux.pm line 419.
+        "new" from ProcStats is float now. Did some fixes in ProcStats,
+          NetStats, PgSwStats and DiskStats... wrong averages/s calculated.
 0.09_09 Released at 2007-04-12.
         Delete key "pid" from Processes() because it exists double
           times: $stats->{Processes}->{$pid}->{pid} = $pid
