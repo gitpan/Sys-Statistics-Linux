@@ -87,7 +87,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::DiskStats;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use strict;
 use warnings;
@@ -141,7 +141,7 @@ sub _load {
 
    if (open $fh, '<', $file->{diskstats}) {
       while (my $line = <$fh>) {
-         if ($line =~ /^\s+(\d+)\s+(\d+)\s+(.+?)\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+$/ && defined $4 && defined $6) {
+         if ($line =~ /^\s+(\d+)\s+(\d+)\s+(.+?)\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+$/) {
             for my $x ($stats{$3}) {
                $x->{major}   = $1;
                $x->{minor}   = $2;
@@ -168,8 +168,7 @@ sub _load {
       close($fh);
    } elsif (open $fh, '<', $file->{partitions}) {
       while (my $line = <$fh>) {
-         $line =~ tr/A-Z/a-z/;
-         next unless $line =~ /^\s+(\d+)\s+(\d+)\s+\d+\s+(.+?)\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+$/ && defined $4 && defined $6;
+         next unless $line =~ /^\s+(\d+)\s+(\d+)\s+\d+\s+(.+?)\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+(\d+)\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+$/;
          for my $x ($stats{$3}) {
             $x->{major}   = $1;
             $x->{minor}   = $2;
@@ -187,7 +186,7 @@ sub _load {
    }
 
    croak "$class: no diskstats found! your system seems not to be compiled with CONFIG_BLK_STATS=y"
-      unless -e $file->{diskstats} && %stats;
+      unless -e $file->{diskstats} || %stats;
 
    return \%stats;
 }

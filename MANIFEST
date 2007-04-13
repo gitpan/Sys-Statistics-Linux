@@ -3,7 +3,6 @@ ChangeLog
 examples/CpuStats.pl
 examples/DiskStats.pl
 examples/FileStats.pl
-examples/Find.pl
 examples/LoadAVG.pl
 examples/MemStats.pl
 examples/NetStats.pl

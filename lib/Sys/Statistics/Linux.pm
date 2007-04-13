@@ -417,7 +417,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_12';
+our $VERSION = '0.09_13';
 
 use strict;
 use warnings;
@@ -543,12 +543,13 @@ sub search {
    my $class  = ref($self);
 
    croak "$class: first argument have to be a hash ref"
-     unless @_ || ref($_[0]) eq 'HASH';
+     unless $_[0] && ref($_[0]) eq 'HASH';
    croak "$class: second argument have to be a hash ref"
      if $_[1] && ref($_[1]) ne 'HASH';
 
    my ($filter, $stats) = @_ == 2 ? @_ : (shift, $self->{stats});
 
+   # $stats and $filter must be set
    return undef unless %{$stats} || %{$filter};
 
    my $opts   = $self->{opts};
@@ -630,7 +631,7 @@ sub fproc {
    my $class  = ref($self);
 
    croak "$class: first argument have to be a hash ref"
-     unless @_ || ref($_[0]) eq 'HASH';
+     unless $_[0] && ref($_[0]) eq 'HASH';
    croak "$class: second argument have to be a hash ref"
      if $_[1] && ref($_[1]) ne 'HASH';
 
@@ -638,13 +639,7 @@ sub fproc {
 
    return undef unless %{$stats->{Processes}} || %{$filter};
 
-   my $opts   = $self->{opts};
-   my @hits   = ();
-
-   return undef
-      unless exists $stats->{Processes}
-          && %{$filter};
-
+   my @hits = ();
    my $sref = $stats->{Processes};
 
    foreach my $pid (keys %{$sref}) {
