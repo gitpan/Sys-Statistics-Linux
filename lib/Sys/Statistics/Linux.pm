@@ -417,7 +417,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_13';
+our $VERSION = '0.09_14';
 
 use strict;
 use warnings;
@@ -550,7 +550,7 @@ sub search {
    my ($filter, $stats) = @_ == 2 ? @_ : (shift, $self->{stats});
 
    # $stats and $filter must be set
-   return undef unless %{$stats} || %{$filter};
+   return undef unless %{$stats} && %{$filter};
 
    my $opts   = $self->{opts};
    my %hits   = ();
@@ -637,7 +637,7 @@ sub fproc {
 
    my ($filter, $stats) = @_ == 2 ? @_ : (shift, $self->{stats});
 
-   return undef unless %{$stats->{Processes}} || %{$filter};
+   return undef unless %{$stats->{Processes}} && %{$filter};
 
    my @hits = ();
    my $sref = $stats->{Processes};
