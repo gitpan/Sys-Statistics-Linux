@@ -389,6 +389,23 @@ EXAMPLES
 
              print Dumper($stats);
 
+    How to get processes with the highest cpu workload:
+
+             use warnings;
+             use strict;
+             use Sys::Statistics::Linux;
+
+             my $lxs = Sys::Statistics::Linux->new( Processes => 1 );
+             sleep(1);
+             my $stats = $lxs->get;
+             my $procs = $stats->{Processes};
+
+             my @top5 = (
+                map  { $_->[0] }
+                reverse sort { $a->[1] <=> $b->[1] }
+                map  { [ $_, $procs->{$_}->{ttime} ] } keys %{$procs}
+             )[0..4];
+
     Take a look into the the examples directory of the distribution for some
     examples with a nice output. :-)
 
