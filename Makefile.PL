@@ -1,8 +1,6 @@
 use ExtUtils::MakeMaker;
 die 'Sorry, but this system seems not to be a linux system!'
    unless $^O =~ /linux/i;
-   unless $^O =~ /linux/i;
-   unless $^O =~ /linux/i;
 WriteMakefile
 (
           'PL_FILES' => {},

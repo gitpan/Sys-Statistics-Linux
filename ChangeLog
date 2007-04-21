@@ -1,3 +1,7 @@
+0.09_16 Released at 2007-04-21.
+        Fixed code in NetStats.pm, DiskStats.pm, PgSwStats.pm and
+          ProcStats.pm. It seems to run better and better. :-)
+0.09_15 Error by uploading to pause.
 0.09_14 Released at 2007-04-13.
         Code fixes.
 0.09_13 Released at 2007-04-13.
