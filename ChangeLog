@@ -1,3 +1,7 @@
+0.09_17 Released at 2007-04.27.
+        Fixed actime from Processes.pm.
+        Null values are now printed as 0.00 by ProcStats, NetStats,
+          DiskStats and PgSwStats.
 0.09_16 Released at 2007-04-21.
         Fixed code in NetStats.pm, DiskStats.pm, PgSwStats.pm and
           ProcStats.pm. It seems to run better and better. :-)

@@ -96,7 +96,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::NetStats;
-our $VERSION = '0.06_01';
+our $VERSION = '0.06_02';
 
 use strict;
 use warnings;
@@ -182,7 +182,7 @@ sub _deltas {
 
          $ldev->{$k} =
             $ldev->{$k} == $idev->{$k}
-               ? 0.00
+               ? sprintf('%.2f', 0)
                : $delta > 0
                   ? sprintf('%.2f', ($ldev->{$k} - $idev->{$k}) / $delta)
                   : sprintf('%.2f', $ldev->{$k} - $idev->{$k});

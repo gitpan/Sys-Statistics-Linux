@@ -80,7 +80,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::ProcStats;
-our $VERSION = '0.06_01';
+our $VERSION = '0.06_02';
 
 use strict;
 use warnings;
@@ -176,7 +176,7 @@ sub _deltas {
 
    $lstat->{new} =
       $lstat->{new} == $istat->{new}
-         ? 0.00
+         ? sprintf('%.2f', 0)
          : $delta > 0
             ? sprintf('%.2f', ($new_init - $istat->{new}) / $delta )
             : sprintf('%.2f', $new_init - $istat->{new});

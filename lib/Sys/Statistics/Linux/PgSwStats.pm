@@ -83,7 +83,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::PgSwStats;
-our $VERSION = '0.05_01';
+our $VERSION = '0.05_02';
 
 use strict;
 use warnings;
@@ -173,7 +173,7 @@ sub _deltas {
 
       $lstat->{$k} =
          $lstat->{$k} == $istat->{$k}
-            ? 0.00
+            ? sprintf('%.2f', 0)
             : $delta > 0
                ? sprintf('%.2f', ($lstat->{$k} - $istat->{$k}) / $delta)
                : sprintf('%.2f', $lstat->{$k} - $istat->{$k});

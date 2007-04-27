@@ -5,17 +5,15 @@ use Sys::Statistics::Linux;
 
 $|++;
 
-my $header  = 20;
-my $average = 1;
-my $dcolumn = 10;
-my $tcolumn = 10;
-my $options = { LoadAVG => 1 };
-my @order   = qw(avg_1 avg_5 avg_15);
-my $lxs     = Sys::Statistics::Linux->new( $options );
-my $h       = $header;
+my $header   = 20;
+my $interval = 1;
+my $dcolumn  = 10;
+my $tcolumn  = 10;
+my @order    = qw(avg_1 avg_5 avg_15);
+my $h        = $header;
+my $lxs      = Sys::Statistics::Linux->new(LoadAVG => 1);
 
 while (1) {
-   sleep($average);
    my $stats = $lxs->get;
 
    if ($h == $header) {
@@ -32,5 +30,5 @@ while (1) {
    print "\n";
 
    $h = $header if --$h == 0;
+   sleep $interval;
 }
-

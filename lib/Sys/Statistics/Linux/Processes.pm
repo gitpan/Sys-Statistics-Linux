@@ -52,7 +52,7 @@ Note that if F</etc/passwd> isn't readable, the key owner is set to F<N/a>.
    prior     -  The priority of the process (+15).
    nice      -  The nice level of the process.
    sttime    -  The time in jiffies the process started after system boot.
-   actime    -  The time in D:H:M (days, hours, minutes) the process is active.
+   actime    -  The time in D:H:M:S (days, hours, minutes, seconds) the process is active.
    vsize     -  The size of virtual memory of the process.
    nswap     -  The size of swap space of the process.
    cnswap    -  The size of swap space of the childrens of the process.
@@ -114,7 +114,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.04';
+our $VERSION = '0.05_01';
 
 use strict;
 use warnings;
@@ -304,7 +304,7 @@ sub _uptime {
    open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
    my ($up, $idle) = split /\s+/, <$fh>;
    close($fh);
-   return ($up, $idle);
+   return $up;
 }
 
 sub _calsec {

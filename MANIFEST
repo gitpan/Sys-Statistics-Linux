@@ -1,16 +1,6 @@
 Build.PL
 ChangeLog
-examples/CpuStats.pl
-examples/DiskStats.pl
-examples/FileStats.pl
 examples/LoadAVG.pl
-examples/MemStats.pl
-examples/NetStats.pl
-examples/PgSwStats.pl
-examples/Processes.pl
-examples/ProcStats.pl
-examples/SockStats.pl
-examples/SysInfo.pl
 INSTALL
 lib/Sys/Statistics/linux.man
 lib/Sys/Statistics/Linux.pm
