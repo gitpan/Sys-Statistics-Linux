@@ -11,6 +11,6 @@ sleep 1;
 
 my $stat = $lxs->get();
 
-my $foo = $lxs->fproc({cmd => qr/init/});
+my $foo = $lxs->psfind({cmd => qr/init/});
 
-ok(@{$foo}, "checking fproc");
+ok(@{$foo}, "checking psfind");

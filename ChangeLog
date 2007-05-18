@@ -1,3 +1,7 @@
+0.09_18 Released at 2007-05-16.
+        Added ttpcks (rxpcks + txpcks) to NetStats.
+        Fixed a bug in DiskStats. The field for wrtbyt was wrong.
+        Changed method name fproc() to psfind().
 0.09_17 Released at 2007-04.27.
         Fixed actime from Processes.pm.
         Null values are now printed as 0.00 by ProcStats, NetStats,

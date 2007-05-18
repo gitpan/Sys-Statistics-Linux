@@ -161,7 +161,7 @@ METHODS
 
              $lxs->init;
 
-  search(), fproc()
+  search(), psfind()
     Both methods provides a simple search engine to find special statistics.
     Both methods except a filter as a hash reference as the first argument.
     If your data comes from extern - maybe from a client that send his
@@ -220,15 +220,15 @@ METHODS
 
             my $hits = $lxs->search(\%filter, \%stats);
 
-    The "fproc()" method search for processes only and returns a array
+    The "psfind()" method search for processes only and returns a array
     reference with all process IDs that matched the filter. Example:
 
-            my $pids = $lxs->fproc({ cmd => qr/init/, owner => 'eq:apache' });
+            my $pids = $lxs->psfind({ cmd => qr/init/, owner => 'eq:apache' });
 
     You can set the statistics as second argument as well if your statistics
     comes from extern.
 
-            my $pids = $lxs->fproc(\%filter, \%stats);
+            my $pids = $lxs->psfind(\%filter, \%stats);
 
     This would return the following process ids:
 
@@ -417,9 +417,7 @@ EXPORTS
     No exports.
 
 TODOS
-       * Dynamic loader for options/modules.
-       * Maybe Sys::Statistics::Linux::Formatter to format statistics
-         for inserts into a database or a nice output to files.
+       * pstree
        * Are there any wishs from your side? Send me a mail!
 
 REPORTING BUGS

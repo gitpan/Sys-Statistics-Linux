@@ -35,4 +35,4 @@ t/12LoadAVG.t
 t/13FileStats.t
 t/14Processes.t
 t/15search.t
-t/16fproc.t
+t/16psfind.t

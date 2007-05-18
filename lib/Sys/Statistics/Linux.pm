@@ -157,7 +157,7 @@ The call of C<init()> re-init all statistics that are necessary for deltas and i
 
          $lxs->init;
 
-=head2 search(), fproc()
+=head2 search(), psfind()
 
 Both methods provides a simple search engine to find special statistics. Both methods except a filter
 as a hash reference as the first argument. If your data comes from extern - maybe from a client that
@@ -214,14 +214,14 @@ If your statistics comes from extern, than you can set the full statistics as th
 
         my $hits = $lxs->search(\%filter, \%stats);
 
-The C<fproc()> method search for processes only and returns a array reference with all process IDs that
+The C<psfind()> method search for processes only and returns a array reference with all process IDs that
 matched the filter. Example:
 
-        my $pids = $lxs->fproc({ cmd => qr/init/, owner => 'eq:apache' });
+        my $pids = $lxs->psfind({ cmd => qr/init/, owner => 'eq:apache' });
 
 You can set the statistics as second argument as well if your statistics comes from extern.
 
-        my $pids = $lxs->fproc(\%filter, \%stats);
+        my $pids = $lxs->psfind(\%filter, \%stats);
 
 This would return the following process ids:
 
@@ -412,9 +412,7 @@ No exports.
 
 =head1 TODOS
 
-   * Dynamic loader for options/modules.
-   * Maybe Sys::Statistics::Linux::Formatter to format statistics
-     for inserts into a database or a nice output to files.
+   * pstree
    * Are there any wishs from your side? Send me a mail!
 
 =head1 REPORTING BUGS
@@ -434,7 +432,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_17';
+our $VERSION = '0.09_18';
 
 use strict;
 use warnings;
@@ -643,7 +641,7 @@ sub search {
    return %hits ? \%hits : undef;
 }
 
-sub fproc {
+sub psfind {
    my $self   = shift;
    my $class  = ref($self);
 
