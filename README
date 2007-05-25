@@ -83,6 +83,19 @@ OPTIONS
         1 - create a new object and init statistics if necessary
         2 - create a new object if not exists but wouldn't init statistics
 
+    In addition it's possible to handoff a process list for option
+    "Processes".
+
+        my $lxs = Sys::Statistics::Linux->new(
+           Processes => {
+              init => 1,
+              pids => [ 1, 2, 3 ]
+           }
+       );
+
+    It's only possible to set "init" to 1 or 2. 1 would init statistics, 2
+    not, but both values would create a new "Processes" object.
+
     To get more informations about the statistics refer the different
     modules of the distribution.
 

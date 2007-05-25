@@ -1,3 +1,6 @@
+0.10    Released at 2007-05-25.
+        Fixed div code parts.
+        Now there can be handoff a process list to Processes.
 0.09_18 Released at 2007-05-16.
         Added ttpcks (rxpcks + txpcks) to NetStats.
         Fixed a bug in DiskStats. The field for wrtbyt was wrong.

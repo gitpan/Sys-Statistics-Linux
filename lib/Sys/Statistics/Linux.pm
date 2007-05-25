@@ -79,6 +79,18 @@ The options must be set with on of the following values:
     1 - create a new object and init statistics if necessary
     2 - create a new object if not exists but wouldn't init statistics
 
+In addition it's possible to handoff a process list for option C<Processes>.
+
+    my $lxs = Sys::Statistics::Linux->new(
+       Processes => {
+          init => 1,
+          pids => [ 1, 2, 3 ]
+       }
+   );
+
+It's only possible to set C<init> to 1 or 2. 1 would init statistics, 2 not, but both values would
+create a new C<Processes> object.
+
 To get more informations about the statistics refer the different modules of the distribution.
 
    SysInfo     -  Collect system informations             with Sys::Statistics::Linux::SysInfo.
@@ -432,7 +444,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.09_18';
+our $VERSION = '0.10';
 
 use strict;
 use warnings;
@@ -472,6 +484,12 @@ sub set {
    my $opts  = $self->{opts};
    my $obj   = $self->{obj};
    my $stats = $self->{stats};
+   my $pids  = ();
+
+   if (ref($sets->{Processes}) eq 'HASH') {
+      $pids = $sets->{Processes}->{pids};
+      $sets->{Processes} = $sets->{Processes}->{init};
+   }
 
    foreach my $opt (keys %{$sets}) {
 
@@ -495,8 +513,13 @@ sub set {
          }
 
          # create a new object if the object doesn't exist
-         $obj->{$opt} = $package->new()
-            unless $obj->{$opt};
+         # or create a new process list object if $pids is set
+         if ($opt eq 'Processes' && $pids) {
+            $obj->{$opt} = $package->new($pids);
+         } else {
+            $obj->{$opt} = $package->new
+               unless $obj->{$opt};
+         }
 
          # get initial statistics if init() is defined and the
          # option is set to 1
@@ -504,7 +527,7 @@ sub set {
             if $opts->{$opt} == 1
             && defined &{$package.'::init'};
 
-      } elsif ($opts->{$opt} == 0) {
+      } elsif ($obj->{$opt} && $opts->{$opt} == 0) {
          delete $obj->{$opt}   if $obj->{$opt};
          delete $stats->{$opt} if $stats->{$opt};
       }

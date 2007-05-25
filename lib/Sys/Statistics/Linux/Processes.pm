@@ -75,6 +75,10 @@ Call C<new()> to create a new object.
 
    my $lxs = new Sys::Statistics::Linux::Processes;
 
+It's possible to handoff an array reference with a PID list.
+
+   my $lxs = Sys::Statistics::Linux::Processes->new([ 1, 2, 3 ]);
+
 =head2 init()
 
 Call C<init()> to initialize the statistics.
@@ -114,14 +118,23 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.05_01';
+our $VERSION = '0.06';
 
 use strict;
 use warnings;
 use Carp qw(croak);
 
 sub new {
-   my $class = shift;
+   my ($class, $pids) = @_;
+
+   croak "$class: not a array reference"
+      if $pids && ref($pids) ne 'ARRAY';
+
+   foreach my $pid (@$pids) {
+      croak "$class: pid '$_' is not a number"
+         unless $pid =~ /^\d+$/;
+   }
+
    my %self = (
       files => {
          basedir   => '/proc',
@@ -130,8 +143,10 @@ sub new {
          p_statm   => 'statm',
          p_status  => 'status',
          p_cmdline => 'cmdline',
-      }
+      },
+      pids => $pids,
    );
+
    return bless \%self, $class;
 }
 
@@ -145,7 +160,7 @@ sub get {
    my $class = ref $self;
 
    croak "$class: there are no initial statistics defined"
-      unless %{$self->{init}};
+      unless exists $self->{init};
 
    $self->{stats} = $self->_load;
    $self->_deltas;
@@ -160,14 +175,18 @@ sub _init {
    my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
+   my $pids  = $self->{pids};
    my %stats;
 
    $stats{uptime} = $self->_uptime;
 
-   opendir my $pdir, $file->{basedir}
-      or croak "$class: unable to open directory $file->{basedir}";
+   unless (@$pids) {
+      opendir my $pdir, $file->{basedir} or croak "$class: unable to open directory $file->{basedir} ($!)";
+      @$pids = (grep /^\d+$/, readdir $pdir);
+      closedir $pdir;
+   }
 
-   foreach my $pid ( grep /^\d+$/, readdir $pdir ) {
+   foreach my $pid (@$pids) {
       if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_stat}") {
          @{$stats{$pid}}{qw(
             minflt cminflt mayflt cmayflt utime
@@ -180,7 +199,6 @@ sub _init {
       }
    }
 
-   closedir $pdir;
    return \%stats;
 }
 
@@ -188,6 +206,7 @@ sub _load {
    my $self  = shift;
    my $class = ref $self;
    my $file  = $self->{files};
+   my $pids  = $self->{pids};
    my (%stats, %userids);
 
    $stats{uptime} = $self->_uptime;
@@ -195,9 +214,14 @@ sub _load {
    # we get all the PIDs from the /proc filesystem. if we are unable to open a file
    # of a process, then it can be that the process doesn't exist any more and
    # we will delete the hash key.
-   opendir my $pdir, $file->{basedir} or croak "$class: unable to open directory $file->{basedir} ($!)";
 
-   foreach my $pid (grep /^\d+$/, readdir $pdir) {
+   unless (@$pids) {
+      opendir my $pdir, $file->{basedir} or croak "$class: unable to open directory $file->{basedir} ($!)";
+      @$pids = (grep /^\d+$/, readdir $pdir);
+      closedir $pdir;
+   }
+
+   foreach my $pid (@$pids) {
 
       # memory usage for each process
       if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_statm}") {
@@ -240,15 +264,18 @@ sub _load {
 
       #  command line for each process
       if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_cmdline}") {
-         $stats{$pid}{cmdline} =  <$fh>;
-         $stats{$pid}{cmdline} =~ s/\0/ /g if $stats{$pid}{cmdline};
-         $stats{$pid}{cmdline} =  'N/a' unless $stats{$pid}{cmdline};
-         chomp $stats{$pid}{cmdline};
+         $stats{$pid}{cmdline} = <$fh>;
+         if ($stats{$pid}{cmdline}) {
+            $stats{$pid}{cmdline} =~ s/\0/ /g;
+            $stats{$pid}{cmdline} =~ s/^\s+//;
+            $stats{$pid}{cmdline} =~ s/\s+$//;
+            chomp $stats{$pid}{cmdline};
+         }
+         $stats{$pid}{cmdline} = 'N/a' unless $stats{$pid}{cmdline};
          close($fh);
       }
    }
 
-   closedir $pdir;
    return \%stats;
 }
 

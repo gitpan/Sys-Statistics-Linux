@@ -87,7 +87,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::DiskStats;
-our $VERSION = '0.08_03';
+our $VERSION = '0.09';
 
 use strict;
 use warnings;
@@ -122,7 +122,7 @@ sub get {
    my $class = ref $self;
 
    croak "$class: there are no initial statistics defined"
-      unless %{$self->{init}};
+      unless exists $self->{init};
 
    $self->{stats} = $self->_load;
    $self->_deltas;
