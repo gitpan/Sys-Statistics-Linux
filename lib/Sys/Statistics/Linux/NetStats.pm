@@ -24,7 +24,7 @@ Further it is necessary to run it as a user with the authorization to read the F
 =head1 DELTAS
 
 It's necessary to initialize the statistics by calling C<init()>, because the statistics are deltas between
-the call of C<init()> and C<get()>. By calling C<get()> the deltas be generated and the initial values
+the call of C<init()> and C<get()>. By calling C<get()> the deltas be generated and the initial values will
 be updated automatically. This way making it possible that the call of C<init()> is only necessary
 after the call of C<new()>. Further it's recommended to sleep for a while - at least one second - between
 the call of C<init()> and/or C<get()> if you want to get useful statistics.
@@ -97,7 +97,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::NetStats;
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use strict;
 use warnings;

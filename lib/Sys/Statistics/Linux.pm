@@ -31,8 +31,8 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
 Sys::Statistics::Linux is the front-end module to Sys-Statistics-Linux and collects
 different linux system informations like processor workload, memory usage, network and
-disk statistics and a lot more. Refer to the documentation of the distribution
-modules to get informations about all possible statistics.
+disk statistics and a lot more. Refer the documentation of the distribution
+modules to get more informations about all possible statistics.
 
 =head1 TECHNICAL NOTE
 
@@ -49,21 +49,21 @@ in /proc/diskstats.
 
 =head1 DELTAS
 
-The options C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
+The statistics C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
 are deltas, for this reason it's necessary to initialize the statistics first before the data
-be generated with C<get()>. These statistics can be initialized with the methods C<new()>, C<set()>
+can be prepared by C<get()>. These statistics can be initialized with the methods C<new()>, C<set()>
 and C<init()>. Each option that is set to TRUE (1) will be initialized by the call of C<new()>
 or C<set()>. The call of C<init()> reinitialize all statistics that are set to 1. By the call
 of C<get()> the initial statistics will be updated automatically. Please refer the METHOD section
 to get more information about the calls of C<new()>, C<set()> and C<get()>.
 
-Another exigence is that you need to sleep for while - at least for one second - before you
-call C<get()> if you want to get useful statistics. The options C<SysInfo>, C<MemStats>,
+Another exigence is to sleep for while - at least for one second - before the
+call of C<get()> if you want to get useful statistics. The options C<SysInfo>, C<MemStats>,
 C<SockStats>, C<DiskUsage>, C<LoadAVG> and C<FileStats> are no deltas. If you need only one
-of this informations you don't need to sleep before the call of C<get()>.
+of these informations you don't need to sleep before the call of C<get()>.
 
-The C<get()> function collects all requested informations and returns a hash reference with the
-statistics. The inital statistics will be updated. You can turn on and off options with C<set()>.
+The method C<get()> then prepares all requested statistics and returns it as a hash reference.
+The inital statistics will be updated. You can turn on and off options with C<set()>.
 
 =head1 OPTIONS
 
@@ -88,7 +88,7 @@ In addition it's possible to handoff a process list for option C<Processes>.
        }
    );
 
-It's only possible to set C<init> to 1 or 2. 1 would init statistics, 2 not, but both values would
+It's only possible to set C<init> to 1 or 2. 1 would init statistics, 2 not but both values would
 create a new C<Processes> object.
 
 To get more informations about the statistics refer the different modules of the distribution.
@@ -111,7 +111,7 @@ To get more informations about the statistics refer the different modules of the
 =head2 new()
 
 Call C<new()> to create a new Sys::Statistics::Linux object. You can call C<new()> with options.
-This options would be hand off to the C<set()> method.
+This options would be handoff to the method C<set()>.
 
 Without options
 
@@ -144,8 +144,8 @@ of C<Sys::Statistics::Linux::CpuStats> and delete the object of C<Sys::Statistic
          $lxs->set(
             CpuStats  => -1, # activated, but paused, wouldn't delete the object
             Processes =>  0, # deactivate - would delete the statistics and destroy the object
-            PgSwStats =>  1, # activate the statistic and calls C<new()> and C<init()> if necessary
-            NetStats  =>  2, # activate the statistic and call C<new()> if necessary but not C<init()>
+            PgSwStats =>  1, # activate the statistic and calls new() and init() if necessary
+            NetStats  =>  2, # activate the statistic and call new() if necessary but not init()
          );
 
 It's possible to call C<set()> with a hash reference of options.
@@ -171,12 +171,12 @@ The call of C<init()> re-init all statistics that are necessary for deltas and i
 
 =head2 search(), psfind()
 
-Both methods provides a simple search engine to find special statistics. Both methods except a filter
+Both methods provides a simple scan engine to find special statistics. Both methods except a filter
 as a hash reference as the first argument. If your data comes from extern - maybe from a client that
 send his statistics to the server - you can set the statistics as the second argument. The second
 argument have to be a hash reference as well.
 
-The C<search()> method search for statistics and rebuilds the hash tree until that keys that matched
+The method C<search()> scans for statistics and rebuilds the hash tree until that keys that matched
 your filter and returns the hits as a hash reference.
 
         my $hits = $lxs->search({
@@ -185,8 +185,8 @@ your filter and returns the hits as a hash reference.
               owner => qr/root/
            },
            CpuStats => {
-              total  => 'gt:50',
-              iowait => '>10'
+              idle   => 'lt:10',
+              iowait => 'gt:10'
            },
            DiskUsage => {
               '/dev/sda1' => {
@@ -197,13 +197,13 @@ your filter and returns the hits as a hash reference.
 
 This would return the following matches:
 
-    * processes with the command C<[su]>
-    * processes with the owner C<root>
-    * all cpu where the C<total> usage is grather than 50
-    * all cpu where C<iowait> is grather than 10
-    * only that disk where C<usageper> is higher than 80
+    * processes with the command "[su]"
+    * processes with the owner "root"
+    * all cpu where "idle" is less than 50
+    * all cpu where "iowait" is grather than 10
+    * only disk '/dev/sda1' if "usageper" is grather than 80
 
-If your statistics comes from extern, than you can set the full statistics as the second argument.
+If the statistics are not gathered by the current process then you can handoff statistics as an argument.
 
         my %stats = (
            CpuStats => {
@@ -226,35 +226,39 @@ If your statistics comes from extern, than you can set the full statistics as th
 
         my $hits = $lxs->search(\%filter, \%stats);
 
-The C<psfind()> method search for processes only and returns a array reference with all process IDs that
+The method C<psfind()> scans for processes only and returns a array reference with all process IDs that
 matched the filter. Example:
 
         my $pids = $lxs->psfind({ cmd => qr/init/, owner => 'eq:apache' });
 
-You can set the statistics as second argument as well if your statistics comes from extern.
+You can handoff the statistics as second argument as well.
 
         my $pids = $lxs->psfind(\%filter, \%stats);
 
 This would return the following process ids:
 
-    * processes that matched the command C<init>
-    * processes with the owner C<apache>
+    * processes that matched the command "init"
+    * processes with the owner "apache"
 
 There are different match operators available:
 
-    * gt or > - grather than
-    * lt or < - less than
-    * eq or = - is equal
-    * ne or ! - is not equal
+    gt  -  grather than
+    lt  -  less than
+    eq  -  is equal
+    ne  -  is not equal
 
 Notation examples:
 
-    gt:50  or  >50
-    lt:50  or  <50
-    eq:50  or  =50
-    ne:50  or  !50
+    gt:50
+    lt:50
+    eq:50
+    ne:50
 
 Both argumnents have to be set as a hash reference.
+
+Note: the operators < > = ! are not available any more. It's possible that in further releases
+could be different changes for C<search()> and C<psfind()>. So please take a look to the 
+documentation if you use it.
 
 =head2 settime()
 
@@ -444,13 +448,13 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use strict;
 use warnings;
 use Carp qw(croak);
 use POSIX qw(strftime);
-use constant RXOPTION => qr/^[0-2\-1]$/;
+use constant RXOPTION => qr/^[0-2\-1]\z/;
 
 sub new {
    my $class = shift;
@@ -577,8 +581,8 @@ sub get {
 }
 
 sub search {
-   my $self   = shift;
-   my $class  = ref($self);
+   my $self  = shift;
+   my $class = ref($self);
 
    croak "$class: first argument have to be a hash ref"
      unless $_[0] && ref($_[0]) eq 'HASH';
@@ -590,12 +594,11 @@ sub search {
    # $stats and $filter must be set
    return undef unless %{$stats} && %{$filter};
 
-   my $opts   = $self->{opts};
-   my %hits   = ();
+   my $opts = $self->{opts};
+   my %hits = ();
 
    foreach my $opt (keys %{$filter}) {
 
-      # this 2 croaks are the only croaks in this loop
       croak "$class: not a hash ref opt '$opt'"
          unless ref($filter->{$opt}) eq 'HASH';
       croak "$class: invalid option '$opt'"
@@ -604,13 +607,12 @@ sub search {
       # next if the object isn't loaded
       next unless exists $stats->{$opt};
 
-      # some sub refs
-      my $fref = $filter->{$opt};
-      my $sref = $stats->{$opt};
-
       # we search for matches for each key that is defined
       # in %filter and rebuild the tree until that key that
       # matched the searched string
+
+      my $fref = $filter->{$opt};
+      my $sref = $stats->{$opt};
 
       foreach my $x (keys %{$fref}) {
 
@@ -623,7 +625,7 @@ sub search {
          #
          #    $fref->{eth0}->{ttbyt}
          #
-         # is defined as filter, than the key "eth0" have to match
+         # is defined as a filter than the key "eth0" have to match
          #
          #    $sref->{eth0}
          #
@@ -638,22 +640,19 @@ sub search {
             while ( my ($name, $value) = each %{$fref->{$x}} ) {
                $hits{$opt}{$x}{$name} = $sref->{$x}->{$name}
                   if exists $sref->{$x}->{$name}
-                  && $class->_diff($sref->{$x}->{$name}, $value);
+                  && $class->_compare($sref->{$x}->{$name}, $value);
             }
 
-         # if ref($fref->{$x}) is return a regexp or 'nothing' than we
-         # search for matches in all key-value pairs that matched
-
-         } elsif (ref($fref->{$x}) =~ /^(Regexp|)$/) {
+         } else {
             foreach my $key (keys %{$sref}) {
                if (ref($sref->{$key}) eq 'HASH') {
                   $hits{$opt}{$key}{$x} = $sref->{$key}->{$x}
                      if exists $sref->{$key}->{$x}
-                     && $class->_diff($sref->{$key}->{$x}, $fref->{$x});
+                     && $class->_compare($sref->{$key}->{$x}, $fref->{$x});
                } else {
                   $hits{$opt}{$x} = $sref->{$x}
                      if exists $sref->{$x}
-                     && $class->_diff($sref->{$x}, $fref->{$x});
+                     && $class->_compare($sref->{$x}, $fref->{$x});
                   last;
                }
             }
@@ -665,8 +664,8 @@ sub search {
 }
 
 sub psfind {
-   my $self   = shift;
-   my $class  = ref($self);
+   my $self  = shift;
+   my $class = ref($self);
 
    croak "$class: first argument have to be a hash ref"
      unless $_[0] && ref($_[0]) eq 'HASH';
@@ -686,7 +685,7 @@ sub psfind {
       while ( my ($key, $value) = each %{$filter} ) {
          push @hits, $pid
             if exists $proc->{$key}
-            && $class->_diff($proc->{$key}, $value);
+            && $class->_compare($proc->{$key}, $value);
       }
    }
 
@@ -697,15 +696,24 @@ sub psfind {
 # private stuff
 #
 
-sub _diff {
-   my ($c, $x, $y) = @_;
+sub _compare {
+   my ($class, $x, $y) = @_;
 
-   return 1
-      if ( ref($y) eq 'Regexp'  &&  $x =~ $y )
-      || ( $y =~ s/^(eq:|=)//   &&  $x eq $y )
-      || ( $y =~ s/^(ne:|!)//   &&  $x ne $y )
-      || ( $y =~ s/^(gt:|>)//   &&  $y =~ /^\d+$/  &&  $x > $y )
-      || ( $y =~ s/^(lt:|<)//   &&  $y =~ /^\d+$/  &&  $x < $y );
+   if (ref($y) eq 'Regexp') {
+      return $x =~ $y;
+   } elsif ($y =~ s/^eq://) {
+      return $x eq $y;
+   } elsif ($y =~ s/^ne://) {
+      return $x ne $y;
+   } elsif ($y =~ s/^gt://) {
+      return $x > $y if $y =~ /^\d+\z/;
+      croak "$class: not a number for operator 'gt:'";
+   } elsif ($y =~ s/^lt://) {
+      return $x < $y if $y =~ /^\d+\z/;
+      croak "$class: not a number for operator 'lt:'";
+   } else {
+      croak "$class: bad search() or psfind() operator '$y'";
+   }
 
    return undef;
 }

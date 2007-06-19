@@ -1,3 +1,7 @@
+0.11    Released at 2007-06-19.
+        Fixed _diff() and replace it with _compare().
+        Did some other code changes like regexes.
+        Kicked operators < > = ! as options for search() and psfind().
 0.10    Released at 2007-05-25.
         Fixed div code parts.
         Now there can be handoff a process list to Processes.

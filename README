@@ -29,7 +29,7 @@ DESCRIPTION
     Sys::Statistics::Linux is the front-end module to Sys-Statistics-Linux
     and collects different linux system informations like processor
     workload, memory usage, network and disk statistics and a lot more.
-    Refer to the documentation of the distribution modules to get
+    Refer the documentation of the distribution modules to get more
     informations about all possible statistics.
 
 TECHNICAL NOTE
@@ -48,9 +48,9 @@ TECHNICAL NOTE
     2.5 these statistics are in /proc/diskstats.
 
 DELTAS
-    The options "CpuStats", "ProcStats", "PgSwStats", "NetStats",
+    The statistics "CpuStats", "ProcStats", "PgSwStats", "NetStats",
     "DiskStats" and "Processes" are deltas, for this reason it's necessary
-    to initialize the statistics first before the data be generated with
+    to initialize the statistics first before the data can be prepared by
     "get()". These statistics can be initialized with the methods "new()",
     "set()" and "init()". Each option that is set to TRUE (1) will be
     initialized by the call of "new()" or "set()". The call of "init()"
@@ -59,15 +59,15 @@ DELTAS
     METHOD section to get more information about the calls of "new()",
     "set()" and "get()".
 
-    Another exigence is that you need to sleep for while - at least for one
-    second - before you call "get()" if you want to get useful statistics.
-    The options "SysInfo", "MemStats", "SockStats", "DiskUsage", "LoadAVG"
-    and "FileStats" are no deltas. If you need only one of this informations
+    Another exigence is to sleep for while - at least for one second -
+    before the call of "get()" if you want to get useful statistics. The
+    options "SysInfo", "MemStats", "SockStats", "DiskUsage", "LoadAVG" and
+    "FileStats" are no deltas. If you need only one of these informations
     you don't need to sleep before the call of "get()".
 
-    The "get()" function collects all requested informations and returns a
-    hash reference with the statistics. The inital statistics will be
-    updated. You can turn on and off options with "set()".
+    The method "get()" then prepares all requested statistics and returns it
+    as a hash reference. The inital statistics will be updated. You can turn
+    on and off options with "set()".
 
 OPTIONS
     All options are identical with the package names of the distribution. To
@@ -94,7 +94,7 @@ OPTIONS
        );
 
     It's only possible to set "init" to 1 or 2. 1 would init statistics, 2
-    not, but both values would create a new "Processes" object.
+    not but both values would create a new "Processes" object.
 
     To get more informations about the statistics refer the different
     modules of the distribution.
@@ -115,8 +115,8 @@ OPTIONS
 METHODS
   new()
     Call "new()" to create a new Sys::Statistics::Linux object. You can call
-    "new()" with options. This options would be hand off to the "set()"
-    method.
+    "new()" with options. This options would be handoff to the method
+    "set()".
 
     Without options
 
@@ -149,8 +149,8 @@ METHODS
              $lxs->set(
                 CpuStats  => -1, # activated, but paused, wouldn't delete the object
                 Processes =>  0, # deactivate - would delete the statistics and destroy the object
-                PgSwStats =>  1, # activate the statistic and calls C<new()> and C<init()> if necessary
-                NetStats  =>  2, # activate the statistic and call C<new()> if necessary but not C<init()>
+                PgSwStats =>  1, # activate the statistic and calls new() and init() if necessary
+                NetStats  =>  2, # activate the statistic and call new() if necessary but not init()
              );
 
     It's possible to call "set()" with a hash reference of options.
@@ -175,13 +175,13 @@ METHODS
              $lxs->init;
 
   search(), psfind()
-    Both methods provides a simple search engine to find special statistics.
+    Both methods provides a simple scan engine to find special statistics.
     Both methods except a filter as a hash reference as the first argument.
     If your data comes from extern - maybe from a client that send his
     statistics to the server - you can set the statistics as the second
     argument. The second argument have to be a hash reference as well.
 
-    The "search()" method search for statistics and rebuilds the hash tree
+    The method "search()" scans for statistics and rebuilds the hash tree
     until that keys that matched your filter and returns the hits as a hash
     reference.
 
@@ -191,8 +191,8 @@ METHODS
                   owner => qr/root/
                },
                CpuStats => {
-                  total  => 'gt:50',
-                  iowait => '>10'
+                  idle   => 'lt:10',
+                  iowait => 'gt:10'
                },
                DiskUsage => {
                   '/dev/sda1' => {
@@ -203,14 +203,14 @@ METHODS
 
     This would return the following matches:
 
-        * processes with the command C<[su]>
-        * processes with the owner C<root>
-        * all cpu where the C<total> usage is grather than 50
-        * all cpu where C<iowait> is grather than 10
-        * only that disk where C<usageper> is higher than 80
+        * processes with the command "[su]"
+        * processes with the owner "root"
+        * all cpu where "idle" is less than 50
+        * all cpu where "iowait" is grather than 10
+        * only disk '/dev/sda1' if "usageper" is grather than 80
 
-    If your statistics comes from extern, than you can set the full
-    statistics as the second argument.
+    If the statistics are not gathered by the current process then you can
+    handoff statistics as an argument.
 
             my %stats = (
                CpuStats => {
@@ -233,36 +233,39 @@ METHODS
 
             my $hits = $lxs->search(\%filter, \%stats);
 
-    The "psfind()" method search for processes only and returns a array
+    The method "psfind()" scans for processes only and returns a array
     reference with all process IDs that matched the filter. Example:
 
             my $pids = $lxs->psfind({ cmd => qr/init/, owner => 'eq:apache' });
 
-    You can set the statistics as second argument as well if your statistics
-    comes from extern.
+    You can handoff the statistics as second argument as well.
 
             my $pids = $lxs->psfind(\%filter, \%stats);
 
     This would return the following process ids:
 
-        * processes that matched the command C<init>
-        * processes with the owner C<apache>
+        * processes that matched the command "init"
+        * processes with the owner "apache"
 
     There are different match operators available:
 
-        * gt or > - grather than
-        * lt or < - less than
-        * eq or = - is equal
-        * ne or ! - is not equal
+        gt  -  grather than
+        lt  -  less than
+        eq  -  is equal
+        ne  -  is not equal
 
     Notation examples:
 
-        gt:50  or  >50
-        lt:50  or  <50
-        eq:50  or  =50
-        ne:50  or  !50
+        gt:50
+        lt:50
+        eq:50
+        ne:50
 
     Both argumnents have to be set as a hash reference.
+
+    Note: the operators < > = ! are not available any more. It's possible
+    that in further releases could be different changes for "search()" and
+    "psfind()". So please take a look to the documentation if you use it.
 
   settime()
     Call "settime()" to define a POSIX formatted time stamp, generated with
