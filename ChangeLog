@@ -1,3 +1,5 @@
+0.11_02 Released at 2007-07-10.
+        Fixed Build.PL and Makefile.PL.
 0.11_01 Released at 2007-07-10.
         Kicked option -1 - does anybody need that option really? I think not!
         Now the disk usage is collected with "df -kP". I hope that works on

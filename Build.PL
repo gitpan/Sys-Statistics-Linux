@@ -9,8 +9,10 @@ my $build = Module::Build->new(
     module_name        => 'Sys::Statistics::Linux',
     dist_author        => 'Jonny Schulz',
     requires => {
-        'Test::More'     => 0,
-        Carp             => 0,
+        'UNIVERSAL::require' => 0,
+        'UNIVERSAL'          => 0,
+        'Test::More'         => 0,
+        'Carp'               => 0,
     },
     recommends         => {},
     sign               => 0,
