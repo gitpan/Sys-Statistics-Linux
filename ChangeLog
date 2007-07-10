@@ -1,10 +1,14 @@
+0.11_01 Released at 2007-07-10.
+        Kicked option -1 - does anybody need that option really? I think not!
+        Now the disk usage is collected with "df -kP". I hope that works on
+          all distributions.
 0.11    Released at 2007-06-19.
         Fixed _diff() and replace it with _compare().
         Did some other code changes like regexes.
         Kicked operators < > = ! as options for search() and psfind().
 0.10    Released at 2007-05-25.
         Fixed div code parts.
-        Now there can be handoff a process list to Processes.
+        Now there can be pass a process list to Processes.
 0.09_18 Released at 2007-05-16.
         Added ttpcks (rxpcks + txpcks) to NetStats.
         Fixed a bug in DiskStats. The field for wrtbyt was wrong.
@@ -39,7 +43,7 @@
         Now all values of PgSwStats, NetStats, DiskStats and ProcStats
           (here only the key "new") are values per second. I break
           this down because it's very confusing if the statistics are
-          just add together. Now there are all rxbyt/s or pgpgin/s or new/s.
+          just add together.
         I kicked IO::File and the _load() Method from some modules
           because they wasn't really necessary.
 0.09_08 Released at 2007-03-05.

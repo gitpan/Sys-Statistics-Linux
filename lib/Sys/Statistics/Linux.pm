@@ -6,7 +6,7 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
    use Sys::Statistics::Linux;
 
-   my $lxs = new Sys::Statistics::Linux;
+   my $lxs = Sys::Statistics::Linux->new();
 
    $lxs->set(
       SysInfo   => 1,
@@ -38,8 +38,8 @@ modules to get more informations about all possible statistics.
 
 This distribution collects statistics by the virtual F</proc> filesystem (procfs) and is developed
 on default vanilla kernels. It is tested on x86 hardware with the distributions SuSE (SuSE on s390
-and s390x architecture as well), Red Hat, Debian, Asianux, Slackware and Mandrake on kernel versions
-2.4 and 2.6 and should run on all linux kernels with a default vanilla kernel as well.
+and s390x architecture as well), openSUSE, RHLE, Fedora, Debian, Ubuntu, Asianux, Slackware and Mandriva
+on kernel versions 2.4 and/or 2.6 and should run on all linux kernels with a default vanilla kernel as well.
 It is possible that this module doesn't run on all distributions if the procfs is too much modified.
 
 For example the linux kernel 2.4 can compiled with the option "CONFIG_BLK_STATS". It is possible to
@@ -52,7 +52,7 @@ in /proc/diskstats.
 The statistics C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
 are deltas, for this reason it's necessary to initialize the statistics first before the data
 can be prepared by C<get()>. These statistics can be initialized with the methods C<new()>, C<set()>
-and C<init()>. Each option that is set to TRUE (1) will be initialized by the call of C<new()>
+and C<init()>. Any option that is set to TRUE (1) will be initialized by the call of C<new()>
 or C<set()>. The call of C<init()> reinitialize all statistics that are set to 1. By the call
 of C<get()> the initial statistics will be updated automatically. Please refer the METHOD section
 to get more information about the calls of C<new()>, C<set()> and C<get()>.
@@ -74,8 +74,7 @@ C<init()>.
 
 The options must be set with on of the following values:
 
-   -1 - set pause on statistics but wouldn't delete them
-    0 - delete statistics and destroy the object
+    0 - deactivate statistics
     1 - create a new object and init statistics if necessary
     2 - create a new object if not exists but wouldn't init statistics
 
@@ -87,9 +86,6 @@ In addition it's possible to handoff a process list for option C<Processes>.
           pids => [ 1, 2, 3 ]
        }
    );
-
-It's only possible to set C<init> to 1 or 2. 1 would init statistics, 2 not but both values would
-create a new C<Processes> object.
 
 To get more informations about the statistics refer the different modules of the distribution.
 
@@ -115,7 +111,7 @@ This options would be handoff to the method C<set()>.
 
 Without options
 
-         my $lxs = new Sys::Statistics::Linux;
+         my $lxs = Sys::Statistics::Linux->new();
 
 Or with options
 
@@ -142,8 +138,7 @@ Call C<set()> to activate or deactivate options. The following example would cal
 of C<Sys::Statistics::Linux::CpuStats> and delete the object of C<Sys::Statistics::Linux::SysInfo>:
 
          $lxs->set(
-            CpuStats  => -1, # activated, but paused, wouldn't delete the object
-            Processes =>  0, # deactivate - would delete the statistics and destroy the object
+            Processes =>  0, # deactivate this statistic
             PgSwStats =>  1, # activate the statistic and calls new() and init() if necessary
             NetStats  =>  2, # activate the statistic and call new() if necessary but not init()
          );
@@ -351,7 +346,7 @@ Activate and deactivate statistics:
          use Sys::Statistics::Linux;
          use Data::Dumper;
 
-         my $lxs = new Sys::Statistics::Linux;
+         my $lxs = Sys::Statistics::Linux->new();
 
          # set the options
          $lxs->set(
@@ -381,7 +376,7 @@ Set and get a time stamp:
          use strict;
          use Sys::Statistics::Linux;
 
-         my $lxs = new Sys::Statistics::Linux;
+         my $lxs = Sys::Statistics::Linux->new();
          $lxs->settime('%Y/%m/%d %H:%M:%S');
          print "$lxs->gettime\n";
 
@@ -415,10 +410,9 @@ How to get processes with the highest cpu workload:
             map  { [ $_, $procs->{$_}->{ttime} ] } keys %{$procs}
          )[0..4];
 
-Take a look into the the F<examples> directory of the distribution for some examples with a nice output. :-)
-
 =head1 DEPENDENCIED
 
+    UNIVERSAL::require
     Test::More
     Carp
 
@@ -428,7 +422,6 @@ No exports.
 
 =head1 TODOS
 
-   * pstree
    * Are there any wishs from your side? Send me a mail!
 
 =head1 REPORTING BUGS
@@ -448,18 +441,20 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.11';
+our $VERSION = '0.11_01';
 
 use strict;
 use warnings;
 use Carp qw(croak);
 use POSIX qw(strftime);
-use constant RXOPTION => qr/^[0-2\-1]\z/;
+use UNIVERSAL;
+use UNIVERSAL::require;
+use constant RXOPTION => qr/^[012]\z/;
 
 sub new {
    my $class = shift;
    my $self = bless {
-      opts  => {
+      opts => {
          SysInfo   =>  0,
          CpuStats  =>  0,
          ProcStats =>  0,
@@ -484,56 +479,52 @@ sub new {
 sub set {
    my $self  = shift;
    my $class = ref $self;
-   my $sets  = $class->_struct(@_);
+   my $args  = $class->_struct(@_);
    my $opts  = $self->{opts};
    my $obj   = $self->{obj};
    my $stats = $self->{stats};
    my $pids  = ();
 
-   if (ref($sets->{Processes}) eq 'HASH') {
-      $pids = $sets->{Processes}->{pids};
-      $sets->{Processes} = $sets->{Processes}->{init};
+   if (ref($args->{Processes}) eq 'HASH') {
+      $pids = $args->{Processes}->{pids};
+      $args->{Processes} = $args->{Processes}->{init};
    }
 
-   foreach my $opt (keys %{$sets}) {
+   foreach my $opt (keys %{$args}) {
 
       # validate the options
       croak "$class: invalid option '$opt'"
          unless exists $opts->{$opt};
       croak "$class: invalid value for '$opt'"
-         unless $sets->{$opt} =~ RXOPTION;
+         unless $args->{$opt} =~ RXOPTION;
 
-      $opts->{$opt} = $sets->{$opt};
+      $opts->{$opt} = $args->{$opt};
 
-      if ($opts->{$opt} > 0) {
+      if ($opts->{$opt}) {
          my $package = $class."::".$opt;
 
          # require mod if not loaded
-         unless (defined &{$package.'::new'}) {
-            my $require = $package;
-            $require =~ s/::/\//g;
-            require "$require.pm"
-               or croak "$class: unable to load $require.pm";
+         unless ($obj->{$opt}) {
+            $package->require
+               or croak "$class: unable to load $package";
          }
 
          # create a new object if the object doesn't exist
          # or create a new process list object if $pids is set
          if ($opt eq 'Processes' && $pids) {
             $obj->{$opt} = $package->new($pids);
-         } else {
-            $obj->{$opt} = $package->new
-               unless $obj->{$opt};
+         } elsif (!$obj->{$opt}) {
+            $obj->{$opt} = $package->new;
          }
 
-         # get initial statistics if init() is defined and the
-         # option is set to 1
+         # get initial statistics if the function init() exists
+         # and the option is set to 1
          $obj->{$opt}->init() 
             if $opts->{$opt} == 1
-            && defined &{$package.'::init'};
+            && UNIVERSAL::can($package, 'init');
 
-      } elsif ($obj->{$opt} && $opts->{$opt} == 0) {
-         delete $obj->{$opt}   if $obj->{$opt};
-         delete $stats->{$opt} if $stats->{$opt};
+      } elsif ($stats->{$obj}) {
+         delete $stats->{$obj};
       }
    }
 }
@@ -545,9 +536,8 @@ sub init {
    my $opts  = $self->{opts};
 
    foreach my $opt (keys %{$opts}) {
-      my $package = $class."::".$opt;
       $obj->{$opt}->init()
-         if defined &{$package.'::init'}
+         if defined &{"$class::$opt::init"}
          && $opts->{$opt} > 0;
    }
 }

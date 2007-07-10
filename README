@@ -4,7 +4,7 @@ NAME
 SYNOPSIS
        use Sys::Statistics::Linux;
 
-       my $lxs = new Sys::Statistics::Linux;
+       my $lxs = Sys::Statistics::Linux->new();
 
        $lxs->set(
           SysInfo   => 1,
@@ -36,10 +36,11 @@ TECHNICAL NOTE
     This distribution collects statistics by the virtual /proc filesystem
     (procfs) and is developed on default vanilla kernels. It is tested on
     x86 hardware with the distributions SuSE (SuSE on s390 and s390x
-    architecture as well), Red Hat, Debian, Asianux, Slackware and Mandrake
-    on kernel versions 2.4 and 2.6 and should run on all linux kernels with
-    a default vanilla kernel as well. It is possible that this module
-    doesn't run on all distributions if the procfs is too much modified.
+    architecture as well), openSUSE, RHLE, Fedora, Debian, Ubuntu, Asianux,
+    Slackware and Mandriva on kernel versions 2.4 and/or 2.6 and should run
+    on all linux kernels with a default vanilla kernel as well. It is
+    possible that this module doesn't run on all distributions if the procfs
+    is too much modified.
 
     For example the linux kernel 2.4 can compiled with the option
     "CONFIG_BLK_STATS". It is possible to activate or deactivate the block
@@ -52,7 +53,7 @@ DELTAS
     "DiskStats" and "Processes" are deltas, for this reason it's necessary
     to initialize the statistics first before the data can be prepared by
     "get()". These statistics can be initialized with the methods "new()",
-    "set()" and "init()". Each option that is set to TRUE (1) will be
+    "set()" and "init()". Any option that is set to TRUE (1) will be
     initialized by the call of "new()" or "set()". The call of "init()"
     reinitialize all statistics that are set to 1. By the call of "get()"
     the initial statistics will be updated automatically. Please refer the
@@ -78,8 +79,7 @@ OPTIONS
 
     The options must be set with on of the following values:
 
-       -1 - set pause on statistics but wouldn't delete them
-        0 - delete statistics and destroy the object
+        0 - deactivate statistics
         1 - create a new object and init statistics if necessary
         2 - create a new object if not exists but wouldn't init statistics
 
@@ -92,9 +92,6 @@ OPTIONS
               pids => [ 1, 2, 3 ]
            }
        );
-
-    It's only possible to set "init" to 1 or 2. 1 would init statistics, 2
-    not but both values would create a new "Processes" object.
 
     To get more informations about the statistics refer the different
     modules of the distribution.
@@ -120,7 +117,7 @@ METHODS
 
     Without options
 
-             my $lxs = new Sys::Statistics::Linux;
+             my $lxs = Sys::Statistics::Linux->new();
 
     Or with options
 
@@ -147,8 +144,7 @@ METHODS
     and delete the object of "Sys::Statistics::Linux::SysInfo":
 
              $lxs->set(
-                CpuStats  => -1, # activated, but paused, wouldn't delete the object
-                Processes =>  0, # deactivate - would delete the statistics and destroy the object
+                Processes =>  0, # deactivate this statistic
                 PgSwStats =>  1, # activate the statistic and calls new() and init() if necessary
                 NetStats  =>  2, # activate the statistic and call new() if necessary but not init()
              );
@@ -357,7 +353,7 @@ EXAMPLES
              use Sys::Statistics::Linux;
              use Data::Dumper;
 
-             my $lxs = new Sys::Statistics::Linux;
+             my $lxs = Sys::Statistics::Linux->new();
 
              # set the options
              $lxs->set(
@@ -387,7 +383,7 @@ EXAMPLES
              use strict;
              use Sys::Statistics::Linux;
 
-             my $lxs = new Sys::Statistics::Linux;
+             my $lxs = Sys::Statistics::Linux->new();
              $lxs->settime('%Y/%m/%d %H:%M:%S');
              print "$lxs->gettime\n";
 
@@ -422,10 +418,8 @@ EXAMPLES
                 map  { [ $_, $procs->{$_}->{ttime} ] } keys %{$procs}
              )[0..4];
 
-    Take a look into the the examples directory of the distribution for some
-    examples with a nice output. :-)
-
 DEPENDENCIED
+        UNIVERSAL::require
         Test::More
         Carp
 
@@ -433,7 +427,6 @@ EXPORTS
     No exports.
 
 TODOS
-       * pstree
        * Are there any wishs from your side? Send me a mail!
 
 REPORTING BUGS

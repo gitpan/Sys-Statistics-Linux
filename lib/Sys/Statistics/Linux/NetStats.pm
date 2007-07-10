@@ -179,7 +179,7 @@ sub _deltas {
       while (my ($k, $v) = each %{$ldev}) {
          croak "$class: different keys in statistics"
             unless defined $idev->{$k};
-         croak "$class: value of '$k' is not a number"
+         croak "$class: statistic '$k' isn't a number"
             unless $v =~ /^\d+$/ && $ldev->{$k} =~ /^\d+$/;
 
          $ldev->{$k} =
