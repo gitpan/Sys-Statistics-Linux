@@ -29,23 +29,33 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
 =head1 DESCRIPTION
 
-Sys::Statistics::Linux is the front-end module to Sys-Statistics-Linux and collects
-different linux system informations like processor workload, memory usage, network and
-disk statistics and a lot more. Refer the documentation of the distribution
-modules to get more informations about all possible statistics.
+Sys::Statistics::Linux is the front-end module to Sys-Statistics-Linux and collects different
+linux system informations like processor workload, memory usage, network and disk statistics
+and a lot more. Refer the documentation of the distribution modules to get more informations
+about all possible statistics.
+
+=head1 MOTIVATION
+
+My motivation is very simple. Every linux administrator knows the well-known tool sar of sysstat.
+It helps me a lot of time to search for system bottlenecks and to solve problems but it's hard to
+parse the output to store different statistics into a database. So I though to develope this
+module. It's not a replacement but it should make it simpler to you to write your own system
+monitor.
+
+If Sys::Statistics::Linux doesn't provide statistics that are strongly needed then let me know it.
+
+If you need some statistics that aren't provided by Sys-Statistics-Linux but strongly needed
+then let me know it.
 
 =head1 TECHNICAL NOTE
 
-This distribution collects statistics by the virtual F</proc> filesystem (procfs) and is developed
-on default vanilla kernels. It is tested on x86 hardware with the distributions SuSE (SuSE on s390
-and s390x architecture as well), openSUSE, RHLE, Fedora, Debian, Ubuntu, Asianux, Slackware and Mandriva
-on kernel versions 2.4 and/or 2.6 and should run on all linux kernels with a default vanilla kernel as well.
-It is possible that this module doesn't run on all distributions if the procfs is too much modified.
-
-For example the linux kernel 2.4 can compiled with the option "CONFIG_BLK_STATS". It is possible to
-activate or deactivate the block statistics for devices with this option. These statistics doesn't
-exist in /proc/partitions if this option isn't activated. Since linux kernel 2.5 these statistics are
-in /proc/diskstats.
+This distribution collects statistics by the virtual F</proc> filesystem (procfs) and is
+developed on default vanilla kernels. It is tested on x86 hardware with the distributions SuSE
+(SuSE on s390 and s390x architecture as well), openSUSE, RHLE, Fedora, Debian, Ubuntu, Asianux,
+Slackware and Mandriva on kernel versions 2.4 and/or 2.6 and should run on all linux kernels with
+a default vanilla kernel as well. It's possible that it doesn't run on all linux distributions
+if some procfs features are deactived or too much modified. As example the linux kernel 2.4 can
+compiled with the option C<CONFIG_BLK_STATS> what turn on or off block statistics for devices.
 
 =head1 DELTAS
 
@@ -134,8 +144,9 @@ Take a look to C<set()> for more informations.
 
 =head2 set()
 
-Call C<set()> to activate or deactivate options. The following example would call C<new()> and C<init()>
-of C<Sys::Statistics::Linux::CpuStats> and delete the object of C<Sys::Statistics::Linux::SysInfo>:
+Call C<set()> to activate or deactivate options. The following example would call C<new()> and
+C<init()> of C<Sys::Statistics::Linux::CpuStats> and delete the object of
+C<Sys::Statistics::Linux::SysInfo>:
 
          $lxs->set(
             Processes =>  0, # deactivate this statistic
@@ -160,7 +171,8 @@ Call C<get()> to get the collected statistics. C<get()> returns the statistics a
 
 =head2 init()
 
-The call of C<init()> re-init all statistics that are necessary for deltas and if the option is higher than 0.
+The call of C<init()> re-init all statistics that are necessary for deltas and if the option is
+higher than 0.
 
          $lxs->init;
 
@@ -198,7 +210,8 @@ This would return the following matches:
     * all cpu where "iowait" is grather than 10
     * only disk '/dev/sda1' if "usageper" is grather than 80
 
-If the statistics are not gathered by the current process then you can handoff statistics as an argument.
+If the statistics are not gathered by the current process then you can handoff statistics as an
+argument.
 
         my %stats = (
            CpuStats => {
@@ -221,8 +234,8 @@ If the statistics are not gathered by the current process then you can handoff s
 
         my $hits = $lxs->search(\%filter, \%stats);
 
-The method C<psfind()> scans for processes only and returns a array reference with all process IDs that
-matched the filter. Example:
+The method C<psfind()> scans for processes only and returns a array reference with all process
+IDs that matched the filter. Example:
 
         my $pids = $lxs->psfind({ cmd => qr/init/, owner => 'eq:apache' });
 
@@ -267,8 +280,8 @@ or the manpage C<strftime(3)>.
 =head2 gettime()
 
 C<gettime()> returns a POSIX formatted time stamp, @foo in list and $bar in scalar context.
-If the time format isn't set then the default format "%Y-%m-%d %H:%M:%S" will be set automatically.
-You can also set a time format with C<gettime()>.
+If the time format isn't set then the default format "%Y-%m-%d %H:%M:%S" will be set
+automatically. You can also set a time format with C<gettime()>.
 
          my $date_time = $lxs->gettime;
 
@@ -300,75 +313,6 @@ A very simple perl script could looks like this:
          print "  idle      $cpu->{idle}\n";
          print "  ioWait    $cpu->{iowait}\n";
          print "  total     $cpu->{total}\n";
-
-Example to collect network statistics with a nice output:
-
-         use warnings;
-         use strict;
-         use Sys::Statistics::Linux;
-
-         $| = 1;
-
-         my $header  = 20;
-         my $average = 1;
-         my $columns = 8;
-         my $options = { NetStats => 1 };
-
-         my @order = qw(
-            rxbyt rxpcks rxerrs rxdrop rxfifo rxframe rxcompr rxmulti
-            txbyt txpcks txerrs txdrop txfifo txcolls txcarr txcompr
-         );
-
-         my $lxs = Sys::Statistics::Linux->new( $options );
-
-         my $h = $header;
-
-         while (1) {
-            sleep($average);
-            my $stats = $lxs->get;
-            if ($h == $header) {
-               printf "%${columns}s", $_ for ('iface', @order);
-               print "\n";
-            }
-            foreach my $device (keys %{$stats->{NetStats}}) {
-               my $dstat = $stats->{NetStats}->{$device};
-               printf "%${columns}s", $device;
-               printf "%${columns}s", $dstat->{$_} for @order;
-               print "\n";
-            }
-            $h = $header if --$h == 0;
-         }
-
-Activate and deactivate statistics:
-
-         use warnings;
-         use strict;
-         use Sys::Statistics::Linux;
-         use Data::Dumper;
-
-         my $lxs = Sys::Statistics::Linux->new();
-
-         # set the options
-         $lxs->set(
-            SysInfo  => 1,
-            CpuStats => 1,
-            MemStats => 1
-         );
-
-         # sleep to get useful statistics for CpuStats
-         sleep(1);
-
-         # $stats contains SysInfo, CpuStats and MemStats
-         my $stats = $lxs->get;
-         print Dumper($stats);
-
-         # we deactivate CpuStats
-         $lxs->set(SysStats => 0);
-
-         # $stats contains CpuStats and MemStats
-         sleep(1);
-         $stats = $lxs->get;
-         print Dumper($stats);
 
 Set and get a time stamp:
 
@@ -412,6 +356,7 @@ How to get processes with the highest cpu workload:
 
 =head1 DEPENDENCIED
 
+    UNIVERSAL
     UNIVERSAL::require
     Test::More
     Carp
@@ -441,7 +386,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.11_02';
+our $VERSION = '0.11_03';
 
 use strict;
 use warnings;
