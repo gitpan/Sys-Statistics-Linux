@@ -13,21 +13,9 @@ Sys::Statistics::Linux::NetStats - Collect linux net statistics.
 
 =head1 DESCRIPTION
 
-This module collects statistics by the virtual F</proc> filesystem (procfs) and is developed on default vanilla
-kernels. It is tested on x86 hardware with the distributions SuSE (SuSE on s390 and s390x architecture as well),
-Red Hat, Debian, Asianux, Slackware and Mandrake on kernel versions 2.4 and 2.6 and should run on all linux
-kernels with a default vanilla kernel as well. It is possible that this module doesn't run on all distributions
-if the procfs is too much changed.
+Sys::Statistics::Linux::NetStats gathers net statistics from the virtual F</proc> filesystem (procfs).
 
-Further it is necessary to run it as a user with the authorization to read the F</proc> filesystem.
-
-=head1 DELTAS
-
-It's necessary to initialize the statistics by calling C<init()>, because the statistics are deltas between
-the call of C<init()> and C<get()>. By calling C<get()> the deltas be generated and the initial values will
-be updated automatically. This way making it possible that the call of C<init()> is only necessary
-after the call of C<new()>. Further it's recommended to sleep for a while - at least one second - between
-the call of C<init()> and/or C<get()> if you want to get useful statistics.
+For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 NET STATISTICS
 
@@ -97,7 +85,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::NetStats;
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use strict;
 use warnings;

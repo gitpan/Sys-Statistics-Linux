@@ -1,10 +1,11 @@
 use strict;
 use warnings;
-use Test::More tests => 32;
+use Test::More tests => 33;
 use Sys::Statistics::Linux;
 
 my %Processes = (
    ppid => undef,
+   nlwp => undef,
    owner => undef,
    pgrp => undef,
    state => undef,

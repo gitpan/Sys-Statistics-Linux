@@ -11,13 +11,9 @@ Sys::Statistics::Linux::MemStats - Collect linux memory informations.
 
 =head1 DESCRIPTION
 
-This module collects statistics by the virtual F</proc> filesystem (procfs) and is developed on default vanilla
-kernels. It is tested on x86 hardware with the distributions SuSE (SuSE on s390 and s390x architecture as well),
-Red Hat, Debian, Asianux, Slackware and Mandrake on kernel versions 2.4 and 2.6 and should run on all linux
-kernels with a default vanilla kernel as well. It is possible that this module doesn't run on all distributions
-if the procfs is too much changed.
+Sys::Statistics::Linux::MemStats gathers memory statistics from the virtual F</proc> filesystem (procfs).
 
-Further it is necessary to run it as a user with the authorization to read the F</proc> filesystem.
+For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 MEMORY INFORMATIONS
 
@@ -82,7 +78,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::MemStats;
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use strict;
 use warnings;

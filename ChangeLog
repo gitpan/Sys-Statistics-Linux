@@ -1,4 +1,7 @@
-0.11_02 Released at 2007-07-10.
+0.11_04 Released at 2007-07-10.
+        Added key nlwp to Processes.
+        All pods updated.
+0.11_03 Released at 2007-07-10.
         Added pgfault and pgmajfault to PgSwStats.
         Add section MOTIVATION to pod.
 0.11_02 Released at 2007-07-10.

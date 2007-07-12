@@ -29,23 +29,19 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
 =head1 DESCRIPTION
 
-Sys::Statistics::Linux is the front-end module to Sys-Statistics-Linux and collects different
-linux system informations like processor workload, memory usage, network and disk statistics
-and a lot more. Refer the documentation of the distribution modules to get more informations
-about all possible statistics.
+Sys::Statistics::Linux is a front-end module and gather different linux system informations
+like processor workload, memory usage, network and disk statistics and a lot more. Refer the
+documentation of the distribution modules to get more informations about all possible statistics.
 
 =head1 MOTIVATION
 
 My motivation is very simple. Every linux administrator knows the well-known tool sar of sysstat.
 It helps me a lot of time to search for system bottlenecks and to solve problems but it's hard to
-parse the output to store different statistics into a database. So I though to develope this
-module. It's not a replacement but it should make it simpler to you to write your own system
-monitor.
+parse the output to store different statistics into a database. So I though to develope
+Sys::Statistics::Linux. It's not a replacement but it should make it simpler to you to write your
+own system monitor.
 
 If Sys::Statistics::Linux doesn't provide statistics that are strongly needed then let me know it.
-
-If you need some statistics that aren't provided by Sys-Statistics-Linux but strongly needed
-then let me know it.
 
 =head1 TECHNICAL NOTE
 
@@ -386,7 +382,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.11_03';
+our $VERSION = '0.12';
 
 use strict;
 use warnings;
@@ -394,7 +390,6 @@ use Carp qw(croak);
 use POSIX qw(strftime);
 use UNIVERSAL;
 use UNIVERSAL::require;
-use constant RXOPTION => qr/^[012]\z/;
 
 sub new {
    my $class = shift;
@@ -424,7 +419,7 @@ sub new {
 sub set {
    my $self  = shift;
    my $class = ref $self;
-   my $args  = $class->_struct(@_);
+   my $args  = ref($_[0]) eq 'HASH' ? shift : {@_};
    my $opts  = $self->{opts};
    my $obj   = $self->{obj};
    my $stats = $self->{stats};
@@ -441,7 +436,7 @@ sub set {
       croak "$class: invalid option '$opt'"
          unless exists $opts->{$opt};
       croak "$class: invalid value for '$opt'"
-         unless $args->{$opt} =~ RXOPTION;
+         unless $args->{$opt} =~ qr/^[012]\z/;
 
       $opts->{$opt} = $args->{$opt};
 
@@ -505,11 +500,10 @@ sub get {
    my $opts   = $self->{opts};
    my $stats  = $self->{stats};
    my $obj    = $self->{obj};
-   my $format = $self->{timeformat};
 
    foreach my $opt (keys %{$opts}) {
       $stats->{$opt} = $obj->{$opt}->get()
-         if $opts->{$opt} > 0;
+         if $opts->{$opt};
    }
 
    return $stats;
@@ -551,7 +545,7 @@ sub search {
 
       foreach my $x (keys %{$fref}) {
 
-         # if $fref->{$x} is a hash ref than the next key have to
+         # if $fref->{$x} is a hash ref then the next key have to
          # match the statistic key. this is used for statistics
          # like NetStats or Processes that uses a hash key for the
          # device name or process id. NetStats example:
@@ -560,16 +554,18 @@ sub search {
          #
          #    $fref->{eth0}->{ttbyt}
          #
-         # is defined as a filter than the key "eth0" have to match
+         # is defined as a filter then the key "eth0" have to match
          #
          #    $sref->{eth0}
          #
-         # than we look if "ttbyt" matched the searched string
+         # then we look if "ttbyt" matched the searched statistic name
+         # and compare the values. if the comparing returns TRUE we the
+         # hash is copied until the matched key-value pair.
 
          if (ref($fref->{$x}) eq 'HASH') {
 
             # if the key $sref->{eth0} doesn't exists
-            # than we continue with the next defined filter
+            # then we continue with the next defined filter
             next unless exists $sref->{$x};
 
             while ( my ($name, $value) = each %{$fref->{$x}} ) {
@@ -577,14 +573,13 @@ sub search {
                   if exists $sref->{$x}->{$name}
                   && $class->_compare($sref->{$x}->{$name}, $value);
             }
-
          } else {
             foreach my $key (keys %{$sref}) {
                if (ref($sref->{$key}) eq 'HASH') {
                   $hits{$opt}{$key}{$x} = $sref->{$key}->{$x}
                      if exists $sref->{$key}->{$x}
                      && $class->_compare($sref->{$key}->{$x}, $fref->{$x});
-               } else {
+               } else { # must be a scalar now
                   $hits{$opt}{$x} = $sref->{$x}
                      if exists $sref->{$x}
                      && $class->_compare($sref->{$x}, $fref->{$x});
@@ -642,28 +637,15 @@ sub _compare {
       return $x ne $y;
    } elsif ($y =~ s/^gt://) {
       return $x > $y if $y =~ /^\d+\z/;
-      croak "$class: not a number for operator 'gt:'";
+      croak "$class: not a number for operator 'gt'";
    } elsif ($y =~ s/^lt://) {
       return $x < $y if $y =~ /^\d+\z/;
-      croak "$class: not a number for operator 'lt:'";
+      croak "$class: not a number for operator 'lt'";
    } else {
-      croak "$class: bad search() or psfind() operator '$y'";
+      croak "$class: bad search() / psfind() operator '$y'";
    }
 
    return undef;
-}
-
-sub _struct {
-   my $class = shift;
-
-   return
-      ref($_[0])
-         ? ref($_[0]) eq 'HASH'
-            ? $_[0]
-            : croak "not a hash ref"
-         : @_ % 2
-            ? croak "odd number of elements in hash"
-            : {@_};
 }
 
 1;

@@ -13,19 +13,9 @@ Sys::Statistics::Linux::Processes - Collect linux process statistics.
 
 =head1 DESCRIPTION
 
-This module collects process statistics from the F</proc> filesystem. It is tested on x86 hardware
-with the distributions SuSE (SuSE on s390 and s390x architecture as well), Red Hat, Debian
-and Mandrake on kernel versions 2.4 and 2.6 but should also running on other linux distributions
-with the same kernel release number. To run this module it is necessary to start it as root or
-another user with the authorization to read the F</proc> filesystem.
+Sys::Statistics::Linux::Processes gathers process informations from the virtual F</proc> filesystem (procfs).
 
-=head1 DELTAS
-
-It's necessary to initialize the statistics by calling C<init()>, because the statistics are deltas between
-the call of C<init()> and C<get()>. By calling C<get()> the deltas be generated and the initial values will
-be updated automatically. This way making it possible that the call of C<init()> is only necessary
-after the call of C<new()>. Further it's recommended to sleep for a while - at least one second - between
-the call of C<init()> and/or C<get()> if you want to get useful statistics.
+For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 PROCESS STATISTICS
 
@@ -35,6 +25,7 @@ F</proc/E<lt>numberE<gt>/status>, F</proc/E<lt>numberE<gt>/cmdline> and F<getpwu
 Note that if F</etc/passwd> isn't readable, the key owner is set to F<N/a>.
 
    ppid      -  The parent process ID of the process.
+   nlwp      -  The number of light weight processes that runs by this process.
    owner     -  The owner name of the process.
    pgrp      -  The group ID of the process.
    state     -  The status of the process.
@@ -118,7 +109,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use strict;
 use warnings;
@@ -237,8 +228,8 @@ sub _load {
          @{$stats{$pid}}{qw(
             cmd state ppid pgrp session ttynr minflt
             cminflt mayflt cmayflt utime stime cutime cstime
-            prior nice sttime vsize nswap cnswap cpu
-         )} = (split /\s+/, <$fh>)[1..6,9..18,21..22,35..36,38];
+            prior nice nlwp sttime vsize nswap cnswap cpu
+         )} = (split /\s+/, <$fh>)[1..6,9..19,21..22,35..36,38];
          close($fh);
       } else {
          delete $stats{$pid};

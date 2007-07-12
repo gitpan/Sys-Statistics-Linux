@@ -26,25 +26,22 @@ SYNOPSIS
        my $stat = $lxs->get;
 
 DESCRIPTION
-    Sys::Statistics::Linux is the front-end module to Sys-Statistics-Linux
-    and collects different linux system informations like processor
-    workload, memory usage, network and disk statistics and a lot more.
-    Refer the documentation of the distribution modules to get more
-    informations about all possible statistics.
+    Sys::Statistics::Linux is a front-end module and gather different linux
+    system informations like processor workload, memory usage, network and
+    disk statistics and a lot more. Refer the documentation of the
+    distribution modules to get more informations about all possible
+    statistics.
 
 MOTIVATION
     My motivation is very simple. Every linux administrator knows the
     well-known tool sar of sysstat. It helps me a lot of time to search for
     system bottlenecks and to solve problems but it's hard to parse the
     output to store different statistics into a database. So I though to
-    develope this module. It's not a replacement but it should make it
-    simpler to you to write your own system monitor.
+    develope Sys::Statistics::Linux. It's not a replacement but it should
+    make it simpler to you to write your own system monitor.
 
     If Sys::Statistics::Linux doesn't provide statistics that are strongly
     needed then let me know it.
-
-    If you need some statistics that aren't provided by Sys-Statistics-Linux
-    but strongly needed then let me know it.
 
 TECHNICAL NOTE
     This distribution collects statistics by the virtual /proc filesystem
