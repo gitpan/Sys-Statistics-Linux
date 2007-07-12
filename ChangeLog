@@ -1,4 +1,6 @@
-0.11_04 Released at 2007-07-10.
+0.13    Released at 2007-07-12.
+        Forget to add os check in make file *argh* sorry! :-)
+0.12    Released at 2007-07-12.
         Added key nlwp to Processes.
         All pods updated.
 0.11_03 Released at 2007-07-10.
