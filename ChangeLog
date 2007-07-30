@@ -1,3 +1,6 @@
+0.14    Released at 2007-07-30.
+        psfind() and search() checks now if a list is wanted. If no statistics found
+          it return undef ... thats bad.
 0.13    Released at 2007-07-12.
         Forget to add os check in make file *argh* sorry! :-)
 0.12    Released at 2007-07-12.

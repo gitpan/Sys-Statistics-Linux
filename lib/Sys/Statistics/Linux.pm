@@ -382,7 +382,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use strict;
 use warnings;
@@ -590,7 +590,7 @@ sub search {
       }
    }
 
-   return %hits ? \%hits : undef;
+   return wantarray ? %hits : \%hits;
 }
 
 sub psfind {
@@ -619,7 +619,7 @@ sub psfind {
       }
    }
 
-   return @hits ? \@hits : undef;
+   return wantarray ? @hits : \@hits;
 }
 
 #
