@@ -75,7 +75,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::DiskStats;
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use strict;
 use warnings;
@@ -255,6 +255,8 @@ sub _deltas {
       my $ldev = $lstat->{$dev};
 
       while (my ($k, $v) = each %{$ldev}) {
+         next if $k =~ /^major\z|^minor\z/;
+
          croak "$class: different keys in statistics"
             unless defined $idev->{$k};
          croak "$class: value of '$k' is not a number"
