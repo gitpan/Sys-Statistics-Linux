@@ -1,3 +1,6 @@
+0.16    Released at 2007-09-17.
+        Bug fixed in Processes.pm. The deltas of utime, stime and ttime
+          weren't calculated per second.
 0.15    Released at 2007-08-04.
         Bug fixed in DiskStats.pm. major and minor was floats.
 0.14    Released at 2007-07-30.

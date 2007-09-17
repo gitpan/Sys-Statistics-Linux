@@ -109,7 +109,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use strict;
 use warnings;
@@ -281,7 +281,7 @@ sub _deltas {
    croak "$class: value of 'uptime' is not a number"
       unless $istat->{uptime} =~ /^\d+(\.\d+|)$/ && $lstat->{uptime} =~ /^\d+(\.\d+|)$/;
 
-   my $uptime = $istat->{uptime} - $lstat->{uptime};
+   my $uptime = $lstat->{uptime} - $istat->{uptime};
    $istat->{uptime} = $lstat->{uptime};
    delete $lstat->{uptime};
 
