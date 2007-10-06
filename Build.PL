@@ -2,6 +2,9 @@ use strict;
 use warnings;
 use Module::Build;
 
+die 'OS unsupported! Sorry, but this system seems not to be a linux system!'
+   unless $^O =~ /linux/i;
+
 my $build = Module::Build->new(
     create_readme      => 1,
     create_makefile_pl => 'traditional',

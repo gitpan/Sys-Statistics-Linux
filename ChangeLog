@@ -1,3 +1,7 @@
+0.18_01 Released at 2007-10-06.
+        Testing for the current developer release of CPAN::Reporter.
+          Makefile.PL die() if the os is not a linux and the new
+          release of CPAN::Reporter sends a FAIL report.
 0.18    Released at 2007-10-06.
         Forget to update the version number of DiskUsage *grrr*.
 0.17    Released at 2007-10-06.
