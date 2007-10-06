@@ -10,7 +10,7 @@ my %PgSwStats = (
    pswpout => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 $lxs->set(PgSwStats => 1);
 sleep(1);
 my $stats = $lxs->get;

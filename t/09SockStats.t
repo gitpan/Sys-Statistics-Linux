@@ -11,7 +11,7 @@ my %SockStats = (
    ipfrag => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 $lxs->set(SockStats => 1);
 my $stats = $lxs->get;
 

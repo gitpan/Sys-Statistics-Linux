@@ -22,7 +22,7 @@ my %MemStats = (
    swaptotal => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 $lxs->set(MemStats => 1);
 my $stats = $lxs->get;
 ok(defined $stats->{MemStats}->{$_}, "checking MemStats $_") for keys %MemStats;

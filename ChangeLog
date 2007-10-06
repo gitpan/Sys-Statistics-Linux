@@ -1,3 +1,8 @@
+0.17    Released at 2007-?????.
+        Statistics minflt, cminflt, mayflt, cmayflt, utime, stime, cutime,
+          and cstime from Processes.pm are now ever floats.
+        Sys::Statistics::Linux is taint safe now.
+        Did some code improvements and fixed pod typos.
 0.16    Released at 2007-09-17.
         Bug fixed in Processes.pm. The deltas of utime, stime and ttime
           weren't calculated per second.

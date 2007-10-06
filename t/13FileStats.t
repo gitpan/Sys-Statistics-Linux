@@ -16,7 +16,7 @@ my %FileStats = (
    wantpages => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 $lxs->set(FileStats => 1);
 my $stats = $lxs->get;
 

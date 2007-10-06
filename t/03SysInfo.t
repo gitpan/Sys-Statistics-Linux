@@ -17,7 +17,7 @@ my %SysInfo = (
    idletime => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 $lxs->set(SysInfo => 1);
 my $stats = $lxs->get;
 

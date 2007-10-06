@@ -74,7 +74,8 @@ sub new {
    my $class = shift;
    my %self = (
       cmd => {
-         df => '/bin/df -kP',
+         path => '/bin',
+         df => 'df -kP',
       }
    );
    return bless \%self, $class;
@@ -86,6 +87,7 @@ sub get {
    my $cmd   = $self->{cmd};
    my (%disk_usage, $disk_name);
 
+   local $ENV{PATH} = $cmd->{path};
    open my $fh, "$cmd->{df}|" or croak "$class: unable to execute '$cmd->{df}' ($!)";
 
    # filter the header

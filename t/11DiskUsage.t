@@ -11,7 +11,7 @@ my %DiskUsage = (
    mountpoint => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 $lxs->set(DiskUsage => 1);
 my $stats = $lxs->get;
 

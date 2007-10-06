@@ -9,7 +9,7 @@ my %ProcStats = (
    count => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 $lxs->set(ProcStats => 1);
 sleep(1);
 my $stats = $lxs->get;

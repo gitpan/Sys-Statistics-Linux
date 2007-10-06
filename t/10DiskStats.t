@@ -14,7 +14,7 @@ my %DiskStats = (
    ttbyt => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 
 # I try to set this option in an eval box first because
 # it could be that this test fails if the linux kernel

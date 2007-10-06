@@ -9,7 +9,7 @@ my %LoadAVG = (
    avg_15 => undef,
 );
 
-my $lxs = new Sys::Statistics::Linux;
+my $lxs = Sys::Statistics::Linux->new;
 $lxs->set(LoadAVG => 1);
 my $stats = $lxs->get;
 ok(defined $stats->{LoadAVG}->{$_}, "checking LoadAVG $_") for keys %LoadAVG;

@@ -109,7 +109,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use strict;
 use warnings;
@@ -300,7 +300,11 @@ sub _deltas {
             # we held this value for the next init stat
             my $tmp      = $lpid->{$k};
             $lpid->{$k} -= $ipid->{$k};
-            $lpid->{$k}  = sprintf('%.2f', $lpid->{$k} / $uptime) if $lpid->{$k} > 0 && $uptime > 0;
+            if ($lpid->{$k} > 0 && $uptime > 0) {
+                $lpid->{$k} = sprintf('%.2f', $lpid->{$k} / $uptime);
+            } else {
+                $lpid->{$k} = sprintf('%.2f', $lpid->{$k});
+            }
             $ipid->{$k}  = $tmp;
          }
          # total workload
