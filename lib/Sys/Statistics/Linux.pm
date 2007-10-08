@@ -399,7 +399,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 use strict;
 use warnings;

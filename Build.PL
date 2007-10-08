@@ -7,7 +7,6 @@ die 'OS unsupported! Sorry, but this system seems not to be a linux system!'
 
 my $build = Module::Build->new(
     create_readme      => 1,
-    create_makefile_pl => 'traditional',
     license            => 'perl',
     module_name        => 'Sys::Statistics::Linux',
     dist_author        => 'Jonny Schulz',
