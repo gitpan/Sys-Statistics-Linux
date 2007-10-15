@@ -1,3 +1,6 @@
+0.21    Released at 2007-10-15.
+        Skipped ipfrag in test if the key isn't defined because
+          ipfrag is only avaiable by kernels > 2.2.
 0.20    Released at 2007-10-08.
         Fixed Makefile.PL.
 0.19    Released at 2007-10-07.

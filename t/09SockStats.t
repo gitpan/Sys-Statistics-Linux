@@ -8,7 +8,6 @@ my %SockStats = (
    tcp => undef,
    udp => undef,
    raw => undef,
-   ipfrag => undef,
 );
 
 my $lxs = Sys::Statistics::Linux->new;
@@ -16,3 +15,9 @@ $lxs->set(SockStats => 1);
 my $stats = $lxs->get;
 
 ok(defined $stats->{SockStats}->{$_}, "checking SockStats $_") for keys %SockStats;
+
+SKIP: { # because ipfrag is only available by kernels > 2.2
+    skip "checking SockStats ipfrag", 1
+        if ! defined $stats->{SockStats}->{ipfrag};
+    ok(1, "checking SockStats ipfrag");
+}
