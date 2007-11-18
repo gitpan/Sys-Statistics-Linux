@@ -6,8 +6,8 @@ Sys::Statistics::Linux::SysInfo - Collect linux system informations.
 
    use Sys::Statistics::Linux::SysInfo;
 
-   my $lxs   = new Sys::Statistics::Linux::SysInfo;
-   my $stats = $lxs->get;
+   my $lxs  = Sys::Statistics::Linux::SysInfo->new;
+   my $info = $lxs->get;
 
 =head1 DESCRIPTION
 
@@ -37,13 +37,13 @@ and F</proc/cpuinfo>, F</proc/meminfo>, F</proc/uptime>.
 
 Call C<new()> to create a new object.
 
-   my $lxs = new Sys::Statistics::Linux::SysInfo;
+   my $lxs = Sys::Statistics::Linux::SysInfo->new;
 
 =head2 get()
 
 Call C<get()> to get the statistics. C<get()> returns the statistics as a hash reference.
 
-   my $stats = $lxs->get;
+   my $info = $lxs->get;
 
 =head1 EXPORTS
 
@@ -70,7 +70,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::SysInfo;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use strict;
 use warnings;

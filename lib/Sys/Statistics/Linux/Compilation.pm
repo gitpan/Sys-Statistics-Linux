@@ -54,6 +54,8 @@ object with:
 
 =item sysinfo()
 
+=item cpuinfo()
+
 =item cpustats()
 
 =item procstats()
@@ -225,7 +227,7 @@ use Carp qw(croak);
 
 # Creating the statistics accessors
 BEGIN {
-    foreach my $stat (qw/sysinfo procstats memstats sockstats loadavg filestats/) {
+    foreach my $stat (qw/sysinfo cpuinfo procstats memstats sockstats loadavg filestats/) {
         no strict 'refs';
         *{$stat} = sub {
             use strict 'refs';

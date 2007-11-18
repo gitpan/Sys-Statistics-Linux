@@ -8,6 +8,7 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
     my $lxs = Sys::Statistics::Linux->new(
         sysinfo   => 1,
+        cpuinfo   => 1,
         cpustats  => 1,
         procstats => 1,
         memstats  => 1,
@@ -51,14 +52,15 @@ If Sys::Statistics::Linux doesn't provide statistics that are strongly needed th
 This distribution collects statistics by the virtual F</proc> filesystem (procfs) and is
 developed on default vanilla kernels. It is tested on x86 hardware with the distributions RHEL,
 Fedora, Debian, Ubuntu, Asianux, Slackware, Mandriva, SuSE (SuSE on s390 and s390x architecture
-as well) and openSUSE on kernel versions 2.4 and/or 2.6 and should run on all linux kernels with
-a default vanilla kernel as well. It's possible that it doesn't run on all linux distributions
-if some procfs features are deactivated or too much modified. As example the linux kernel 2.4 can
-compiled with the option C<CONFIG_BLK_STATS> what turn on or off block statistics for devices.
+as well but a long time ago) and openSUSE on kernel versions 2.4 and/or 2.6 and should run on all
+linux kernels with a default vanilla kernel as well. It's possible that it doesn't run on all linux
+distributions if some procfs features are deactivated or too much modified. As example the linux
+kernel 2.4 can compiled with the option C<CONFIG_BLK_STATS> what turn on or off block statistics
+for devices.
 
 =head1 DELTAS
 
-The statistics C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
+The statistics for C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
 are deltas, for this reason it's necessary to initialize the statistics first before the data
 can be prepared by C<get()>. These statistics can be initialized with the methods C<new()>,
 C<set()> and C<init()>. Any option that is set to 1 will be initialized by the call of C<new()>
@@ -66,10 +68,10 @@ or C<set()>. The call of init() re-initialize all statistics that are set to 1 o
 of C<get()> the initial statistics will be updated automatically. Please refer the METHOD section
 to get more information about the calls of C<new()>, C<set()>, C<init()> and C<get()>.
 
-Another exigence is to sleep for while - at least for one second - before the
-call of C<get()> if you want to get useful statistics. The statistics C<SysInfo>, C<MemStats>,
-C<SockStats>, C<DiskUsage>, C<LoadAVG> and C<FileStats> are no deltas. If you need only one
-of these informations you don't need to sleep before the call of C<get()>.
+Another exigence is to sleep for while - at least for one second - before the call of C<get()>
+if you want to get useful statistics. The statistics for C<SysInfo>, C<MemStats>, C<SockStats>,
+C<DiskUsage>, C<LoadAVG> and C<FileStats> are no deltas. If you need only one of these informations
+you don't need to sleep before the call of C<get()>.
 
 The method C<get()> prepares all requested statistics and returns the statistics as a
 C<Sys::Statistics::Linux::Compilation> object. The inital statistics will be updated.
@@ -328,7 +330,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.21_01';
+our $VERSION = '0.21_02';
 
 use strict;
 use warnings;
@@ -341,12 +343,11 @@ use Sys::Statistics::Linux::Compilation;
 sub new {
     my $class = shift;
     my @options = qw(
-        SysInfo   CpuStats
-        ProcStats MemStats
-        PgSwStats NetStats
-        SockStats DiskStats
-        DiskUsage LoadAVG
-        FileStats Processes
+        SysInfo   CpuInfo   CpuStats
+        ProcStats MemStats  PgSwStats
+        NetStats  SockStats DiskStats
+        DiskUsage LoadAVG   FileStats
+        Processes
     );
     my $self = bless { obj  => { }, mods => { } }, $class; 
     foreach my $opt (@options) {

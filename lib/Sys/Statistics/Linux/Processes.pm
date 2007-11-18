@@ -6,10 +6,10 @@ Sys::Statistics::Linux::Processes - Collect linux process statistics.
 
    use Sys::Statistics::Linux::Processes;
 
-   my $lxs = new Sys::Statistics::Linux::Processes;
+   my $lxs = Sys::Statistics::Linux::Processes->new;
    $lxs->init;
    sleep 1;
-   my $stats = $lxs->get;
+   my $stat = $lxs->get;
 
 =head1 DESCRIPTION
 
@@ -64,7 +64,7 @@ Note that if F</etc/passwd> isn't readable, the key owner is set to F<N/a>.
 
 Call C<new()> to create a new object.
 
-   my $lxs = new Sys::Statistics::Linux::Processes;
+   my $lxs = Sys::Statistics::Linux::Processes->new;
 
 It's possible to handoff an array reference with a PID list.
 
@@ -80,7 +80,7 @@ Call C<init()> to initialize the statistics.
 
 Call C<get()> to get the statistics. C<get()> returns the statistics as a hash reference.
 
-   my $stats = $lxs->get;
+   my $stat = $lxs->get;
 
 =head1 EXPORTS
 
@@ -109,7 +109,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use strict;
 use warnings;

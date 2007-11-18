@@ -1,3 +1,6 @@
+0.21_02 Released at 2007-11-18.
+        - Added CpuInfo.pm.
+
 0.21_01 Released at 2007-11-18.
         - WHOA a lot of changes...
         - All options are lowercase now! The key names are now lowercase as well!
