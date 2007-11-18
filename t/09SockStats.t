@@ -3,21 +3,21 @@ use warnings;
 use Test::More tests => 5;
 use Sys::Statistics::Linux;
 
-my %SockStats = (
-   used => undef,
-   tcp => undef,
-   udp => undef,
-   raw => undef,
+my @sockstats = qw(
+   used
+   tcp
+   udp
+   raw
 );
 
 my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(SockStats => 1);
+$lxs->set(sockstats => 1);
 my $stats = $lxs->get;
 
-ok(defined $stats->{SockStats}->{$_}, "checking SockStats $_") for keys %SockStats;
+ok(defined $stats->sockstats->{$_}, "checking sockstats $_") for @sockstats;
 
 SKIP: { # because ipfrag is only available by kernels > 2.2
-    skip "checking SockStats ipfrag", 1
-        if ! defined $stats->{SockStats}->{ipfrag};
-    ok(1, "checking SockStats ipfrag");
+    skip "checking sockstats ipfrag", 1
+        if ! defined $stats->sockstats->{ipfrag};
+    ok(1, "checking sockstats ipfrag");
 }

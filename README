@@ -5,23 +5,28 @@ SYNOPSIS
         use Sys::Statistics::Linux;
 
         my $lxs = Sys::Statistics::Linux->new(
-            SysInfo   => 1,
-            CpuStats  => 1,
-            ProcStats => 1,
-            MemStats  => 1,
-            PgSwStats => 1,
-            NetStats  => 1,
-            SockStats => 1,
-            DiskStats => 1,
-            DiskUsage => 1,
-            LoadAVG   => 1,
-            FileStats => 1,
-            Processes => 1,
+            sysinfo   => 1,
+            cpustats  => 1,
+            procstats => 1,
+            memstats  => 1,
+            pgswstats => 1,
+            netstats  => 1,
+            sockstats => 1,
+            diskstats => 1,
+            diskusage => 1,
+            loadavg   => 1,
+            filestats => 1,
+            processes => 1,
         );
 
         sleep 1;
 
+        # $stat is a Sys::Statistics::Linux::Compilation object
         my $stat = $lxs->get;
+
+        foreach my $key ($stat->loadavg) {
+            print $key, " ", $stat->loadavg($key), "\n";
+        }
 
 DESCRIPTION
     Sys::Statistics::Linux is a front-end module and gather different linux
@@ -67,30 +72,31 @@ DELTAS
 
     Another exigence is to sleep for while - at least for one second -
     before the call of "get()" if you want to get useful statistics. The
-    options "SysInfo", "MemStats", "SockStats", "DiskUsage", "LoadAVG" and
-    "FileStats" are no deltas. If you need only one of these informations
-    you don't need to sleep before the call of "get()".
+    statistics "SysInfo", "MemStats", "SockStats", "DiskUsage", "LoadAVG"
+    and "FileStats" are no deltas. If you need only one of these
+    informations you don't need to sleep before the call of "get()".
 
-    The method "get()" then prepares all requested statistics and returns it
-    as a hash reference. The inital statistics will be updated.
+    The method "get()" prepares all requested statistics and returns the
+    statistics as a "Sys::Statistics::Linux::Compilation" object. The inital
+    statistics will be updated.
 
 OPTIONS
-    All options are identical with the package names of the distribution. To
-    activate the gathering of statistics you have to set the options by the
-    call of "new()" or "set()". In addition you can deactivate statistics
-    with "set()".
+    All options are identical with the package names of the distribution in
+    lowercase. To activate the gathering of statistics you have to set the
+    options by the call of "new()" or "set()". In addition you can
+    deactivate statistics with "set()".
 
     The options must be set with one of the following values:
 
         0 - deactivate statistics
-        1 - create a new object and init statistics if necessary
-        2 - create a new object if not exists but wouldn't init statistics
+        1 - activate and init statistics
+        2 - activate statistics but don't init
 
     In addition it's possible to handoff a process list for option
     "Processes".
 
         my $lxs = Sys::Statistics::Linux->new(
-            Processes => {
+            processes => {
                 init => 1,
                 pids => [ 1, 2, 3 ]
             }
@@ -99,18 +105,18 @@ OPTIONS
     To get more informations about the statistics refer the different
     modules of the distribution.
 
-        SysInfo     -  Collect system informations             with Sys::Statistics::Linux::SysInfo.
-        CpuStats    -  Collect cpu statistics                  with Sys::Statistics::Linux::CpuStats.
-        ProcStats   -  Collect process statistics              with Sys::Statistics::Linux::ProcStats.
-        MemStats    -  Collect memory statistics               with Sys::Statistics::Linux::MemStats.
-        PgSwStats   -  Collect paging and swapping statistics  with Sys::Statistics::Linux::PgSwStats.
-        NetStats    -  Collect net statistics                  with Sys::Statistics::Linux::NetStats.
-        SockStats   -  Collect socket statistics               with Sys::Statistics::Linux::SockStats.
-        DiskStats   -  Collect disk statistics                 with Sys::Statistics::Linux::DiskStats.
-        DiskUsage   -  Collect the disk usage                  with Sys::Statistics::Linux::DiskUsage.
-        LoadAVG     -  Collect the load average                with Sys::Statistics::Linux::LoadAVG.
-        FileStats   -  Collect inode statistics                with Sys::Statistics::Linux::FileStats.
-        Processes   -  Collect process statistics              with Sys::Statistics::Linux::Processes.
+        sysinfo     -  Collect system informations             with Sys::Statistics::Linux::SysInfo.
+        cpustats    -  Collect cpu statistics                  with Sys::Statistics::Linux::CpuStats.
+        procstats   -  Collect process statistics              with Sys::Statistics::Linux::ProcStats.
+        memstats    -  Collect memory statistics               with Sys::Statistics::Linux::MemStats.
+        pgswstats   -  Collect paging and swapping statistics  with Sys::Statistics::Linux::PgSwStats.
+        netstats    -  Collect net statistics                  with Sys::Statistics::Linux::NetStats.
+        sockstats   -  Collect socket statistics               with Sys::Statistics::Linux::SockStats.
+        diskstats   -  Collect disk statistics                 with Sys::Statistics::Linux::DiskStats.
+        diskusage   -  Collect the disk usage                  with Sys::Statistics::Linux::DiskUsage.
+        loadavg     -  Collect the load average                with Sys::Statistics::Linux::LoadAVG.
+        filestats   -  Collect inode statistics                with Sys::Statistics::Linux::FileStats.
+        processes   -  Collect process statistics              with Sys::Statistics::Linux::Processes.
 
 METHODS
   new()
@@ -124,17 +130,17 @@ METHODS
 
     Or with options
 
-        my $lxs = Sys::Statistics::Linux->new(CpuStats => 1);
+        my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
 
     Would do nothing
 
-        my $lxs = Sys::Statistics::Linux->new(CpuStats => 0);
+        my $lxs = Sys::Statistics::Linux->new( cpustats => 0 );
 
     It's possible to call "new()" with a hash reference of options.
 
         my %options = (
-            CpuStats => 1,
-            MemStats => 1
+            cpustats => 1,
+            memstats => 1
         );
 
         my $lxs = Sys::Statistics::Linux->new(\%options);
@@ -145,25 +151,36 @@ METHODS
     and delete the object of "Sys::Statistics::Linux::SysInfo":
 
         $lxs->set(
-            Processes =>  0, # deactivate this statistic
-            PgSwStats =>  1, # activate the statistic and calls new() and init() if necessary
-            NetStats  =>  2, # activate the statistic and call new() if necessary but not init()
+            processes =>  0, # deactivate this statistic
+            pgswstats =>  1, # activate the statistic and calls new() and init() if necessary
+            netstats  =>  2, # activate the statistic and call new() if necessary but not init()
         );
 
     It's possible to call "set()" with a hash reference of options.
 
         my %options = (
-            CpuStats => 2,
-            MemStats => 2
+            cpustats => 2,
+            memstats => 2
         );
 
         $lxs->set(\%options);
 
   get()
-    Call "get()" to get the collected statistics. "get()" returns the
-    statistics as a hash reference.
+    Call "get()" to get the collected statistics. "get()" returns a
+    Sys::Statistics::Linux::Compilation object.
 
-        my $stats = $lxs->get;
+        my $stat = $lxs->get;
+
+    Now the statistcs are available with
+
+        $stat->cpustats
+
+        # or
+
+        $stat->{cpustats}
+
+    Take a look to the documentation of
+    "Sys::Statistics::Linux::Compilation" for more informations.
 
   init()
     The call of init() initiate all activated statistics that are necessary
@@ -174,119 +191,26 @@ METHODS
 
     The following example would calculate average statistics for 30 minutes:
 
-        # initiate CpuStats
-        my $lxs = Sys::Statistics::Linux->new(CpuStats => 1);
-
-        while ( 1 ) {
-            sleep(1800); # the average
-            my $stat = $lxs->get;
-        }
-
-    If you just want a current snapshot of the system each 30 minutes the
-    following example would be better for you:
-
-        # don't initiate CpuStats
-        my $lxs = Sys::Statistics::Linux->new(CpuStats => 2);
+        # initiate cpustats
+        my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
 
         while ( 1 ) {
             sleep(1800);
-            $lxs->init; # init CpuStats
-            sleep(1);   # the average
             my $stat = $lxs->get;
         }
 
-  search(), psfind()
-    Both methods provides a simple scan engine to find special statistics.
-    Both methods except a filter as a hash reference as the first argument.
-    If your data comes from extern - maybe from a client that send his
-    statistics to the server - you can set the statistics as the second
-    argument. The second argument have to be a hash reference as well.
+    If you just want a current snapshot of the system each 30 minutes and
+    not the average the following example would be better for you:
 
-    The method "search()" scans for statistics and rebuilds the hash tree
-    until that keys that matched your filter and returns the hits as a hash
-    reference.
+        # don't initiate cpustats
+        my $lxs = Sys::Statistics::Linux->new( cpustats => 2 );
 
-        my $hits = $lxs->search({
-            Processes => {
-                cmd   => qr/\[su\]/,
-                owner => qr/root/
-            },
-            CpuStats => {
-                idle   => 'lt:10',
-                iowait => 'gt:10'
-            },
-            DiskUsage => {
-                '/dev/sda1' => {
-                    usageper => 'gt:80'
-                }
-            }
-        });
-
-    This would return the following matches:
-
-        * processes with the command "[su]"
-        * processes with the owner "root"
-        * all cpu where "idle" is less than 50
-        * all cpu where "iowait" is grather than 10
-        * only disk '/dev/sda1' if "usageper" is grather than 80
-
-    If the statistics are not gathered by the current process then you can
-    handoff statistics as an argument.
-
-        my %stats = (
-            CpuStats => {
-                cpu => {
-                    system => '51.00',
-                    total  => '51.00',
-                    idle   => '49.00',
-                    nice   => '0.00',
-                    user   => '0.00',
-                    iowait => '0.00'
-                }
-            }
-        );
-               
-        my %filter = (
-            CpuStats => {
-                total => 'gt:50'
-            }
-        );
-
-        my $hits = $lxs->search(\%filter, \%stats);
-
-    The method "psfind()" scans for processes only and returns a array
-    reference with all process IDs that matched the filter. Example:
-
-        my $pids = $lxs->psfind({ cmd => qr/init/, owner => 'eq:apache' });
-
-    You can handoff the statistics as second argument as well.
-
-        my $pids = $lxs->psfind(\%filter, \%stats);
-
-    This would return the following process ids:
-
-        * processes that matched the command "init"
-        * processes with the owner "apache"
-
-    There are different match operators available:
-
-        gt  -  grather than
-        lt  -  less than
-        eq  -  is equal
-        ne  -  is not equal
-
-    Notation examples:
-
-        gt:50
-        lt:50
-        eq:50
-        ne:50
-
-    Both argumnents have to be set as a hash reference.
-
-    Note: the operators < > = ! are not available any more. It's possible
-    that in further releases could be different changes for "search()" and
-    "psfind()". So please take a look to the documentation if you use it.
+        while ( 1 ) {
+            sleep(1800);
+            $lxs->init;
+            sleep(1);
+            my $stat = $lxs->get;
+        }
 
   settime()
     Call "settime()" to define a POSIX formatted time stamp, generated with
@@ -316,14 +240,14 @@ METHODS
 EXAMPLES
     A very simple perl script could looks like this:
 
-        use warnings;
         use strict;
+        use warnings;
         use Sys::Statistics::Linux;
 
-        my $lxs = Sys::Statistics::Linux->new( CpuStats => 1 );
+        my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
         sleep(1);
-        my $stats = $lxs->get;
-        my $cpu   = $stats->{CpuStats}->{cpu};
+        my $stat = $lxs->get;
+        my $cpu  = $stat->cpustats->{cpu};
 
         print "Statistics for CpuStats (all)\n";
         print "  user      $cpu->{user}\n";
@@ -335,8 +259,8 @@ EXAMPLES
 
     Set and get a time stamp:
 
-        use warnings;
         use strict;
+        use warnings;
         use Sys::Statistics::Linux;
 
         my $lxs = Sys::Statistics::Linux->new();
@@ -346,35 +270,41 @@ EXAMPLES
     If you're not sure you can use the the "Data::Dumper" module to learn
     more about the hash structure:
 
-        use warnings;
         use strict;
+        use warnings;
         use Sys::Statistics::Linux;
         use Data::Dumper;
 
-        my $lxs = Sys::Statistics::Linux->new( CpuStats => 1 );
+        my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
         sleep(1);
-        my $stats = $lxs->get;
+        my $stat = $lxs->get;
 
-        print Dumper($stats);
+        print Dumper($stat);
 
     How to get processes with the highest cpu workload:
 
-        use warnings;
         use strict;
+        use warnings;
         use Sys::Statistics::Linux;
 
-        my $lxs = Sys::Statistics::Linux->new( Processes => 1 );
+        my $lxs = Sys::Statistics::Linux->new( processes => 1 );
         sleep(1);
-        my $stats = $lxs->get;
-        my $procs = $stats->{Processes};
+        my $stat = $lxs->get;
+        my $proc = $stat->processes;
 
         my @top5 = (
            map  { $_->[0] }
            reverse sort { $a->[1] <=> $b->[1] }
-           map  { [ $_, $procs->{$_}->{ttime} ] } keys %{$procs}
+           map  { [ $_, $procs->{$_}->{ttime} ] } keys %{$proc}
         )[0..4];
 
-DEPENDENCIED
+BACKWARD COMPATIBILITY
+    The old options and keys - CpuStats, NetStats, etc - are still available
+    but it's not possible to access the statistics via
+    "Sys::Statistics::Linux::Compilation" and it's not possible to call
+    "search()" and "psfind()" if you use the old options.
+
+PREREQUISITES
         UNIVERSAL
         UNIVERSAL::require
         Test::More

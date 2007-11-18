@@ -3,15 +3,14 @@ use warnings;
 use Test::More tests => 3;
 use Sys::Statistics::Linux;
 
-my %ProcStats = (
-   new => undef,
-   runqueue => undef,
-   count => undef,
+my @procstats = qw(
+   new
+   runqueue
+   count
 );
 
 my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(ProcStats => 1);
+$lxs->set(procstats => 1);
 sleep(1);
 my $stats = $lxs->get;
-
-ok(defined $stats->{ProcStats}->{$_}, "checking ProcStats $_") for keys %ProcStats;
+ok(defined $stats->procstats->{$_}, "checking procstats $_") for @procstats;

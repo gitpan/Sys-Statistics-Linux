@@ -3,19 +3,19 @@ use warnings;
 use Test::More tests => 5;
 use Sys::Statistics::Linux;
 
-my %DiskUsage = (
-   total => undef,
-   usage => undef,
-   free => undef,
-   usageper => undef,
-   mountpoint => undef,
+my @diskusage = qw(
+    total
+    usage
+    free
+    usageper
+    mountpoint
 );
 
 my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(DiskUsage => 1);
+$lxs->set(diskusage => 1);
 my $stats = $lxs->get;
 
-for my $dev (keys %{$stats->{DiskUsage}}) {
-   ok(defined $stats->{DiskUsage}->{$dev}->{$_}, "checking DiskUsage $_") for keys %DiskUsage;
+for my $dev (keys %{$stats->diskusage}) {
+   ok(defined $stats->diskusage->{$dev}->{$_}, "checking diskusage $_") for @diskusage;
    last; # we check only one device, that should be enough
 }

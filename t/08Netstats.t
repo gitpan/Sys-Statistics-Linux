@@ -3,33 +3,33 @@ use warnings;
 use Test::More tests => 18;
 use Sys::Statistics::Linux;
 
-my %NetStats = (
-   rxbyt => undef,
-   rxpcks => undef,
-   rxerrs => undef,
-   rxdrop => undef,
-   rxfifo => undef,
-   rxframe => undef,
-   rxcompr => undef,
-   rxmulti => undef,
-   txbyt => undef,
-   txpcks => undef,
-   txerrs => undef,
-   txdrop => undef,
-   txfifo => undef,
-   txcolls => undef,
-   txcarr => undef,
-   txcompr => undef,
-   ttpcks => undef,
-   ttbyt => undef,
+my @netstats = qw(
+   rxbyt
+   rxpcks
+   rxerrs
+   rxdrop
+   rxfifo
+   rxframe
+   rxcompr
+   rxmulti
+   txbyt
+   txpcks
+   txerrs
+   txdrop
+   txfifo
+   txcolls
+   txcarr
+   txcompr
+   ttpcks
+   ttbyt
 );
 
 my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(NetStats => 1);
+$lxs->set(netstats => 1);
 sleep(1);
 my $stats = $lxs->get;
 
-for my $dev (keys %{$stats->{NetStats}}) {
-   ok(defined $stats->{NetStats}->{$dev}->{$_}, "checking NetStats $_") for keys %NetStats;
+for my $dev (keys %{$stats->netstats}) {
+   ok(defined $stats->netstats->{$dev}->{$_}, "checking netstats $_") for @netstats;
    last; # we check only one device, that should be enough
 }

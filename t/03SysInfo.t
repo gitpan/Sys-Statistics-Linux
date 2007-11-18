@@ -2,23 +2,21 @@ use strict;
 use warnings;
 use Test::More tests => 10;
 use Sys::Statistics::Linux;
-use Data::Dumper;
 
-my %SysInfo = (
-   hostname => undef,
-   domain => undef,
-   kernel => undef,
-   release => undef,
-   version => undef,
-   memtotal => undef,
-   swaptotal => undef,
-   countcpus => undef,
-   uptime => undef,
-   idletime => undef,
+my @sysinfo = qw(
+   hostname
+   domain
+   kernel
+   release
+   version
+   memtotal
+   swaptotal
+   countcpus
+   uptime
+   idletime
 );
 
 my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(SysInfo => 1);
+$lxs->set(sysinfo => 1);
 my $stats = $lxs->get;
-
-ok(defined $stats->{SysInfo}->{$_}, "checking SysInfo $_") for keys %SysInfo;
+ok(defined $stats->sysinfo->{$_}, "checking sysinfo $_") for @sysinfo;

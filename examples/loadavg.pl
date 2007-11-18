@@ -10,10 +10,10 @@ my $interval = 1;
 my $column   = 10;
 my @order    = qw(avg_1 avg_5 avg_15);
 my $h_int    = $header;
-my $lxs      = Sys::Statistics::Linux->new(LoadAVG => 1);
+my $lxs      = Sys::Statistics::Linux->new(loadavg => 1);
 
 while ( 1 ) {
-   my $stats = $lxs->get->{LoadAVG};
+   my $stats = $lxs->get->loadavg;
 
    if ($h_int == $header) {
       printf "%${column}s", $_ for ('date', 'time', @order);

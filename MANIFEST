@@ -1,9 +1,10 @@
 Build.PL
 ChangeLog
-examples/LoadAVG.pl
+examples/loadavg.pl
 INSTALL
 lib/Sys/Statistics/linux.man
 lib/Sys/Statistics/Linux.pm
+lib/Sys/Statistics/Linux/Compilation.pm
 lib/Sys/Statistics/Linux/CpuStats.pm
 lib/Sys/Statistics/Linux/DiskStats.pm
 lib/Sys/Statistics/Linux/DiskUsage.pm
@@ -36,3 +37,4 @@ t/13FileStats.t
 t/14Processes.t
 t/15search.t
 t/16psfind.t
+t/17backward_compability.t

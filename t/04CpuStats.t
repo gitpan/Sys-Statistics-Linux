@@ -3,18 +3,17 @@ use warnings;
 use Test::More tests => 6;
 use Sys::Statistics::Linux;
 
-my %CpuStats = (
-   user => undef,
-   nice => undef,
-   system => undef,
-   idle => undef,
-   iowait => undef,
-   total => undef,
+my @cpustats = qw(
+   user
+   nice
+   system
+   idle
+   iowait
+   total
 );
 
 my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(CpuStats => 1);
+$lxs->set(cpustats => 1);
 sleep(1);
 my $stats = $lxs->get;
-
-ok(defined $stats->{CpuStats}->{cpu}->{$_}, "checking CpuStats $_") for keys %CpuStats;
+ok(defined $stats->cpustats->{cpu}->{$_}, "checking cpustats $_") for @cpustats;
