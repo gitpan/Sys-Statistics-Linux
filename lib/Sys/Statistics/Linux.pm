@@ -294,9 +294,17 @@ How to get processes with the highest cpu workload:
 
 =head1 BACKWARD COMPATIBILITY
 
-The old options and keys - CpuStats, NetStats, etc - are still available but it's not
-possible to access the statistics via C<Sys::Statistics::Linux::Compilation> and it's
+The old options and keys - CpuStats, NetStats, etc - are still available together but deprecated!
+It's not possible to access the statistics via C<Sys::Statistics::Linux::Compilation> and it's
 not possible to call C<search()> and C<psfind()> if you use the old options.
+
+You should use the new options and access the statistics over the accessors
+
+    $stats->cpustats
+
+or direct
+
+    $stats->{cpustats}
 
 =head1 PREREQUISITES
 
@@ -330,7 +338,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use strict;
 use warnings;

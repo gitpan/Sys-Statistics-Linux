@@ -120,7 +120,7 @@ sub get {
 
     # maybe there is no swap space on the machine
     if (!$meminfo{swaptotal}) {
-        $meminfo{swapusedper} = 0;
+        $meminfo{swapusedper} = '0.00';
     } else {
         $meminfo{swapusedper} = sprintf('%.2f', 100 * $meminfo{swapused} / $meminfo{swaptotal});
     }

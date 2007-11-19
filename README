@@ -301,9 +301,18 @@ EXAMPLES
 
 BACKWARD COMPATIBILITY
     The old options and keys - CpuStats, NetStats, etc - are still available
-    but it's not possible to access the statistics via
+    together but deprecated! It's not possible to access the statistics via
     "Sys::Statistics::Linux::Compilation" and it's not possible to call
     "search()" and "psfind()" if you use the old options.
+
+    You should use the new options and access the statistics over the
+    accessors
+
+        $stats->cpustats
+
+    or direct
+
+        $stats->{cpustats}
 
 PREREQUISITES
         UNIVERSAL

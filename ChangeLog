@@ -1,3 +1,7 @@
+0.24    Released at 2007-11-19.
+        - Fixed swapusedper.
+        - Some POD improvements.
+
 0.23    Released at 2007-11-19.
         - *grml* forget to update ChangeLog :)
 
