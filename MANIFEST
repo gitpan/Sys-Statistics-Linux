@@ -39,4 +39,5 @@ t/110filestats.t
 t/120processes.t
 t/130search.t
 t/140psfind.t
+t/150pstop.t
 t/200backward_compatibility

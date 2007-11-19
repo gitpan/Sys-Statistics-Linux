@@ -100,6 +100,24 @@ LoadAVG example:
     my @keys = $stat->loadavg;                  # the statistic keys
     my @vals = $stat->loadavg(@keys);           # the values for @keys
 
+=head2 pstop()
+
+This method is looking for top processes and returns a sorted list of PIDs as an array or
+array reference depending on the context. It expected two values: a key name and the number
+of top processes to return.
+
+As example you want to get the top 5 processes with the highest cpu usage:
+
+    my @top5 = $stat->pstop( ttime => 5 );
+    # or as a reference
+    my $top5 = $stat->pstop( ttime => 5 );
+
+If you want to get all processes:
+
+    my @top_all = $stat->pstop( ttime => $FALSE );
+    # or just
+    my @top_all = $stat->pstop( 'ttime' );
+
 =head2 search(), psfind()
 
 Both methods provides a simple scan engine to find special statistics. Both methods except a filter
@@ -210,6 +228,8 @@ Please report all bugs to <jschulz.cpan(at)bloonix.de>.
 
 Jonny Schulz <jschulz.cpan(at)bloonix.de>.
 
+Thanks to Moritz Lenz for his suggestion for the name for this module.
+
 =head1 COPYRIGHT
 
 Copyright (c) 2006, 2007 by Jonny Schulz. All rights reserved.
@@ -219,7 +239,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Compilation;
-our $VERSION = '0.00_01';
+our $VERSION = '0.01';
 
 use strict;
 use warnings;
@@ -260,8 +280,10 @@ BEGIN {
 }
 
 sub new {
-    @_ == 2 or croak 'Usage: class->new( \%statistics )';
     my ($class, $stats) = @_;
+    unless (ref($stats) eq 'HASH') {
+        croak 'Usage: class->new( \%statistics )';
+    }
     return bless $stats, $class;
 }
 
@@ -352,6 +374,23 @@ sub psfind {
     }
 
     return wantarray ? @hits : \@hits;
+}
+
+sub pstop {
+    my ($self, $key, $count) = @_;
+    unless ($key) {
+        croak 'Usage: pstop( $key => $count )';
+    }
+    my $proc = $self->{processes};
+    my @top = (
+        map { $_->[0] }
+        reverse sort { $a->[1] <=> $b->[1] }
+        map { [ $_, $proc->{$_}->{$key} ] } keys %{$proc}
+    );
+    if ($count) {
+        @top = @top[0..--$count];
+    }
+    return wantarray ? @top : \@top;
 }
 
 #
