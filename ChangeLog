@@ -1,3 +1,10 @@
+0.23    Released at 2007-11-19.
+        - *grml* forget to update ChangeLog :)
+
+0.22    Released at 2007-11-19.
+        - Added pstop() to Compilation.pm and t/150pstop.t.
+        - Did some POD fixes in all modules.
+
 0.21_02 Released at 2007-11-18.
         - Added CpuInfo.pm.
 
