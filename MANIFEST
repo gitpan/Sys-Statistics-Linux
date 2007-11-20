@@ -5,7 +5,6 @@ INSTALL
 lib/Sys/Statistics/linux.man
 lib/Sys/Statistics/Linux.pm
 lib/Sys/Statistics/Linux/Compilation.pm
-lib/Sys/Statistics/Linux/CpuInfo.pm
 lib/Sys/Statistics/Linux/CpuStats.pm
 lib/Sys/Statistics/Linux/DiskStats.pm
 lib/Sys/Statistics/Linux/DiskUsage.pm
@@ -26,7 +25,6 @@ t/001pod.t
 t/002pod-coverage.t
 t/010sysinfo.t
 t/020cpustats.t
-t/025cpuinfo.t
 t/030procstats.t
 t/040memstat.t
 t/050pgswstats.t

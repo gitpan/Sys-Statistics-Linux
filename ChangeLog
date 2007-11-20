@@ -1,3 +1,7 @@
+0.25    Released at 2007-11.20.
+        - Kicked CpuInfo.pm. The reason is that /proc/cpuinfo can be very
+          different on various architectures.
+
 0.24    Released at 2007-11-19.
         - Fixed swapusedper.
         - Some POD improvements.

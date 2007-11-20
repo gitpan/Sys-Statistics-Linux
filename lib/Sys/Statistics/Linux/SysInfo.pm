@@ -142,6 +142,7 @@ sub get {
             }
         }
         close($fh);
+        $stats->{countcpus} ||= 1; # if it was not possible to match
    }
 
     {   # up- and idletime

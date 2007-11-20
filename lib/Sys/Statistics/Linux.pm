@@ -8,7 +8,6 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
     my $lxs = Sys::Statistics::Linux->new(
         sysinfo   => 1,
-        cpuinfo   => 1,
         cpustats  => 1,
         procstats => 1,
         memstats  => 1,
@@ -338,7 +337,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 use strict;
 use warnings;
@@ -351,11 +350,10 @@ use Sys::Statistics::Linux::Compilation;
 sub new {
     my $class = shift;
     my @options = qw(
-        SysInfo   CpuInfo   CpuStats
-        ProcStats MemStats  PgSwStats
-        NetStats  SockStats DiskStats
-        DiskUsage LoadAVG   FileStats
-        Processes
+        SysInfo   CpuStats  ProcStats
+        MemStats  PgSwStats NetStats
+        SockStats DiskStats DiskUsage
+        LoadAVG   FileStats Processes
     );
     my $self = bless { obj  => { }, mods => { } }, $class; 
     foreach my $opt (@options) {

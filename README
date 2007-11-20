@@ -6,7 +6,6 @@ SYNOPSIS
 
         my $lxs = Sys::Statistics::Linux->new(
             sysinfo   => 1,
-            cpuinfo   => 1,
             cpustats  => 1,
             procstats => 1,
             memstats  => 1,
