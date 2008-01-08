@@ -1,4 +1,8 @@
-0.25    Released at 2007-11.20.
+0.25_01 Released at 2008-01-08.
+        - Added to MemStats: swapcached, active, inactive, hightotal,
+          highfree, lowtotal, lowfree, commitlimit and committed_as
+
+0.25    Released at 2007-11-20.
         - Kicked CpuInfo.pm. The reason is that /proc/cpuinfo can be very
           different on various architectures.
 
