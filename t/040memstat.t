@@ -21,19 +21,11 @@ my @memstats = qw(
     inactive
 );
 
-my @memstats26 = qw(
-    hightotal
-    highfree
-    lowtotal
-    lowfree
-    committed_as
-);
-
+my @memstats26  = qw(committed_as);
 my @memstats269 = qw(commitlimit);
 
 open my $fh, '<', '/proc/sys/kernel/osrelease' or die $!;
-my $rls = <$fh>;
-my @rls = ($rls =~ /^\d\.(\d)\.(\d+)/);
+my @rls = split /\./, <$fh>;
 close $fh;
 
 my $lxs = Sys::Statistics::Linux->new;
@@ -45,9 +37,9 @@ if ($rls[0] < 6) {
 } else {
     push @memstats, $_ for @memstats26;
     if ($rls[1] < 9) {
-        plan tests => 20;
+        plan tests => 16;
     } else {
-        plan tests => 21;
+        plan tests => 17;
         push @memstats, $_ for @memstats269;
     }
 }

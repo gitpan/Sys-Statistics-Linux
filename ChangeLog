@@ -1,3 +1,11 @@
+0.25_02 Released at 2008-01-10.
+        - Kicked from MemStats: hightotal, highfree, lowtotal, lowfree
+          The reason is that 64-bit architectures by their nature has high
+          memory support and do not need the HIGHMEM configuraiton directive.
+          As a result these values are not available on any 64-bit. Yes,
+          there exists exceptions on some distributions like RHEL4 x86_64,
+          but are they useful?
+
 0.25_01 Released at 2008-01-08.
         - Added to MemStats: swapcached, active, inactive, hightotal,
           highfree, lowtotal, lowfree, commitlimit and committed_as
@@ -121,8 +129,8 @@
 
 0.09_12 Released at 2007-04-12.
         - Changed search() and fproc(). Now statistics can be set
-          as second argument. The first argument have to be the
-          search filter. Both arguments have to be a hash refrence.
+          as second argument. The first argument has to be the
+          search filter. Both arguments has to be a hash refrence.
 
 0.09_11 Released at 2007-04-12.
         - To much files uploaded. :-)
