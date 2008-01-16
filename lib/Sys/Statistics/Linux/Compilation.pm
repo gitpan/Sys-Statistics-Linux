@@ -121,9 +121,8 @@ If you want to get all processes:
 =head2 search(), psfind()
 
 Both methods provides a simple scan engine to find special statistics. Both methods except a filter
-as a hash reference as the first argument. If your data comes from extern - maybe from a client that
-send his statistics to the server - you can set the statistics as the second argument. The second
-argument have to be a hash reference as well.
+as a hash reference. It's possible to pass the statistics as second argument if the data is not stored
+in the object.
 
 The method C<search()> scans for statistics and rebuilds the hash tree until that keys that matched
 your filter and returns the hits as a hash reference.
@@ -239,7 +238,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Compilation;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use strict;
 use warnings;

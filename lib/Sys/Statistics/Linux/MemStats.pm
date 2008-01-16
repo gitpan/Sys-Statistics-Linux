@@ -86,7 +86,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::MemStats;
-our $VERSION = '0.10_02';
+our $VERSION = '0.11';
 
 use strict;
 use warnings;
