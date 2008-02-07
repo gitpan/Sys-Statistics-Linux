@@ -54,8 +54,6 @@ object with:
 
 =item sysinfo()
 
-=item cpuinfo()
-
 =item cpustats()
 
 =item procstats()
@@ -65,6 +63,8 @@ object with:
 =item pgswstats()
 
 =item netstats()
+
+=item netinfo()
 
 =item sockstats()
 
@@ -238,7 +238,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Compilation;
-our $VERSION = '0.02';
+our $VERSION = '0.02_01';
 
 use strict;
 use warnings;
@@ -246,7 +246,7 @@ use Carp qw(croak);
 
 # Creating the statistics accessors
 BEGIN {
-    foreach my $stat (qw/sysinfo cpuinfo procstats memstats sockstats loadavg filestats/) {
+    foreach my $stat (qw/sysinfo procstats memstats sockstats loadavg filestats/) {
         no strict 'refs';
         *{$stat} = sub {
             use strict 'refs';
@@ -258,7 +258,7 @@ BEGIN {
             return wantarray ? keys %{$self->{$stat}} : $self->{$stat};
         };
     }
-    foreach my $stat (qw/cpustats pgswstats netstats diskstats diskusage processes/) {
+    foreach my $stat (qw/cpustats pgswstats netstats netinfo diskstats diskusage processes/) {
         no strict 'refs';
         *{$stat} = sub {
             use strict 'refs';

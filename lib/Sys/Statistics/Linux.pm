@@ -337,7 +337,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.26';
+our $VERSION = '0.26_01';
 
 use strict;
 use warnings;
@@ -438,6 +438,9 @@ sub get {
     foreach my $opt (keys %{$self->{opts}}) {
         if ($self->{opts}->{$opt}) {
             $stat{$opt} = $self->{obj}->{$opt}->get();
+            if ($opt eq 'netstats') {
+                $stat{netinfo} = $stat{$opt} = $self->{obj}->{$opt}->get_raw();
+            }
         }
     }
     return Sys::Statistics::Linux::Compilation->new(\%stat);

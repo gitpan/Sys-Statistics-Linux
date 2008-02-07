@@ -1,3 +1,7 @@
+0.26_01 Released at 2008-02-07
+        - *uhm* forget to kicked cpuinfo()
+        - Added netinfo() to get the raw data of netstats() (feature request).
+
 0.26    Released at 2008-01-16
         - Tests seems to be okay... just a full version.
 

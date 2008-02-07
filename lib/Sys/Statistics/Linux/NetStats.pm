@@ -60,6 +60,10 @@ Call C<get()> to get the statistics. C<get()> returns the statistics as a hash r
 
     my $stat = $lxs->get;
 
+=head2 get_raw()
+
+Call C<get_raw()> to get the raw data - no deltas.
+
 =head1 EXPORTS
 
 No exports.
@@ -85,7 +89,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::NetStats;
-our $VERSION = '0.11';
+our $VERSION = '0.11_01';
 
 use strict;
 use warnings;
@@ -118,6 +122,12 @@ sub get {
     $self->{stats} = $self->_load;
     $self->_deltas;
     return $self->{stats};
+}
+
+sub get_raw {
+    my $self = shift;
+    my %raw  = %{$self->{init}};
+    return \%raw;
 }
 
 #

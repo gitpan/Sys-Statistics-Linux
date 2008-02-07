@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 18;
+use Test::More tests => 36;
 use Sys::Statistics::Linux;
 
 my @netstats = qw(
@@ -30,6 +30,11 @@ sleep(1);
 my $stats = $lxs->get;
 
 for my $dev (keys %{$stats->netstats}) {
+   ok(defined $stats->netstats->{$dev}->{$_}, "checking netstats $_") for @netstats;
+   last; # we check only one device, that should be enough
+}
+
+for my $dev (keys %{$stats->netinfo}) {
    ok(defined $stats->netstats->{$dev}->{$_}, "checking netstats $_") for @netstats;
    last; # we check only one device, that should be enough
 }
