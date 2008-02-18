@@ -40,9 +40,8 @@ This module provides different methods to access and filter the statistics compi
 
 =head2 new()
 
-Create a new C<Compilation> object. This creator is only useful if you
-don't call C<get()> of C<Sys::Statistics::Linux>. You can create a new
-object with:
+Create a new C<Sys::Statistics::Linux::Compilation> object. This creator is only useful if you
+don't call C<get()> of C<Sys::Statistics::Linux>. You can create a new object with:
 
     my $lxs  = Sys::Statistics::Linux::LoadAVG->new();
     my $load = $lxs->get;
@@ -65,6 +64,8 @@ object with:
 =item netstats()
 
 =item netinfo()
+
+C<netinfo()> provides raw data - no deltas.
 
 =item sockstats()
 
@@ -238,7 +239,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Compilation;
-our $VERSION = '0.02_01';
+our $VERSION = '0.04';
 
 use strict;
 use warnings;
@@ -309,22 +310,6 @@ sub search {
         # matched the searched string
 
         foreach my $x (keys %{$fref}) {
-
-            # if $fref->{$x} is a hash ref then the next key have to
-            # match the statistic key. this is used for statistics
-            # like NetStats or Processes that uses a hash key for the
-            # device name or process id. NetStats example... if
-            #
-            #    $fref->{eth0}->{ttbyt}
-            #
-            # is defined as a filter then the key "eth0" have to match
-            #
-            #    $proc->{eth0}
-            #
-            # then we look if "ttbyt" matched the searched statistic name
-            # and compare the values. if the comparing returns TRUE we the
-            # hash is copied until the matched key-value pair.
-
             if (ref($fref->{$x}) eq 'HASH') {
 
                 # if the key $proc->{eth0} doesn't exists

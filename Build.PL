@@ -17,6 +17,7 @@ my $build = Module::Build->new(
         'UNIVERSAL'          => 0,
         'Test::More'         => 0,
         'Carp'               => 0,
+        'POSIX'              => 0,
     },
 );
 

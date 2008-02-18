@@ -68,7 +68,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::ProcStats;
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use strict;
 use warnings;

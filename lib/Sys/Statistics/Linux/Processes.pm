@@ -109,7 +109,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.12';
+our $VERSION = '0.14';
 
 use strict;
 use warnings;
@@ -290,7 +290,9 @@ sub _deltas {
         my $ipid = $istat->{$pid};
         my $lpid = $lstat->{$pid};
 
-        # if the process doesn't exist it seems to be a new process
+        # yeah, what happends if the start time is different... it seems that a new
+        # process with the same process-id were created... for this reason I have to
+        # check if the start time is equal!
         if ($ipid->{sttime} && $ipid->{sttime} == $lpid->{sttime}) {
             for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime)) {
                 croak "$class: different keys in statistics"
@@ -306,12 +308,12 @@ sub _deltas {
                 } else {
                     $lpid->{$k} = sprintf('%.2f', $lpid->{$k});
                 }
-                $ipid->{$k}  = $tmp;
+                $ipid->{$k} = $tmp;
             }
             # total workload
-            $lpid->{ttime}  = sprintf('%.2f', $lpid->{stime} + $lpid->{utime});
+            $lpid->{ttime} = sprintf('%.2f', $lpid->{stime} + $lpid->{utime});
         } else {
-            # we initialize the new process
+            # if the start time wasn't equal than we store the process to init
             for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime sttime)) {
                 $ipid->{$k} = $lpid->{$k};
                 delete $lstat->{$pid};

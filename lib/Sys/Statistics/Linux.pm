@@ -73,7 +73,7 @@ C<DiskUsage>, C<LoadAVG> and C<FileStats> are no deltas. If you need only one of
 you don't need to sleep before the call of C<get()>.
 
 The method C<get()> prepares all requested statistics and returns the statistics as a
-C<Sys::Statistics::Linux::Compilation> object. The inital statistics will be updated.
+L<Sys::Statistics::Linux::Compilation> object. The inital statistics will be updated.
 
 =head1 OPTIONS
 
@@ -87,7 +87,7 @@ The options must be set with one of the following values:
     1 - activate and init statistics
     2 - activate statistics but don't init
 
-In addition it's possible to handoff a process list for option C<Processes>.
+In addition it's possible to pass a process list for option C<Processes>.
 
     my $lxs = Sys::Statistics::Linux->new(
         processes => {
@@ -116,7 +116,7 @@ To get more informations about the statistics refer the different modules of the
 =head2 new()
 
 Call C<new()> to create a new Sys::Statistics::Linux object. You can call C<new()> with options.
-This options would be handoff to the method C<set()>.
+This options would be passed to the method C<set()>.
 
 Without options
 
@@ -141,9 +141,10 @@ It's possible to call C<new()> with a hash reference of options.
 
 =head2 set()
 
-Call C<set()> to activate or deactivate options. The following example would call C<new()> and
-C<init()> of C<Sys::Statistics::Linux::CpuStats> and delete the object of
-C<Sys::Statistics::Linux::SysInfo>:
+Call C<set()> to activate or deactivate options.
+
+The following example would call C<new()> and initialize C<Sys::Statistics::Linux::CpuStats>
+and delete the object of C<Sys::Statistics::Linux::SysInfo>.
 
     $lxs->set(
         processes =>  0, # deactivate this statistic
@@ -162,7 +163,8 @@ It's possible to call C<set()> with a hash reference of options.
 
 =head2 get()
 
-Call C<get()> to get the collected statistics. C<get()> returns a Sys::Statistics::Linux::Compilation object.
+Call C<get()> to get the collected statistics. C<get()> returns a L<Sys::Statistics::Linux::Compilation>
+object.
 
     my $stat = $lxs->get;
 
@@ -174,13 +176,13 @@ Now the statistcs are available with
 
     $stat->{cpustats}
 
-Take a look to the documentation of C<Sys::Statistics::Linux::Compilation> for more informations.
+Take a look to the documentation of L<Sys::Statistics::Linux::Compilation> for more informations.
 
 =head2 init()
 
 The call of init() initiate all activated statistics that are necessary for deltas. That could be helpful
 if your script runs in a endless loop with a high sleep interval. Don't forget that if you call C<get()>
-that the statistics are average values since the last time they were initiated.
+that the statistics are deltas since the last time they were initiated.
 
 The following example would calculate average statistics for 30 minutes:
 
@@ -259,9 +261,9 @@ Set and get a time stamp:
 
     my $lxs = Sys::Statistics::Linux->new();
     $lxs->settime('%Y/%m/%d %H:%M:%S');
-    print "$lxs->gettime\n";
+    print $lxs->gettime, "\n";
 
-If you're not sure you can use the the C<Data::Dumper> module to learn more about the hash structure:
+If you want to know how the data looks like you can use C<Data::Dumper> to check it:
 
     use strict;
     use warnings;
@@ -274,7 +276,7 @@ If you're not sure you can use the the C<Data::Dumper> module to learn more abou
 
     print Dumper($stat);
 
-How to get processes with the highest cpu workload:
+How to get the top 5 processes with the highest cpu workload:
 
     use strict;
     use warnings;
@@ -283,18 +285,12 @@ How to get processes with the highest cpu workload:
     my $lxs = Sys::Statistics::Linux->new( processes => 1 );
     sleep(1);
     my $stat = $lxs->get;
-    my $proc = $stat->processes;
-
-    my @top5 = (
-       map  { $_->[0] }
-       reverse sort { $a->[1] <=> $b->[1] }
-       map  { [ $_, $procs->{$_}->{ttime} ] } keys %{$proc}
-    )[0..4];
+    my @top5 = $stat->pstop( ttime => 5 );
 
 =head1 BACKWARD COMPATIBILITY
 
 The old options and keys - CpuStats, NetStats, etc - are still available together but deprecated!
-It's not possible to access the statistics via C<Sys::Statistics::Linux::Compilation> and it's
+It's not possible to access the statistics via L<Sys::Statistics::Linux::Compilation> and it's
 not possible to call C<search()> and C<psfind()> if you use the old options.
 
 You should use the new options and access the statistics over the accessors
@@ -307,10 +303,11 @@ or direct
 
 =head1 PREREQUISITES
 
+    Carp
+    POSIX
+    Test::More
     UNIVERSAL
     UNIVERSAL::require
-    Test::More
-    Carp
 
 =head1 EXPORTS
 
@@ -337,7 +334,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.26_01';
+our $VERSION = '0.28';
 
 use strict;
 use warnings;
@@ -357,8 +354,10 @@ sub new {
     );
     my $self = bless { obj  => { }, mods => { } }, $class; 
     foreach my $opt (@options) {
+        # backward compatibility
         $self->{opts}->{$opt} = 0;
         $self->{maps}->{$opt} = $opt;
+        # new style
         my $lcopt = lc($opt);
         $self->{opts}->{$lcopt} = 0;
         $self->{maps}->{$lcopt} = $opt;
