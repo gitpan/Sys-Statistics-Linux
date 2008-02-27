@@ -18,6 +18,7 @@ my $build = Module::Build->new(
         'Test::More'         => 0,
         'Carp'               => 0,
         'POSIX'              => 0,
+        'Time::HiRes'        => 0,
     },
 );
 

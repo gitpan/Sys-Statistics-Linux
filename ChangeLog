@@ -1,3 +1,6 @@
+0.32    Released at 2008-02-27.
+        - DAWN! Forget to add Time::HiRes to the dependencies!
+
 0.30    Released at 2008-02-27.
         - Replaced uptime() with Time::HiRes::gettimeofday().
 

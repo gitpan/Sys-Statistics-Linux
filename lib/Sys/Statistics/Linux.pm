@@ -306,6 +306,7 @@ or direct
     Carp
     POSIX
     Test::More
+    Time::HiRes
     UNIVERSAL
     UNIVERSAL::require
 
@@ -334,7 +335,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.30';
+our $VERSION = '0.32';
 
 use strict;
 use warnings;

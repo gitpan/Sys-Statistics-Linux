@@ -1,6 +1,6 @@
 ---
 name: Sys-Statistics-Linux
-version: 0.30
+version: 0.32
 author:
   - Jonny Schulz
 abstract: Front-end module to collect system statistics
@@ -11,12 +11,13 @@ requires:
   Carp: 0
   POSIX: 0
   Test::More: 0
+  Time::HiRes: 0
   UNIVERSAL: 0
   UNIVERSAL::require: 0
 provides:
   Sys::Statistics::Linux:
     file: lib/Sys/Statistics/Linux.pm
-    version: 0.30
+    version: 0.32
   Sys::Statistics::Linux::Compilation:
     file: lib/Sys/Statistics/Linux/Compilation.pm
     version: 0.06

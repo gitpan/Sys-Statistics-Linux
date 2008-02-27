@@ -311,6 +311,7 @@ PREREQUISITES
         Carp
         POSIX
         Test::More
+        Time::HiRes
         UNIVERSAL
         UNIVERSAL::require
 
