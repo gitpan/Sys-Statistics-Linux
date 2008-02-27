@@ -89,26 +89,26 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::NetStats;
-our $VERSION = '0.12';
+our $VERSION = '0.14';
 
 use strict;
 use warnings;
 use Carp qw(croak);
+use Time::HiRes;
 
 sub new {
     my $class = shift;
     my %self = (
         files => {
             netstats => '/proc/net/dev',
-            uptime => '/proc/uptime',
-        },
+        }
     );
     return bless \%self, $class;
 }
 
 sub init {
     my $self = shift;
-    $self->{uptime} = $self->_uptime;
+    $self->{time} = Time::HiRes::gettimeofday();
     $self->{init} = $self->_load;
 }
 
@@ -157,13 +157,13 @@ sub _load {
 }
 
 sub _deltas {
-    my $self   = shift;
-    my $class  = ref $self;
-    my $istat  = $self->{init};
-    my $lstat  = $self->{stats};
-    my $uptime = $self->_uptime;
-    my $delta  = sprintf('%.2f', $uptime - $self->{uptime});
-    $self->{uptime} = $uptime;
+    my $self  = shift;
+    my $class = ref $self;
+    my $istat = $self->{init};
+    my $lstat = $self->{stats};
+    my $time  = Time::HiRes::gettimeofday();
+    my $delta = sprintf('%.2f', $time - $self->{time});
+    $self->{time} = $time;
 
     foreach my $dev (keys %{$lstat}) {
         unless (exists $istat->{$dev}) {
@@ -191,16 +191,6 @@ sub _deltas {
             $idev->{$k} = $v;
         }
     }
-}
-
-sub _uptime {
-    my $self  = shift;
-    my $class = ref $self;
-    my $file  = $self->{files};
-    open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
-    my ($up, $idle) = split /\s+/, <$fh>;
-    close($fh);
-    return $up;
 }
 
 1;

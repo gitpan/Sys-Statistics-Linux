@@ -152,38 +152,12 @@ This would return the following matches:
     * all cpu where "iowait" is grather than 10
     * only disk '/dev/sda1' if "usageper" is grather than 80
 
-If the statistics are not gathered by the current process then you can handoff statistics as an
-argument.
-
-    my %stats = (
-        cpustats => {
-            cpu => {
-                system => '51.00',
-                total  => '51.00',
-                idle   => '49.00',
-                nice   => '0.00',
-                user   => '0.00',
-                iowait => '0.00'
-            }
-        }
-    );
-
-    my $stat = Sys::Statistics::Linux::Compilation(\%stats);
-
-    my %filter = (
-        cpustats => {
-            total => 'gt:50'
-        }
-    );
-
-    my $hits = $stat->search(\%filter);
-
 The method C<psfind()> scans for processes only and returns a array reference with all process
 IDs that matched the filter. Example:
 
     my $pids = $stat->psfind({ cmd => qr/init/, owner => 'eq:apache' });
 
-You can handoff the statistics as second argument as well.
+You can pass the statistics as second argument as well.
 
     my $pids = $stat->psfind(\%filter, \%stats);
 
@@ -239,7 +213,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Compilation;
-our $VERSION = '0.04';
+our $VERSION = '0.06';
 
 use strict;
 use warnings;

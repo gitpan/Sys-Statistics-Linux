@@ -1,3 +1,6 @@
+0.30    Released at 2008-02-27.
+        - Replaced uptime() with Time::HiRes::gettimeofday().
+
 0.28    Released at 2008-02-11.
         - Full version. Jupm over 0.27 because I want to use odd numbers
           for developer releases in the future.

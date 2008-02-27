@@ -109,11 +109,12 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.14';
+our $VERSION = '0.16';
 
 use strict;
 use warnings;
 use Carp qw(croak);
+use Time::HiRes;
 
 sub new {
     my ($class, $pids) = @_;
@@ -129,7 +130,6 @@ sub new {
    my %self = (
         files => {
             basedir   => '/proc',
-            uptime    => '/proc/uptime',
             p_stat    => 'stat',
             p_statm   => 'statm',
             p_status  => 'status',
@@ -169,7 +169,7 @@ sub _init {
     my $pids  = $self->{pids};
     my %stats;
 
-    $stats{uptime} = $self->_uptime;
+    $stats{time} = Time::HiRes::gettimeofday();
 
     unless (@$pids) {
         opendir my $pdir, $file->{basedir} or croak "$class: unable to open directory $file->{basedir} ($!)";
@@ -200,7 +200,7 @@ sub _load {
     my $pids  = $self->{pids};
     my (%stats, %userids);
 
-    $stats{uptime} = $self->_uptime;
+    $stats{time} = Time::HiRes::gettimeofday();
 
     # we get all the PIDs from the /proc filesystem. if we are unable to open a file
     # of a process, then it can be that the process doesn't exist any more and
@@ -238,7 +238,7 @@ sub _load {
         }
 
         # calculate the active time of each process
-        my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $stats{uptime} - $stats{$pid}{sttime} / 100));
+        my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $stats{time} - $stats{$pid}{sttime} / 100));
         $stats{$pid}{actime} = "$d:".sprintf('%02d:%02d:%02d', $h, $m, $s);
 
         # determine the owner of the process
@@ -277,14 +277,14 @@ sub _deltas {
     my $istat = $self->{init};
     my $lstat = $self->{stats};
 
-    croak "$class: missing key 'uptime'"
-        unless $istat->{uptime} && $lstat->{uptime};
-    croak "$class: value of 'uptime' is not a number"
-        unless $istat->{uptime} =~ /^\d+(\.\d+|)$/ && $lstat->{uptime} =~ /^\d+(\.\d+|)$/;
+    croak "$class: missing key 'time'"
+        unless $istat->{time} && $lstat->{time};
+    croak "$class: value of 'time' is not a number"
+        unless $istat->{time} =~ /^\d+(\.\d+|)$/ && $lstat->{time} =~ /^\d+(\.\d+|)$/;
 
-    my $uptime = $lstat->{uptime} - $istat->{uptime};
-    $istat->{uptime} = $lstat->{uptime};
-    delete $lstat->{uptime};
+    my $time = $lstat->{time} - $istat->{time};
+    $istat->{time} = $lstat->{time};
+    delete $lstat->{time};
 
     for my $pid (keys %{$lstat}) {
         my $ipid = $istat->{$pid};
@@ -303,8 +303,8 @@ sub _deltas {
                 # we held this value for the next init stat
                 my $tmp      = $lpid->{$k};
                 $lpid->{$k} -= $ipid->{$k};
-                if ($lpid->{$k} > 0 && $uptime > 0) {
-                    $lpid->{$k} = sprintf('%.2f', $lpid->{$k} / $uptime);
+                if ($lpid->{$k} > 0 && $time > 0) {
+                    $lpid->{$k} = sprintf('%.2f', $lpid->{$k} / $time);
                 } else {
                     $lpid->{$k} = sprintf('%.2f', $lpid->{$k});
                 }
@@ -320,16 +320,6 @@ sub _deltas {
             }
         }
     }
-}
-
-sub _uptime {
-    my $self  = shift;
-    my $class = ref $self;
-    my $file  = $self->{files};
-    open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
-    my ($up, $idle) = split /\s+/, <$fh>;
-    close($fh);
-    return $up;
 }
 
 sub _calsec {

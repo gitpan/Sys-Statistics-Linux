@@ -73,14 +73,14 @@ our $VERSION = '0.12';
 use strict;
 use warnings;
 use Carp qw(croak);
+use Time::HiRes;
 
 sub new {
     my $class = shift;
     my %self = (
         files => {
             loadavg => '/proc/loadavg',
-            stat => '/proc/stat',
-            uptime => '/proc/uptime',
+            stat    => '/proc/stat',
         }
     );
     return bless \%self, $class;
@@ -88,7 +88,7 @@ sub new {
 
 sub init {
     my $self = shift;
-    $self->{uptime} = $self->_uptime;
+    $self->{time} = Time::HiRes::gettimeofday();
     $self->{init}->{new} = $self->_newproc;
 }
 
@@ -145,13 +145,13 @@ sub _newproc {
 }
 
 sub _deltas {
-    my $self   = shift;
-    my $class  = ref $self;
-    my $istat  = $self->{init};
-    my $lstat  = $self->{stats};
-    my $uptime = $self->_uptime;
-    my $delta  = sprintf('%.2f', $uptime - $self->{uptime});
-    $self->{uptime} = $uptime;
+    my $self  = shift;
+    my $class = ref $self;
+    my $istat = $self->{init};
+    my $lstat = $self->{stats};
+    my $time  = Time::HiRes::gettimeofday();
+    my $delta = sprintf('%.2f', $time - $self->{time});
+    $self->{time} = $time;
 
     croak "$class: different keys in statistics"
         unless defined $istat->{new} && defined $lstat->{new};
@@ -168,16 +168,6 @@ sub _deltas {
                 : sprintf('%.2f', $new_init - $istat->{new});
 
     $istat->{new} = $new_init;
-}
-
-sub _uptime {
-    my $self  = shift;
-    my $class = ref $self;
-    my $file  = $self->{files};
-    open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
-    my ($up, $idle) = split /\s+/, <$fh>;
-    close($fh);
-    return $up;
 }
 
 1;
