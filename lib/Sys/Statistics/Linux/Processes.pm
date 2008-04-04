@@ -109,7 +109,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.16';
+our $VERSION = '0.18';
 
 use strict;
 use warnings;
@@ -119,14 +119,6 @@ use Time::HiRes;
 sub new {
     my ($class, $pids) = @_;
 
-    croak "$class: not a array reference"
-        if $pids && ref($pids) ne 'ARRAY';
-
-   foreach my $pid (@$pids) {
-        croak "$class: pid '$_' is not a number"
-            unless $pid =~ /^\d+$/;
-   }
-
    my %self = (
         files => {
             basedir   => '/proc',
@@ -135,8 +127,20 @@ sub new {
             p_status  => 'status',
             p_cmdline => 'cmdline',
         },
-        pids => $pids,
     );
+
+    if ($pids) {
+        if (ref($pids) ne 'ARRAY') {
+            croak "$class: not a array reference";
+        }
+
+        foreach my $pid (@$pids) {
+            croak "$class: pid '$pid' is not a number"
+                unless $pid =~ /^\d+$/;
+        }
+
+        $self{pids} = $pids;
+    }
 
     return bless \%self, $class;
 }
@@ -166,14 +170,16 @@ sub _init {
     my $self  = shift;
     my $class = ref $self;
     my $file  = $self->{files};
-    my $pids  = $self->{pids};
-    my %stats;
+    my ($pids, %stats);
 
     $stats{time} = Time::HiRes::gettimeofday();
 
-    unless (@$pids) {
-        opendir my $pdir, $file->{basedir} or croak "$class: unable to open directory $file->{basedir} ($!)";
-        @$pids = (grep /^\d+$/, readdir $pdir);
+    if ($self->{pids}) {
+        $pids = $self->{pids};
+    } else {
+        opendir my $pdir, $file->{basedir}
+            or croak "$class: unable to open directory $file->{basedir} ($!)";
+        $pids = [(grep /^\d+$/, readdir $pdir)];
         closedir $pdir;
     }
 
@@ -197,8 +203,7 @@ sub _load {
     my $self  = shift;
     my $class = ref $self;
     my $file  = $self->{files};
-    my $pids  = $self->{pids};
-    my (%stats, %userids);
+    my ($pids, %stats, %userids);
 
     $stats{time} = Time::HiRes::gettimeofday();
 
@@ -206,9 +211,12 @@ sub _load {
     # of a process, then it can be that the process doesn't exist any more and
     # we will delete the hash key.
 
-    unless (@$pids) {
-        opendir my $pdir, $file->{basedir} or croak "$class: unable to open directory $file->{basedir} ($!)";
-        @$pids = (grep /^\d+$/, readdir $pdir);
+    if ($self->{pids}) {
+        $pids = $self->{pids};
+    } else {
+        opendir my $pdir, $file->{basedir}
+            or croak "$class: unable to open directory $file->{basedir} ($!)";
+        $pids = [(grep /^\d+$/, readdir $pdir)];
         closedir $pdir;
     }
 
@@ -254,7 +262,7 @@ sub _load {
             next;
         }
 
-        #  command line for each process
+        # command line for each process
         if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_cmdline}") {
             $stats{$pid}{cmdline} = <$fh>;
             if ($stats{$pid}{cmdline}) {
@@ -293,7 +301,7 @@ sub _deltas {
         # yeah, what happends if the start time is different... it seems that a new
         # process with the same process-id were created... for this reason I have to
         # check if the start time is equal!
-        if ($ipid->{sttime} && $ipid->{sttime} == $lpid->{sttime}) {
+        if ($ipid && $ipid->{sttime} == $lpid->{sttime}) {
             for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime)) {
                 croak "$class: different keys in statistics"
                     unless defined $ipid->{$k};
@@ -315,7 +323,9 @@ sub _deltas {
         } else {
             # if the start time wasn't equal than we store the process to init
             for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime sttime)) {
-                $ipid->{$k} = $lpid->{$k};
+                # a really bad bug! $ipid is undef if the pid is new
+                #$ipid->{$k} = $lpid->{$k};
+                $istat->{$pid}->{$k} = $lpid->{$k};
                 delete $lstat->{$pid};
             }
         }

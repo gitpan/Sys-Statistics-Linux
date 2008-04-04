@@ -40,7 +40,7 @@ documentation of the distribution modules to get more informations about all pos
 
 My motivation is very simple. Every linux administrator knows the well-known tool sar of sysstat.
 It helps me a lot of time to search for system bottlenecks and to solve problems but it's hard to
-parse the output and to store different statistics into a database. So I though to develope
+parse the output and to store different statistics into a database. So I thought to develope
 Sys::Statistics::Linux. It's not a replacement but it should make it simpler to you to write your
 own system monitor.
 
@@ -60,14 +60,14 @@ for devices.
 =head1 DELTAS
 
 The statistics for C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
-are deltas, for this reason it's necessary to initialize the statistics first before the data
-can be prepared by C<get()>. These statistics can be initialized with the methods C<new()>,
-C<set()> and C<init()>. Any option that is set to 1 will be initialized by the call of C<new()>
-or C<set()>. The call of init() re-initialize all statistics that are set to 1 or 2. By the call
-of C<get()> the initial statistics will be updated automatically. Please refer the METHOD section
-to get more information about the calls of C<new()>, C<set()>, C<init()> and C<get()>.
+are deltas, for this reason it's necessary to initialize the statistics before the data can be
+prepared by C<get()>. These statistics can be initialized with the methods C<new()>, C<set()> and
+C<init()>. Any option that is set to 1 will be initialized by the call of C<new()> or C<set()>.
+The call of init() re-initialize all statistics that are set to 1 or 2. By the call of C<get()>
+the initial statistics will be updated automatically. Please refer the section L</METHODS> to get more
+information about the calls of C<new()>, C<set()>, C<init()> and C<get()>.
 
-Another exigence is to sleep for while - at least for one second - before the call of C<get()>
+Another exigence is to sleep for a while - at least for one second - before the call of C<get()>
 if you want to get useful statistics. The statistics for C<SysInfo>, C<MemStats>, C<SockStats>,
 C<DiskUsage>, C<LoadAVG> and C<FileStats> are no deltas. If you need only one of these informations
 you don't need to sleep before the call of C<get()>.
@@ -180,9 +180,9 @@ Take a look to the documentation of L<Sys::Statistics::Linux::Compilation> for m
 
 =head2 init()
 
-The call of init() initiate all activated statistics that are necessary for deltas. That could be helpful
-if your script runs in a endless loop with a high sleep interval. Don't forget that if you call C<get()>
-that the statistics are deltas since the last time they were initiated.
+The call of C<init()> initiate all activated statistics that are necessary for deltas. That could
+be helpful if your script runs in a endless loop with a high sleep interval. Don't forget that if
+you call C<get()> that the statistics are deltas since the last time they were initiated.
 
 The following example would calculate average statistics for 30 minutes:
 
@@ -335,7 +335,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 use strict;
 use warnings;
@@ -345,6 +345,9 @@ use UNIVERSAL;
 use UNIVERSAL::require;
 use Sys::Statistics::Linux::Compilation;
 
+# save loaded modules
+my %MODS;
+
 sub new {
     my $class = shift;
     my @options = qw(
@@ -353,7 +356,7 @@ sub new {
         SockStats DiskStats DiskUsage
         LoadAVG   FileStats Processes
     );
-    my $self = bless { obj  => { }, mods => { } }, $class; 
+    my $self = bless { obj => { } }, $class; 
     foreach my $opt (@options) {
         # backward compatibility
         $self->{opts}->{$opt} = 0;
@@ -373,7 +376,6 @@ sub set {
     my $args  = ref($_[0]) eq 'HASH' ? shift : {@_};
     my $opts  = $self->{opts};
     my $obj   = $self->{obj};
-    my $mods  = $self->{mods};
     my $maps  = $self->{maps};
     my $pids  = ();
 
@@ -396,9 +398,9 @@ sub set {
             my $package = $class.'::'.$maps->{$opt};
 
             # require mod if not loaded
-            unless ($mods->{$package}) {
+            unless ($MODS{$package}) {
                 $package->require or croak "$class: unable to load $package";
-                $mods->{$package} = 1;
+                $MODS{$package} = 1;
             }
 
             # create a new object if the object doesn't exist
@@ -433,7 +435,8 @@ sub init {
 }
 
 sub get {
-    my $self = shift;
+    my ($self, $time) = @_;
+    sleep $time if $time;
     my %stat = ();
     foreach my $opt (keys %{$self->{opts}}) {
         if ($self->{opts}->{$opt}) {

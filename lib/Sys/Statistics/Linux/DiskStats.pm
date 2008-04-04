@@ -75,7 +75,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::DiskStats;
-our $VERSION = '0.16';
+our $VERSION = '0.18';
 
 use strict;
 use warnings;
@@ -128,7 +128,7 @@ sub _load {
     my $bksz  = $self->{blocksize};
     my (%stats, $fh);
 
-    # --------------------------------------------------------
+    # -----------------------------------------------------------------------------
     # one of the both must be opened for the disk statistics!
     # if diskstats (2.6) doesn't exists then let's try to read
     # the partitions (2.4)
@@ -167,24 +167,26 @@ sub _load {
     #     (field 9) times the number of milliseconds spent doing I/O since the
     #     last update of this field.  This can provide an easy measure of both
     #     I/O completion time and the backlog that may be accumulating.
-    # --------------------------------------------------------
+    # -----------------------------------------------------------------------------
 
     if (open $fh, '<', $file->{diskstats}) {
         while (my $line = <$fh>) {
+            #                   --      --      --      F1     F2     F3     F4     F5     F6     F7     F8    F9    F10   F11
+            #                   $1      $2      $3      $4     --     $5     --     $6     --     $7     --    --    --    --
             if ($line =~ /^\s+(\d+)\s+(\d+)\s+(.+?)\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+$/) {
                 for my $x ($stats{$3}) { # $3 -> the device name
                     $x->{major}   = $1;
                     $x->{minor}   = $2;
-                    $x->{rdreq}   = $4;
-                    $x->{rdbyt}   = $5 * $bksz;
-                    $x->{wrtreq}  = $6;
-                    $x->{wrtbyt}  = $7 * $bksz;
+                    $x->{rdreq}   = $4;         # Field 1
+                    $x->{rdbyt}   = $5 * $bksz; # Field 3
+                    $x->{wrtreq}  = $6;         # Field 5
+                    $x->{wrtbyt}  = $7 * $bksz; # Field 7
                     $x->{ttreq}  += $x->{rdreq} + $x->{wrtreq};
                     $x->{ttbyt}  += $x->{rdbyt} + $x->{wrtbyt};
                 }
             }
 
-            # --------------------------------------------------------
+            # -----------------------------------------------------------------------------
             # Field  1 -- # of reads issued
             #     This is the total number of reads issued to this partition.
             # Field  2 -- # of sectors read
@@ -195,16 +197,17 @@ sub _load {
             # Field  4 -- # of sectors written
             #     This is the total number of sectors requested to be written to
             #     this partition.
-            # --------------------------------------------------------
-
+            # -----------------------------------------------------------------------------
+            #                      --      --      --      F1      F2      F3      F4
+            #                      $1      $2      $3      $4      $5      $6      $7
             elsif ($line =~ /^\s+(\d+)\s+(\d+)\s+(.+?)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/) {
                 for my $x ($stats{$3}) { # $3 -> the device name
                     $x->{major}   = $1;
                     $x->{minor}   = $2;
-                    $x->{rdreq}   = $4;
-                    $x->{rdbyt}   = $5 * $bksz;
-                    $x->{wrtreq}  = $6;
-                    $x->{wrtbyt}  = $7 * $bksz;
+                    $x->{rdreq}   = $4;         # Field 1
+                    $x->{rdbyt}   = $5 * $bksz; # Field 2
+                    $x->{wrtreq}  = $6;         # Field 3
+                    $x->{wrtbyt}  = $7 * $bksz; # Field 4
                     $x->{ttreq}  += $x->{rdreq} + $x->{wrtreq};
                     $x->{ttbyt}  += $x->{rdbyt} + $x->{wrtbyt};
                 }
@@ -213,14 +216,16 @@ sub _load {
         close($fh);
     } elsif (open $fh, '<', $file->{partitions}) {
         while (my $line = <$fh>) {
+            #                           --      --     --     --      F1     F2     F3     F4     F5     F6     F7     F8    F9    F10   F11
+            #                           $1      $2     --     $3      $4     --     $5     --     $6     --     $7     --    --    --    --
             next unless $line =~ /^\s+(\d+)\s+(\d+)\s+\d+\s+(.+?)\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+$/;
             for my $x ($stats{$3}) { # $3 -> the device name
                 $x->{major}   = $1;
                 $x->{minor}   = $2;
-                $x->{rdreq}   = $4;
-                $x->{rdbyt}   = $5 * $bksz;
-                $x->{wrtreq}  = $6;
-                $x->{wrtbyt}  = $7 * $bksz;
+                $x->{rdreq}   = $4;         # Field 1
+                $x->{rdbyt}   = $5 * $bksz; # Field 3
+                $x->{wrtreq}  = $6;         # Field 5
+                $x->{wrtbyt}  = $7 * $bksz; # Field 7
                 $x->{ttreq}  += $x->{rdreq} + $x->{wrtreq};
                 $x->{ttbyt}  += $x->{rdbyt} + $x->{wrtbyt};
             }

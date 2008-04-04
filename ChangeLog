@@ -1,3 +1,7 @@
+0.33    Released at 2008-04-04.
+        - Found a bug in Processes.pm. New processes was not added
+          to $self->{init}.
+
 0.32    Released at 2008-02-27.
         - DAWN! Forget to add Time::HiRes to the dependencies!
 
