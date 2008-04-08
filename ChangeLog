@@ -1,3 +1,6 @@
+0.34    Released at 2008-04-08.
+        - Timestamp of 0.33 in the future and a lot of fail reports.
+
 0.33    Released at 2008-04-04.
         - Found a bug in Processes.pm. New processes was not added
           to $self->{init}.
