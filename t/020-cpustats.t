@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test::More tests => 5;
 use Sys::Statistics::Linux;
 
 my @cpustats = qw(
@@ -8,7 +8,6 @@ my @cpustats = qw(
    nice
    system
    idle
-   iowait
    total
 );
 

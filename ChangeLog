@@ -1,3 +1,9 @@
+0.35_01 Released at 2008-05-08.
+        - Added irq, softirq, steal to CpuStats.pm.
+        - Fixed the calculation of total cpu utilization in CpuStats.pm.
+          Thanks to Morton B. for his suggestion.
+        - Key iowait is only available with kernels >= 2.6.
+
 0.34    Released at 2008-04-08.
         - Timestamp of 0.33 in the future and a lot of fail reports.
 

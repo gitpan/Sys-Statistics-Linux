@@ -38,8 +38,8 @@ DESCRIPTION
 MOTIVATION
     My motivation is very simple. Every linux administrator knows the
     well-known tool sar of sysstat. It helps me a lot of time to search for
-    system bottlenecks and to solve problems but it's hard to parse the
-    output and to store different statistics into a database. So I thought
+    system bottlenecks and to solve problems, but it's hard to parse the
+    output if you want to store the statistics into a database. So I thought
     to develope Sys::Statistics::Linux. It's not a replacement but it should
     make it simpler to you to write your own system monitor.
 
@@ -48,12 +48,11 @@ MOTIVATION
 
 TECHNICAL NOTE
     This distribution collects statistics by the virtual /proc filesystem
-    (procfs) and is developed on default vanilla kernels. It is tested on
+    (procfs) and is developed on the default vanilla kernel. It is tested on
     x86 hardware with the distributions RHEL, Fedora, Debian, Ubuntu,
     Asianux, Slackware, Mandriva, SuSE (SuSE on s390 and s390x architecture
     as well but a long time ago) and openSUSE on kernel versions 2.4 and/or
-    2.6 and should run on all linux kernels with a default vanilla kernel as
-    well. It's possible that it doesn't run on all linux distributions if
+    2.6. It's possible that it doesn't run on all linux distributions if
     some procfs features are deactivated or too much modified. As example
     the linux kernel 2.4 can compiled with the option "CONFIG_BLK_STATS"
     what turn on or off block statistics for devices.
@@ -79,6 +78,10 @@ DELTAS
     The method "get()" prepares all requested statistics and returns the
     statistics as a Sys::Statistics::Linux::Compilation object. The inital
     statistics will be updated.
+
+MANUAL PROC(5)
+    The "/www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html"" in <a
+    href="http:Linux Programmer's Manual</a>>.
 
 OPTIONS
     All options are identical with the package names of the distribution in

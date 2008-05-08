@@ -39,8 +39,8 @@ documentation of the distribution modules to get more informations about all pos
 =head1 MOTIVATION
 
 My motivation is very simple. Every linux administrator knows the well-known tool sar of sysstat.
-It helps me a lot of time to search for system bottlenecks and to solve problems but it's hard to
-parse the output and to store different statistics into a database. So I thought to develope
+It helps me a lot of time to search for system bottlenecks and to solve problems, but it's hard to
+parse the output if you want to store the statistics into a database. So I thought to develope
 Sys::Statistics::Linux. It's not a replacement but it should make it simpler to you to write your
 own system monitor.
 
@@ -49,13 +49,12 @@ If Sys::Statistics::Linux doesn't provide statistics that are strongly needed th
 =head1 TECHNICAL NOTE
 
 This distribution collects statistics by the virtual F</proc> filesystem (procfs) and is
-developed on default vanilla kernels. It is tested on x86 hardware with the distributions RHEL,
+developed on the default vanilla kernel. It is tested on x86 hardware with the distributions RHEL,
 Fedora, Debian, Ubuntu, Asianux, Slackware, Mandriva, SuSE (SuSE on s390 and s390x architecture
-as well but a long time ago) and openSUSE on kernel versions 2.4 and/or 2.6 and should run on all
-linux kernels with a default vanilla kernel as well. It's possible that it doesn't run on all linux
-distributions if some procfs features are deactivated or too much modified. As example the linux
-kernel 2.4 can compiled with the option C<CONFIG_BLK_STATS> what turn on or off block statistics
-for devices.
+as well but a long time ago) and openSUSE on kernel versions 2.4 and/or 2.6. It's possible that
+it doesn't run on all linux distributions if some procfs features are deactivated or too much
+modified. As example the linux kernel 2.4 can compiled with the option C<CONFIG_BLK_STATS> what
+turn on or off block statistics for devices.
 
 =head1 DELTAS
 
@@ -74,6 +73,10 @@ you don't need to sleep before the call of C<get()>.
 
 The method C<get()> prepares all requested statistics and returns the statistics as a
 L<Sys::Statistics::Linux::Compilation> object. The inital statistics will be updated.
+
+=head1 MANUAL PROC(5)
+
+The L<<a href="http://www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html">Linux Programmer's Manual</a>>.
 
 =head1 OPTIONS
 
@@ -335,7 +338,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.34';
+our $VERSION = '0.35_01';
 
 use strict;
 use warnings;

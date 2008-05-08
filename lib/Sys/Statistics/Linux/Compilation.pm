@@ -157,10 +157,6 @@ IDs that matched the filter. Example:
 
     my $pids = $stat->psfind({ cmd => qr/init/, owner => 'eq:apache' });
 
-You can pass the statistics as second argument as well.
-
-    my $pids = $stat->psfind(\%filter, \%stats);
-
 This would return the following process ids:
 
     * processes that matched the command "init"
@@ -213,11 +209,11 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Compilation;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use strict;
 use warnings;
-use Carp qw(croak);
+use Carp;
 
 # Creating the statistics accessors
 BEGIN {
@@ -256,7 +252,7 @@ BEGIN {
 sub new {
     my ($class, $stats) = @_;
     unless (ref($stats) eq 'HASH') {
-        croak 'Usage: class->new( \%statistics )';
+        croak 'Usage: $class->new( \%statistics )';
     }
     return bless $stats, $class;
 }
@@ -356,7 +352,8 @@ sub pstop {
 #
 
 sub _compare {
-    my ($class, $x, $y) = @_;
+    my ($self, $x, $y) = @_;
+
     if (ref($y) eq 'Regexp') {
         return $x =~ $y;
     } elsif ($y =~ s/^eq://) {
@@ -368,8 +365,9 @@ sub _compare {
     } elsif ($y =~ s/^lt://) {
         return $x < $y;
     } else {
-        croak "$class: bad search() / psfind() operator '$y'";
+        croak ref($self).": bad search() / psfind() operator '$y'";
     }
+
     return undef;
 }
 

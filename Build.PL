@@ -5,6 +5,9 @@ use Module::Build;
 die 'OS unsupported! Sorry, but this system seems not to be a linux system!'
    unless $^O =~ /linux/i;
 
+die 'OS unsupported! Stupid! RTFM and let me access /proc!'
+   unless -r '/proc';
+
 my $build = Module::Build->new(
     create_readme => 1,
     license       => 'perl',
