@@ -36,7 +36,7 @@ DESCRIPTION
     statistics.
 
 MOTIVATION
-    My motivation is very simple. Every linux administrator knows the
+    My motivation is very simple... every linux administrator knows the
     well-known tool sar of sysstat. It helps me a lot of time to search for
     system bottlenecks and to solve problems, but it's hard to parse the
     output if you want to store the statistics into a database. So I thought
@@ -62,12 +62,12 @@ DELTAS
     "DiskStats" and "Processes" are deltas, for this reason it's necessary
     to initialize the statistics before the data can be prepared by "get()".
     These statistics can be initialized with the methods "new()", "set()"
-    and "init()". Any option that is set to 1 will be initialized by the
-    call of "new()" or "set()". The call of init() re-initialize all
-    statistics that are set to 1 or 2. By the call of "get()" the initial
-    statistics will be updated automatically. Please refer the section
-    "METHODS" to get more information about the calls of "new()", "set()",
-    "init()" and "get()".
+    and "init()". For any option that is set to 1, the statistics will be
+    initialized by the call of "new()" or "set()". The call of init()
+    re-initialize all statistics that are set to 1 or 2. By the call of
+    "get()" the initial statistics will be updated automatically. Please
+    refer the section "METHODS" to get more information about the calls of
+    "new()", "set()", "init()" and "get()".
 
     Another exigence is to sleep for a while - at least for one second -
     before the call of "get()" if you want to get useful statistics. The
@@ -80,8 +80,9 @@ DELTAS
     statistics will be updated.
 
 MANUAL PROC(5)
-    The "/www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html"" in <a
-    href="http:Linux Programmer's Manual</a>>.
+    The Linux Programmer's Manual
+
+        http://www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html
 
 OPTIONS
     All options are identical with the package names of the distribution in
@@ -235,7 +236,7 @@ METHODS
 
     Or
 
-        my ($date, $time) = $lxs->gettime;
+        my ($date, $time) = $lxs->gettime();
 
     Or
 
@@ -271,8 +272,8 @@ EXAMPLES
         $lxs->settime('%Y/%m/%d %H:%M:%S');
         print $lxs->gettime, "\n";
 
-    If you want to know how the data looks like you can use "Data::Dumper"
-    to check it:
+    If you want to know how the data structure looks like you can use
+    "Data::Dumper" to check it:
 
         use strict;
         use warnings;
@@ -298,7 +299,7 @@ EXAMPLES
 
 BACKWARD COMPATIBILITY
     The old options and keys - CpuStats, NetStats, etc - are still available
-    together but deprecated! It's not possible to access the statistics via
+    but deprecated! It's not possible to access the statistics via
     Sys::Statistics::Linux::Compilation and it's not possible to call
     "search()" and "psfind()" if you use the old options.
 
@@ -307,7 +308,7 @@ BACKWARD COMPATIBILITY
 
         $stats->cpustats
 
-    or direct
+    or directly with
 
         $stats->{cpustats}
 

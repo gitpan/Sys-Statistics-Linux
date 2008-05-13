@@ -84,7 +84,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::CpuStats;
-our $VERSION = '0.13_01';
+our $VERSION = '0.14';
 
 use strict;
 use warnings;

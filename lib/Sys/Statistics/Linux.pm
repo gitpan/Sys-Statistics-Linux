@@ -38,7 +38,7 @@ documentation of the distribution modules to get more informations about all pos
 
 =head1 MOTIVATION
 
-My motivation is very simple. Every linux administrator knows the well-known tool sar of sysstat.
+My motivation is very simple... every linux administrator knows the well-known tool sar of sysstat.
 It helps me a lot of time to search for system bottlenecks and to solve problems, but it's hard to
 parse the output if you want to store the statistics into a database. So I thought to develope
 Sys::Statistics::Linux. It's not a replacement but it should make it simpler to you to write your
@@ -61,10 +61,11 @@ turn on or off block statistics for devices.
 The statistics for C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
 are deltas, for this reason it's necessary to initialize the statistics before the data can be
 prepared by C<get()>. These statistics can be initialized with the methods C<new()>, C<set()> and
-C<init()>. Any option that is set to 1 will be initialized by the call of C<new()> or C<set()>.
-The call of init() re-initialize all statistics that are set to 1 or 2. By the call of C<get()>
-the initial statistics will be updated automatically. Please refer the section L</METHODS> to get more
-information about the calls of C<new()>, C<set()>, C<init()> and C<get()>.
+C<init()>. For any option that is set to 1, the statistics will be initialized by the call of
+C<new()> or C<set()>. The call of init() re-initialize all statistics that are set to 1 or 2.
+By the call of C<get()> the initial statistics will be updated automatically. Please refer the
+section L</METHODS> to get more information about the calls of C<new()>, C<set()>, C<init()>
+and C<get()>.
 
 Another exigence is to sleep for a while - at least for one second - before the call of C<get()>
 if you want to get useful statistics. The statistics for C<SysInfo>, C<MemStats>, C<SockStats>,
@@ -76,7 +77,9 @@ L<Sys::Statistics::Linux::Compilation> object. The inital statistics will be upd
 
 =head1 MANUAL PROC(5)
 
-The L<<a href="http://www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html">Linux Programmer's Manual</a>>.
+The Linux Programmer's Manual
+
+    http://www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html
 
 =head1 OPTIONS
 
@@ -229,7 +232,7 @@ automatically. You can also set a time format with C<gettime()>.
 
 Or
 
-    my ($date, $time) = $lxs->gettime;
+    my ($date, $time) = $lxs->gettime();
 
 Or
 
@@ -266,7 +269,7 @@ Set and get a time stamp:
     $lxs->settime('%Y/%m/%d %H:%M:%S');
     print $lxs->gettime, "\n";
 
-If you want to know how the data looks like you can use C<Data::Dumper> to check it:
+If you want to know how the data structure looks like you can use C<Data::Dumper> to check it:
 
     use strict;
     use warnings;
@@ -292,7 +295,7 @@ How to get the top 5 processes with the highest cpu workload:
 
 =head1 BACKWARD COMPATIBILITY
 
-The old options and keys - CpuStats, NetStats, etc - are still available together but deprecated!
+The old options and keys - CpuStats, NetStats, etc - are still available but deprecated!
 It's not possible to access the statistics via L<Sys::Statistics::Linux::Compilation> and it's
 not possible to call C<search()> and C<psfind()> if you use the old options.
 
@@ -300,7 +303,7 @@ You should use the new options and access the statistics over the accessors
 
     $stats->cpustats
 
-or direct
+or directly with
 
     $stats->{cpustats}
 
@@ -338,7 +341,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.35_01';
+our $VERSION = '0.36';
 
 use strict;
 use warnings;
