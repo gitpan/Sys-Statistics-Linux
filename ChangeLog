@@ -1,3 +1,7 @@
+0.37    Released at 2008-09-05.
+        - Fixed a bug in Linux.pm for netstats/netinfo. The raw data was
+          returned with netstats and not the deltas.
+
 0.36    Released at 2008-05-13.
         - Tests for 0.35_01 all ok. Now a full release.
 
@@ -11,7 +15,7 @@
         - Timestamp of 0.33 in the future and a lot of fail reports.
 
 0.33    Released at 2008-04-04.
-        - Found a bug in Processes.pm. New processes was not added
+        - Found a bug in Processes.pm. New processes were not added
           to $self->{init}.
 
 0.32    Released at 2008-02-27.
@@ -38,7 +42,7 @@
 0.25_02 Released at 2008-01-10.
         - Kicked from MemStats: hightotal, highfree, lowtotal, lowfree
           The reason is that 64-bit architectures by their nature has high
-          memory support and do not need the HIGHMEM configuraiton directive.
+          memory support and do not need the HIGHMEM configuration directive.
           As a result these values are not available on any 64-bit. Yes,
           there exists exceptions on some distributions like RHEL4 x86_64,
           but are they useful?
@@ -106,7 +110,7 @@
           weren't calculated per second.
 
 0.15    Released at 2007-08-04.
-        - Bug fixed in DiskStats.pm. major and minor was floats.
+        - Bug fixed in DiskStats.pm. major and minor were floats.
 
 0.14    Released at 2007-07-30.
         - psfind() and search() checks now if a list is wanted. If no statistics found
@@ -185,7 +189,7 @@
           this down because it's very confusing if the statistics are
           just add together.
         - I kicked IO::File and the _load() Method from some modules
-          because they wasn't really necessary.
+          because they weren't really necessary.
 
 0.09_08 Released at 2007-03-05.
         - Add the method fproc() to search for processes.
@@ -245,7 +249,7 @@
           and this message is not very helpful if init() was called.
 
 0.03    Released at 2006-12-28.
-        - Updated Sys::Statistics::Linux::CpuStats. There wasn't
+        - Updated Sys::Statistics::Linux::CpuStats. There weren't
           irq and softirq calculated for the uptime for each cpu.
           This values are only available with kernels > 2.4.
           That aren't new keys! Just added for calculation.
@@ -260,4 +264,4 @@
         - No code changes. Just updated POD and added t/Pod.t.
 
 0.01	Released at 2006-12-08.
-x.xx	Thanks to Larry Wall and all other Perl developer for Perl :-)
+x.xx	Thanks to Larry Wall and all other Perl developers for Perl :-)

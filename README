@@ -50,12 +50,16 @@ TECHNICAL NOTE
     This distribution collects statistics by the virtual /proc filesystem
     (procfs) and is developed on the default vanilla kernel. It is tested on
     x86 hardware with the distributions RHEL, Fedora, Debian, Ubuntu,
-    Asianux, Slackware, Mandriva, SuSE (SuSE on s390 and s390x architecture
-    as well but a long time ago) and openSUSE on kernel versions 2.4 and/or
-    2.6. It's possible that it doesn't run on all linux distributions if
-    some procfs features are deactivated or too much modified. As example
-    the linux kernel 2.4 can compiled with the option "CONFIG_BLK_STATS"
-    what turn on or off block statistics for devices.
+    Asianux, Slackware, Mandriva and openSuSE (SLES on zSeries as well but a
+    long time ago) on kernel versions 2.4 and/or 2.6. It's possible that it
+    doesn't run on all linux distributions if some procfs features are
+    deactivated or too much modified. As example the linux kernel 2.4 can
+    compiled with the option "CONFIG_BLK_STATS" what turn on or off block
+    statistics for devices.
+
+    Don't give up if some of the modules doesn't run on your hardware! Tell
+    me what's wrong and I will try to solve it! You just have to make the
+    first move and to send me a mail. :-)
 
 DELTAS
     The statistics for "CpuStats", "ProcStats", "PgSwStats", "NetStats",
@@ -66,7 +70,7 @@ DELTAS
     initialized by the call of "new()" or "set()". The call of init()
     re-initialize all statistics that are set to 1 or 2. By the call of
     "get()" the initial statistics will be updated automatically. Please
-    refer the section "METHODS" to get more information about the calls of
+    refer the section "METHODS" to get more informations about the usage of
     "new()", "set()", "init()" and "get()".
 
     Another exigence is to sleep for a while - at least for one second -
@@ -198,6 +202,7 @@ METHODS
 
         # initiate cpustats
         my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
+        sleep(1);
 
         while ( 1 ) {
             sleep(1800);
@@ -205,16 +210,32 @@ METHODS
         }
 
     If you just want a current snapshot of the system each 30 minutes and
-    not the average the following example would be better for you:
+    not the average then the following example would be better for you:
 
-        # don't initiate cpustats
+        # do not initiate cpustats
         my $lxs = Sys::Statistics::Linux->new( cpustats => 2 );
 
         while ( 1 ) {
-            sleep(1800);
-            $lxs->init;
+            $lxs->init;             # init the statistics
+            sleep(1);               # sleep for the deltas
+            my $stat = $lxs->get;   # get the statistics
+            sleep(1800);            # sleep until the next run
+        }
+
+    If you want to write a simple command line utility that prints the
+    current workload to the screen then you can use something like this:
+
+        my @order = qw(user system iowait idle nice irq softirq total);
+        printf "%-20s%8s%8s%8s%8s%8s%8s%8s%8s\n", 'time', @order;
+
+        my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
+
+        while ( 1 ){
             sleep(1);
-            my $stat = $lxs->get;
+            my $cpu  = $lxs->get->cpustats;
+            my $time = $lxs->gettime;
+            printf "%-20s%8s%8s%8s%8s%8s%8s%8s%8s\n",
+                $time, @{$cpu->{cpu}}{@order};
         }
 
   settime()

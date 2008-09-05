@@ -3,7 +3,7 @@ use ExtUtils::MakeMaker;
 die 'OS unsupported! Sorry, but this system seems not to be a linux system!'
    unless $^O =~ /linux/i;
 
-die 'OS unsupported! Stupid! RTFM and let me access /proc ;-)'
+die 'OS unsupported! Stupid! RTFM and gimme me access to /proc ;-)'
    unless -r '/proc';
 
 WriteMakefile

@@ -16,6 +16,7 @@ lib/Sys/Statistics/Linux/Processes.pm
 lib/Sys/Statistics/Linux/ProcStats.pm
 lib/Sys/Statistics/Linux/SockStats.pm
 lib/Sys/Statistics/Linux/SysInfo.pm
+LICENCE
 Makefile.PL
 MANIFEST			This list of files
 META.yml

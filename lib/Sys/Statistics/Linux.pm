@@ -49,12 +49,15 @@ If Sys::Statistics::Linux doesn't provide statistics that are strongly needed th
 =head1 TECHNICAL NOTE
 
 This distribution collects statistics by the virtual F</proc> filesystem (procfs) and is
-developed on the default vanilla kernel. It is tested on x86 hardware with the distributions RHEL,
-Fedora, Debian, Ubuntu, Asianux, Slackware, Mandriva, SuSE (SuSE on s390 and s390x architecture
-as well but a long time ago) and openSUSE on kernel versions 2.4 and/or 2.6. It's possible that
-it doesn't run on all linux distributions if some procfs features are deactivated or too much
-modified. As example the linux kernel 2.4 can compiled with the option C<CONFIG_BLK_STATS> what
-turn on or off block statistics for devices.
+developed on the default vanilla kernel. It is tested on x86 hardware with the distributions
+RHEL, Fedora, Debian, Ubuntu, Asianux, Slackware, Mandriva and openSuSE (SLES on zSeries as
+well but a long time ago) on kernel versions 2.4 and/or 2.6. It's possible that it doesn't
+run on all linux distributions if some procfs features are deactivated or too much modified.
+As example the linux kernel 2.4 can compiled with the option C<CONFIG_BLK_STATS> what turn
+on or off block statistics for devices.
+
+Don't give up if some of the modules doesn't run on your hardware! Tell me what's wrong
+and I will try to solve it! You just have to make the first move and to send me a mail. :-)
 
 =head1 DELTAS
 
@@ -64,7 +67,7 @@ prepared by C<get()>. These statistics can be initialized with the methods C<new
 C<init()>. For any option that is set to 1, the statistics will be initialized by the call of
 C<new()> or C<set()>. The call of init() re-initialize all statistics that are set to 1 or 2.
 By the call of C<get()> the initial statistics will be updated automatically. Please refer the
-section L</METHODS> to get more information about the calls of C<new()>, C<set()>, C<init()>
+section L</METHODS> to get more informations about the usage of C<new()>, C<set()>, C<init()>
 and C<get()>.
 
 Another exigence is to sleep for a while - at least for one second - before the call of C<get()>
@@ -194,6 +197,7 @@ The following example would calculate average statistics for 30 minutes:
 
     # initiate cpustats
     my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
+    sleep(1);
 
     while ( 1 ) {
         sleep(1800);
@@ -201,16 +205,32 @@ The following example would calculate average statistics for 30 minutes:
     }
 
 If you just want a current snapshot of the system each 30 minutes and not the average
-the following example would be better for you:
+then the following example would be better for you:
 
-    # don't initiate cpustats
+    # do not initiate cpustats
     my $lxs = Sys::Statistics::Linux->new( cpustats => 2 );
 
     while ( 1 ) {
-        sleep(1800);
-        $lxs->init;
+        $lxs->init;             # init the statistics
+        sleep(1);               # sleep for the deltas
+        my $stat = $lxs->get;   # get the statistics
+        sleep(1800);            # sleep until the next run
+    }
+
+If you want to write a simple command line utility that prints the current workload
+to the screen then you can use something like this:
+
+    my @order = qw(user system iowait idle nice irq softirq total);
+    printf "%-20s%8s%8s%8s%8s%8s%8s%8s%8s\n", 'time', @order;
+
+    my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
+
+    while ( 1 ){
         sleep(1);
-        my $stat = $lxs->get;
+        my $cpu  = $lxs->get->cpustats;
+        my $time = $lxs->gettime;
+        printf "%-20s%8s%8s%8s%8s%8s%8s%8s%8s\n",
+            $time, @{$cpu->{cpu}}{@order};
     }
 
 =head2 settime()
@@ -341,7 +361,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 use strict;
 use warnings;
@@ -448,7 +468,7 @@ sub get {
         if ($self->{opts}->{$opt}) {
             $stat{$opt} = $self->{obj}->{$opt}->get();
             if ($opt eq 'netstats') {
-                $stat{netinfo} = $stat{$opt} = $self->{obj}->{$opt}->get_raw();
+                $stat{netinfo} = $self->{obj}->{$opt}->get_raw();
             }
         }
     }
