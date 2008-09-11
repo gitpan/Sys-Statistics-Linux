@@ -1,6 +1,6 @@
 ---
 name: Sys-Statistics-Linux
-version: 0.37
+version: 0.38
 author:
   - Jonny Schulz
 abstract: Front-end module to collect system statistics
@@ -17,16 +17,16 @@ requires:
 provides:
   Sys::Statistics::Linux:
     file: lib/Sys/Statistics/Linux.pm
-    version: 0.37
+    version: 0.38
   Sys::Statistics::Linux::Compilation:
     file: lib/Sys/Statistics/Linux/Compilation.pm
     version: 0.07
   Sys::Statistics::Linux::CpuStats:
     file: lib/Sys/Statistics/Linux/CpuStats.pm
-    version: 0.14
+    version: 0.15
   Sys::Statistics::Linux::DiskStats:
     file: lib/Sys/Statistics/Linux/DiskStats.pm
-    version: 0.18
+    version: 0.19
   Sys::Statistics::Linux::DiskUsage:
     file: lib/Sys/Statistics/Linux/DiskUsage.pm
     version: 0.08
@@ -41,16 +41,16 @@ provides:
     version: 0.12
   Sys::Statistics::Linux::NetStats:
     file: lib/Sys/Statistics/Linux/NetStats.pm
-    version: 0.14
+    version: 0.15
   Sys::Statistics::Linux::PgSwStats:
     file: lib/Sys/Statistics/Linux/PgSwStats.pm
-    version: 0.12
+    version: 0.13
   Sys::Statistics::Linux::ProcStats:
     file: lib/Sys/Statistics/Linux/ProcStats.pm
-    version: 0.12
+    version: 0.13
   Sys::Statistics::Linux::Processes:
     file: lib/Sys/Statistics/Linux/Processes.pm
-    version: 0.18
+    version: 0.19
   Sys::Statistics::Linux::SockStats:
     file: lib/Sys/Statistics/Linux/SockStats.pm
     version: 0.06

@@ -79,9 +79,9 @@ sub new {
     my $class = shift;
     my %self = (
         files => {
-            file_nr    => '/proc/sys/fs/file-nr',
-            inode_nr   => '/proc/sys/fs/inode-nr',
-            dentries   => '/proc/sys/fs/dentry-state',
+            file_nr  => '/proc/sys/fs/file-nr',
+            inode_nr => '/proc/sys/fs/inode-nr',
+            dentries => '/proc/sys/fs/dentry-state',
         }
     );
     return bless \%self, $class;

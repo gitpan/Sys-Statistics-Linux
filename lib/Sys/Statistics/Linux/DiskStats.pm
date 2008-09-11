@@ -75,7 +75,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::DiskStats;
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 use strict;
 use warnings;
@@ -109,8 +109,9 @@ sub get {
     my $self  = shift;
     my $class = ref $self;
 
-    croak "$class: there are no initial statistics defined"
-        unless exists $self->{init};
+    if (!exists $self->{init}) {
+        croak "$class: there are no initial statistics defined";
+    }
 
     $self->{stats} = $self->_load;
     $self->_deltas;
@@ -235,8 +236,9 @@ sub _load {
         croak "$class: unable to open $file->{diskstats} or $file->{partitions} ($!)";
     }
 
-    croak "$class: no diskstats found! your system seems not to be compiled with CONFIG_BLK_STATS=y"
-        unless -e $file->{diskstats} || %stats;
+    if (!-e $file->{diskstats} || !scalar %stats) {
+        croak "$class: no diskstats found! your system seems not to be compiled with CONFIG_BLK_STATS=y";
+    }
 
     return \%stats;
 }
@@ -251,7 +253,7 @@ sub _deltas {
     $self->{time} = $time;
 
     foreach my $dev (keys %{$lstat}) {
-        unless (exists $istat->{$dev}) {
+        if (!exists $istat->{$dev}) {
             delete $lstat->{$dev};
             next;
         }
@@ -262,10 +264,12 @@ sub _deltas {
         while (my ($k, $v) = each %{$ldev}) {
             next if $k =~ /^major\z|^minor\z/;
 
-            croak "$class: different keys in statistics"
-                unless defined $idev->{$k};
-            croak "$class: value of '$k' is not a number"
-                unless $v =~ /^\d+$/ && $ldev->{$k} =~ /^\d+$/;
+            if (!defined $idev->{$k}) {
+                croak "$class: not defined key found '$k'";
+            }
+            if ($v !~ /^\d+\z/ || $ldev->{$k} !~ /^\d+\z/) {
+                croak "$class: invalid value for key '$k'";
+            }
 
             $ldev->{$k} =
                 $ldev->{$k} == $idev->{$k}

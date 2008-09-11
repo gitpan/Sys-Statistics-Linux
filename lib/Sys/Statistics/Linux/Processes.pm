@@ -109,12 +109,13 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Processes;
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 use strict;
 use warnings;
 use Carp qw(croak);
 use Time::HiRes;
+use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
 sub new {
     my ($class, $pids) = @_;
@@ -135,8 +136,9 @@ sub new {
         }
 
         foreach my $pid (@$pids) {
-            croak "$class: pid '$pid' is not a number"
-                unless $pid =~ /^\d+$/;
+            if ($pid !~ /^\d+\z/) {
+                croak "$class: pid '$pid' is not a number";
+            }
         }
 
         $self{pids} = $pids;
@@ -154,8 +156,9 @@ sub get {
     my $self  = shift;
     my $class = ref $self;
 
-    croak "$class: there are no initial statistics defined"
-        unless exists $self->{init};
+    if (!exists $self->{init}) {
+        croak "$class: there are no initial statistics defined";
+    }
 
     $self->{stats} = $self->_load;
     $self->_deltas;
@@ -179,7 +182,7 @@ sub _init {
     } else {
         opendir my $pdir, $file->{basedir}
             or croak "$class: unable to open directory $file->{basedir} ($!)";
-        $pids = [(grep /^\d+$/, readdir $pdir)];
+        $pids = [(grep /^\d+\z/, readdir $pdir)];
         closedir $pdir;
     }
 
@@ -216,7 +219,7 @@ sub _load {
     } else {
         opendir my $pdir, $file->{basedir}
             or croak "$class: unable to open directory $file->{basedir} ($!)";
-        $pids = [(grep /^\d+$/, readdir $pdir)];
+        $pids = [(grep /^\d+\z/, readdir $pdir)];
         closedir $pdir;
     }
 
@@ -252,8 +255,8 @@ sub _load {
         # determine the owner of the process
         if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_status}") {
             while (my $line = <$fh>) {
-                next unless $line =~ /^Uid:(\s+|\t+)(\d+)/;
-                $stats{$pid}{owner} = getpwuid($2) || 'N/a';
+                next unless $line =~ /^Uid:(?:\s+|\t+)(\d+)/;
+                $stats{$pid}{owner} = getpwuid($1) || 'N/a';
                 last;
             }
             close($fh);
@@ -285,10 +288,13 @@ sub _deltas {
     my $istat = $self->{init};
     my $lstat = $self->{stats};
 
-    croak "$class: missing key 'time'"
-        unless $istat->{time} && $lstat->{time};
-    croak "$class: value of 'time' is not a number"
-        unless $istat->{time} =~ /^\d+(\.\d+|)$/ && $lstat->{time} =~ /^\d+(\.\d+|)$/;
+    if (!defined $istat->{time} || !defined $lstat->{time}) {
+        croak "$class: not defined key found 'time'";
+    }
+
+    if ($istat->{time} !~ NUMBER || $lstat->{time} !~ NUMBER) {
+        croak "$class: invalid value for key 'time'";
+    }
 
     my $time = $lstat->{time} - $istat->{time};
     $istat->{time} = $lstat->{time};
@@ -303,12 +309,14 @@ sub _deltas {
         # check if the start time is equal!
         if ($ipid && $ipid->{sttime} == $lpid->{sttime}) {
             for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime)) {
-                croak "$class: different keys in statistics"
-                    unless defined $ipid->{$k};
-                croak "$class: value of '$k' is not a number"
-                    unless $ipid->{$k} =~ /^\d+(\.\d+|)$/ && $lpid->{$k} =~ /^\d+(\.\d+|)$/;
+                if (!defined $ipid->{$k}) {
+                    croak "$class: not defined key found '$k'";
+                }
+                if ($ipid->{$k} !~ NUMBER || $lpid->{$k} !~ NUMBER) {
+                    croak "$class: invalid value for key '$k'";
+                }
 
-                # we held this value for the next init stat
+                # $tmp is used for the next init stat
                 my $tmp      = $lpid->{$k};
                 $lpid->{$k} -= $ipid->{$k};
                 if ($lpid->{$k} > 0 && $time > 0) {
@@ -321,10 +329,8 @@ sub _deltas {
             # total workload
             $lpid->{ttime} = sprintf('%.2f', $lpid->{stime} + $lpid->{utime});
         } else {
-            # if the start time wasn't equal than we store the process to init
+            # if the start time is not equal then it seems to be a new process
             for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime sttime)) {
-                # a really bad bug! $ipid is undef if the pid is new
-                #$ipid->{$k} = $lpid->{$k};
                 $istat->{$pid}->{$k} = $lpid->{$k};
                 delete $lstat->{$pid};
             }

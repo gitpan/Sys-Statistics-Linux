@@ -68,7 +68,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::ProcStats;
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use strict;
 use warnings;
@@ -96,8 +96,9 @@ sub get {
     my $self  = shift;
     my $class = ref $self;
 
-    croak "$class: there are no initial statistics defined"
-        unless exists $self->{init};
+    if (!exists $self->{init}) {
+        croak "$class: there are no initial statistics defined";
+    }
 
     $self->{stats} = $self->_load;
     $self->_deltas;
@@ -153,10 +154,12 @@ sub _deltas {
     my $delta = sprintf('%.2f', $time - $self->{time});
     $self->{time} = $time;
 
-    croak "$class: different keys in statistics"
-        unless defined $istat->{new} && defined $lstat->{new};
-    croak "$class: value of 'new' is not a number"
-        unless $istat->{new} =~ /^\d+$/ && $lstat->{new} =~ /^\d+$/;
+    if (!defined $istat->{new} || !defined $lstat->{new}) {
+        croak "$class: not defined key found 'new'";
+    }
+    if ($istat->{new} !~ /^\d+\z/ || $lstat->{new} !~ /^\d+\z/) {
+        croak "$class: invalid value for key 'new'";
+    }
 
     my $new_init = $lstat->{new};
 

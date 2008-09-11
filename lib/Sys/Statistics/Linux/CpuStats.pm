@@ -84,7 +84,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::CpuStats;
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 use strict;
 use warnings;
@@ -109,8 +109,9 @@ sub get {
     my $self  = shift;
     my $class = ref $self;
 
-    croak "$class: there are no initial statistics defined"
-        unless exists $self->{init};
+    if (!exists $self->{init}) {
+        croak "$class: there are no initial statistics defined";
+    }
 
     $self->{stats} = $self->_load;
     $self->_deltas;
@@ -160,10 +161,12 @@ sub _deltas {
         my $uptime;
 
         while (my ($k, $v) = each %{$dcpu}) {
-            croak "$class: different keys in statistics"
-                unless defined $icpu->{$k};
-            croak "$class: value of '$k' is not a number"
-                unless $v =~ /^\d+$/ && $dcpu->{$k} =~ /^\d+$/;
+            if (!defined $icpu->{$k}) {
+                croak "$class: not defined key found '$k'";
+            }
+            if ($v !~ /^\d+\z/ || $dcpu->{$k} !~ /^\d+\z/) {
+                croak "$class: invalid value for key '$k'";
+            }
             $dcpu->{$k} -= $icpu->{$k};
             $icpu->{$k}  = $v;
             $uptime += $dcpu->{$k};

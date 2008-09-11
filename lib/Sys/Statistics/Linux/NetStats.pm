@@ -89,7 +89,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::NetStats;
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 use strict;
 use warnings;
@@ -116,8 +116,9 @@ sub get {
     my $self  = shift;
     my $class = ref $self;
 
-    croak "$class: there are no initial statistics defined"
-        unless exists $self->{init};
+    if (!exists $self->{init}) {
+        croak "$class: there are no initial statistics defined";
+    }
 
     $self->{stats} = $self->_load;
     $self->_deltas;
@@ -166,7 +167,7 @@ sub _deltas {
     $self->{time} = $time;
 
     foreach my $dev (keys %{$lstat}) {
-        unless (exists $istat->{$dev}) {
+        if (!exists $istat->{$dev}) {
             delete $lstat->{$dev};
             next;
         }
@@ -175,10 +176,12 @@ sub _deltas {
         my $ldev = $lstat->{$dev};
 
         while (my ($k, $v) = each %{$ldev}) {
-            croak "$class: different keys in statistics"
-                unless defined $idev->{$k};
-            croak "$class: statistic '$k' isn't a number"
-                unless $v =~ /^\d+$/ && $ldev->{$k} =~ /^\d+$/;
+            if (!defined $idev->{$k}) {
+                croak "$class: not defined key found '$k'";
+            }
+            if ($v !~ /^\d+\z/ || $ldev->{$k} !~ /^\d+\z/) {
+                croak "$class: invalid value for key '$k'";
+            }
 
             $ldev->{$k} =
                 $ldev->{$k} == $idev->{$k}

@@ -76,7 +76,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::PgSwStats;
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use strict;
 use warnings;
@@ -104,8 +104,9 @@ sub get {
     my $self  = shift;
     my $class = ref $self;
 
-    croak "$class: there are no initial statistics defined"
-        unless exists $self->{init};
+    if (!exists $self->{init}) {
+        croak "$class: there are no initial statistics defined";
+    }
 
     $self->{stats} = $self->_load;
     $self->_deltas;
@@ -137,7 +138,7 @@ sub _load {
     # if paging and swapping are not found in /proc/stat
     # then let's try a look into /proc/vmstat (since 2.6)
 
-    unless (defined $stats{pswpout}) {
+    if (!defined $stats{pswpout}) {
         open my $fh, '<', $file->{vmstat} or croak "$class: unable to open $file->{vmstat} ($!)";
         while (my $line = <$fh>) {
             next unless $line =~ /^(pgpgin|pgpgout|pswpin|pswpout|pgfault|pgmajfault)\s+(\d+)/;
@@ -159,10 +160,12 @@ sub _deltas {
     $self->{time} = $time;
 
     while (my ($k, $v) = each %{$lstat}) {
-        croak "$class: different keys in statistics"
-            unless defined $istat->{$k} && defined $lstat->{$k};
-        croak "$class: value of '$k' is not a number"
-            unless $v =~ /^\d+$/ && $istat->{$k} =~ /^\d+$/;
+        if (!defined $istat->{$k} || !defined $lstat->{$k}) {
+            croak "$class: not defined key found '$k'";
+        }
+        if ($v !~ /^\d+\z/ || $istat->{$k} !~ /^\d+\z/) {
+            croak "$class: invalid value for key '$k'";
+        }
 
         $lstat->{$k} =
             $lstat->{$k} == $istat->{$k}

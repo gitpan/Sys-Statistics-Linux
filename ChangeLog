@@ -1,3 +1,11 @@
+0.38    Released at 2008-09-11.
+        - Fixed a little bug in Processes.pm - thanks to Marcus V. for
+          his report! Marcus reported that minflt could be negativ on
+          Xen machines and Processes.pm croaks with the message:
+          "value of 'minflt' is not a number".
+        - Different code improvements in ProcStats.pm, NetStats.pm,
+          CpuStats.pm, PgSwStats.pm.
+
 0.37    Released at 2008-09-05.
         - Fixed a bug in Linux.pm for netstats/netinfo. The raw data was
           returned with netstats and not the deltas.
