@@ -1,3 +1,9 @@
+0.39_01 Released at 2008-09-22.
+        - http://rt.cpan.org/Public/Bug/Display.html?id=39451
+          Fixed bug in Memstats.pm for key "inactive". On earlier kernels
+          it's Inact_dirty, Inact_laundry and Inact_clean.
+          Thanks to Peter E. for his report.
+
 0.38    Released at 2008-09-11.
         - Fixed a little bug in Processes.pm - thanks to Marcus V. for
           his report! Marcus reported that minflt could be negativ on
