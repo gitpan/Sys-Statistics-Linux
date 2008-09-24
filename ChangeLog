@@ -1,3 +1,6 @@
+0.40    Released at 2008-09-24.
+        - All tests for 0.39_01 runs fine, now a full version.
+
 0.39_01 Released at 2008-09-22.
         - http://rt.cpan.org/Public/Bug/Display.html?id=39451
           Fixed bug in Memstats.pm for key "inactive". On earlier kernels
