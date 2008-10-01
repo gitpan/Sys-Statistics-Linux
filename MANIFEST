@@ -1,5 +1,6 @@
 Build.PL
 ChangeLog
+examples/diskusage.pl
 examples/loadavg.pl
 INSTALL
 lib/Sys/Statistics/Linux.pm
