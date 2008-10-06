@@ -16,12 +16,12 @@ my $build = Module::Build->new(
     recommends    => { },
     sign          => 0,
     requires      => {
+        'Carp'        => 0,
+        'POSIX'       => 0,
+        'Test::More'  => 0,
+        'Time::HiRes' => 0,
+        'UNIVERSAL'   => 0,
         'UNIVERSAL::require' => 0,
-        'UNIVERSAL'          => 0,
-        'Test::More'         => 0,
-        'Carp'               => 0,
-        'POSIX'              => 0,
-        'Time::HiRes'        => 0,
     },
 );
 

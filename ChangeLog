@@ -1,3 +1,10 @@
+0.42    Released at 2008-10-06.
+        - Added $PAGES_TO_BYTES to Sys::Statistics::Linux::Processes.
+          With this variable it's possible to get bytes/kilobytes instead
+          of pages for some statistics - feature request of Marcus V.
+        - Fixed a bug in processes. The values drs and lrs in Processes.pm
+          were interchanged.
+
 0.41    Released at 2008-10-01.
         -  http://rt.cpan.org/Ticket/Display.html?id=39723
            Sys::Statistics::Linux::DiskUsage - added global variables

@@ -88,6 +88,9 @@ MANUAL PROC(5)
 
         http://www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html
 
+    If you have questions or don't understand the sense of some statistics
+    then take a look into this awesome documentation.
+
 OPTIONS
     All options are identical with the package names of the distribution in
     lowercase. To activate the gathering of statistics you have to set the

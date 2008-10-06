@@ -84,6 +84,9 @@ The Linux Programmer's Manual
 
     http://www.kernel.org/doc/man-pages/online/pages/man5/proc.5.html
 
+If you have questions or don't understand the sense of some statistics then take a look
+into this awesome documentation.
+
 =head1 OPTIONS
 
 All options are identical with the package names of the distribution in lowercase. To activate
@@ -361,7 +364,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 
 use strict;
 use warnings;
@@ -376,13 +379,15 @@ my %MODS;
 
 sub new {
     my $class = shift;
+    my $self  = bless { obj => { } }, $class; 
+
     my @options = qw(
         SysInfo   CpuStats  ProcStats
         MemStats  PgSwStats NetStats
         SockStats DiskStats DiskUsage
         LoadAVG   FileStats Processes
     );
-    my $self = bless { obj => { } }, $class; 
+
     foreach my $opt (@options) {
         # backward compatibility
         $self->{opts}->{$opt} = 0;
@@ -392,6 +397,7 @@ sub new {
         $self->{opts}->{$lcopt} = 0;
         $self->{maps}->{$lcopt} = $opt;
     }
+
     $self->set(@_) if @_;
     return $self;
 }
