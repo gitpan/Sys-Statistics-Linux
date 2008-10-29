@@ -4,7 +4,7 @@ NAME
 SYNOPSIS
         use Sys::Statistics::Linux;
 
-        my $lxs = Sys::Statistics::Linux->new(
+        my %options = (
             sysinfo   => 1,
             cpustats  => 1,
             procstats => 1,
@@ -19,14 +19,15 @@ SYNOPSIS
             processes => 1,
         );
 
+        my $lxs = Sys::Statistics::Linux->new(\%options);
         sleep 1;
-
-        # $stat is a Sys::Statistics::Linux::Compilation object
         my $stat = $lxs->get;
 
-        foreach my $key ($stat->loadavg) {
-            print $key, " ", $stat->loadavg($key), "\n";
-        }
+    Or
+
+        my $sleep = 1;
+        my $lxs   = Sys::Statistics::Linux->new(\%options);
+        my $stat  = $lxs->get($sleep);
 
 DESCRIPTION
     Sys::Statistics::Linux is a front-end module and gather different linux
@@ -181,7 +182,13 @@ METHODS
     Call "get()" to get the collected statistics. "get()" returns a
     Sys::Statistics::Linux::Compilation object.
 
-        my $stat = $lxs->get;
+        my $lxs  = Sys::Statistics::Linux->new(\%options);
+        sleep(1);
+        my $stat = $lxs->get();
+
+    Or you can pass the time to sleep with the call of "get()".
+
+        my $stat = $lxs->get($time_to_sleep);
 
     Now the statistcs are available with
 
@@ -205,7 +212,6 @@ METHODS
 
         # initiate cpustats
         my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
-        sleep(1);
 
         while ( 1 ) {
             sleep(1800);
@@ -219,10 +225,9 @@ METHODS
         my $lxs = Sys::Statistics::Linux->new( cpustats => 2 );
 
         while ( 1 ) {
-            $lxs->init;             # init the statistics
-            sleep(1);               # sleep for the deltas
-            my $stat = $lxs->get;   # get the statistics
-            sleep(1800);            # sleep until the next run
+            $lxs->init;              # init the statistics
+            my $stat = $lxs->get(1); # get the statistics
+            sleep(1800);             # sleep until the next run
         }
 
     If you want to write a simple command line utility that prints the
@@ -234,8 +239,7 @@ METHODS
         my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
 
         while ( 1 ){
-            sleep(1);
-            my $cpu  = $lxs->get->cpustats;
+            my $cpu  = $lxs->get(1)->cpustats;
             my $time = $lxs->gettime;
             printf "%-20s%8s%8s%8s%8s%8s%8s%8s%8s\n",
                 $time, @{$cpu->{cpu}}{@order};
@@ -342,7 +346,6 @@ PREREQUISITES
         Test::More
         Time::HiRes
         UNIVERSAL
-        UNIVERSAL::require
 
 EXPORTS
     No exports.

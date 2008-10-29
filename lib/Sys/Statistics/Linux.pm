@@ -6,7 +6,7 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
     use Sys::Statistics::Linux;
 
-    my $lxs = Sys::Statistics::Linux->new(
+    my %options = (
         sysinfo   => 1,
         cpustats  => 1,
         procstats => 1,
@@ -21,14 +21,15 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
         processes => 1,
     );
 
+    my $lxs = Sys::Statistics::Linux->new(\%options);
     sleep 1;
-
-    # $stat is a Sys::Statistics::Linux::Compilation object
     my $stat = $lxs->get;
 
-    foreach my $key ($stat->loadavg) {
-        print $key, " ", $stat->loadavg($key), "\n";
-    }
+Or
+
+    my $sleep = 1;
+    my $lxs   = Sys::Statistics::Linux->new(\%options);
+    my $stat  = $lxs->get($sleep);
 
 =head1 DESCRIPTION
 
@@ -178,7 +179,13 @@ It's possible to call C<set()> with a hash reference of options.
 Call C<get()> to get the collected statistics. C<get()> returns a L<Sys::Statistics::Linux::Compilation>
 object.
 
-    my $stat = $lxs->get;
+    my $lxs  = Sys::Statistics::Linux->new(\%options);
+    sleep(1);
+    my $stat = $lxs->get();
+
+Or you can pass the time to sleep with the call of C<get()>.
+
+    my $stat = $lxs->get($time_to_sleep);
 
 Now the statistcs are available with
 
@@ -200,7 +207,6 @@ The following example would calculate average statistics for 30 minutes:
 
     # initiate cpustats
     my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
-    sleep(1);
 
     while ( 1 ) {
         sleep(1800);
@@ -214,10 +220,9 @@ then the following example would be better for you:
     my $lxs = Sys::Statistics::Linux->new( cpustats => 2 );
 
     while ( 1 ) {
-        $lxs->init;             # init the statistics
-        sleep(1);               # sleep for the deltas
-        my $stat = $lxs->get;   # get the statistics
-        sleep(1800);            # sleep until the next run
+        $lxs->init;              # init the statistics
+        my $stat = $lxs->get(1); # get the statistics
+        sleep(1800);             # sleep until the next run
     }
 
 If you want to write a simple command line utility that prints the current workload
@@ -229,8 +234,7 @@ to the screen then you can use something like this:
     my $lxs = Sys::Statistics::Linux->new( cpustats => 1 );
 
     while ( 1 ){
-        sleep(1);
-        my $cpu  = $lxs->get->cpustats;
+        my $cpu  = $lxs->get(1)->cpustats;
         my $time = $lxs->gettime;
         printf "%-20s%8s%8s%8s%8s%8s%8s%8s%8s\n",
             $time, @{$cpu->{cpu}}{@order};
@@ -337,7 +341,6 @@ or directly with
     Test::More
     Time::HiRes
     UNIVERSAL
-    UNIVERSAL::require
 
 =head1 EXPORTS
 
@@ -364,18 +367,14 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 
 use strict;
 use warnings;
 use Carp qw(croak);
 use POSIX qw(strftime);
 use UNIVERSAL;
-use UNIVERSAL::require;
 use Sys::Statistics::Linux::Compilation;
-
-# save loaded modules
-my %MODS;
 
 sub new {
     my $class = shift;
@@ -429,11 +428,12 @@ sub set {
         if ($opts->{$opt}) {
             my $package = $class.'::'.$maps->{$opt};
 
-            # require mod if not loaded
-            unless ($MODS{$package}) {
-                $package->require or croak "$class: unable to load $package";
-                $MODS{$package} = 1;
-            }
+            # require module - require know which modules are loaded
+            # and doesn't load a module twice.
+            my $require = $package;
+            $require =~ s/::/\//g;
+            $require .= '.pm';
+            require $require;
 
             # create a new object if the object doesn't exist
             # or create a new process list object if $pids is set
@@ -459,6 +459,7 @@ sub init {
     my $self  = shift;
     my $class = ref $self;
     my $maps  = $self->{maps};
+
     foreach my $opt (keys %{$self->{opts}}) {
         if ($self->{opts}->{$opt} > 0 && UNIVERSAL::can(ref($self->{obj}->{$opt}), 'init')) {
             $self->{obj}->{$opt}->init();
@@ -470,6 +471,7 @@ sub get {
     my ($self, $time) = @_;
     sleep $time if $time;
     my %stat = ();
+
     foreach my $opt (keys %{$self->{opts}}) {
         if ($self->{opts}->{$opt}) {
             $stat{$opt} = $self->{obj}->{$opt}->get();
@@ -478,6 +480,7 @@ sub get {
             }
         }
     }
+
     return Sys::Statistics::Linux::Compilation->new(\%stat);
 }
 

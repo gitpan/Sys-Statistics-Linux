@@ -21,7 +21,6 @@ my $build = Module::Build->new(
         'Test::More'  => 0,
         'Time::HiRes' => 0,
         'UNIVERSAL'   => 0,
-        'UNIVERSAL::require' => 0,
     },
 );
 
