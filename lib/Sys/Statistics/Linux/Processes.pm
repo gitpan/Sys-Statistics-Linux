@@ -50,6 +50,9 @@ Note that if F</etc/passwd> isn't readable, the key owner is set to F<N/a>.
     nswap     -  The size of swap space of the process.
     cnswap    -  The size of swap space of the childrens of the process.
     cpu       -  The CPU number the process was last executed on.
+    wchan     -  The "channel" in which the process is waiting.
+    fd        -  This is a subhash containing each file which the process has open, named by its file descriptor.
+                 0 is standard input, 1 standard output, 2 standard error, etc.
     cmd       -  Command of the process.
     cmdline   -  Command line of the process.
 
@@ -130,7 +133,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -143,6 +146,7 @@ sub new {
             p_statm   => 'statm',
             p_status  => 'status',
             p_cmdline => 'cmdline',
+            p_wchan   => 'wchan',
         },
     );
 
@@ -305,6 +309,28 @@ sub _load {
             }
             $stats{$pid}{cmdline} = 'N/a' unless $stats{$pid}{cmdline};
             close($fh);
+        } else {
+            delete $stats{$pid};
+            next;
+        }
+
+        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_wchan}") {
+            $stats{$pid}{wchan} = <$fh>;
+            chomp($stats{$pid}{wchan});
+        } else {
+            delete $stats{$pid};
+            next;
+        }
+
+        if (opendir my $dh, "$file->{basedir}/$pid/fd") {
+            foreach my $link (grep !/^\.+\z/, readdir($dh)) {
+                my $target = readlink("$file->{basedir}/$pid/fd/$link")
+                    or do { delete $stats{$pid}; next; };
+                $stats{$pid}{fd}{$link} = $target;
+            }
+        } else {
+            delete $stats{$pid};
+            next;
         }
     }
 

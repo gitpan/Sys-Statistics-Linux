@@ -360,14 +360,14 @@ Jonny Schulz <jschulz.cpan(at)bloonix.de>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2006, 2007 by Jonny Schulz. All rights reserved.
+Copyright (C) 2006-2008 by Jonny Schulz. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.43';
+our $VERSION = '0.44_01';
 
 use strict;
 use warnings;

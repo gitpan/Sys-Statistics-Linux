@@ -1,3 +1,6 @@
+0.44_01 Released at 2009-01-13.
+        - Added "wchan" and "fd" to Processes.pm.
+
 0.43    Released at 2008-10-29.
         - Kicked UNIVERSAL::require.
         - Now it's possible to pass $sleep_time to get().

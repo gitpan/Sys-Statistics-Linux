@@ -88,18 +88,13 @@ returns the first level keys of the statistics. Example:
     my @dev  = $stat->netstats;                 # the devices eth0, eth1, ...
     my $eth0 = $stat->netstats('eth0');         # eth0 statistics as a hash reference
     my @keys = $stat->netstats('eth0');         # the statistic keys
-    my @vals = $stat->netstats('eth0', @keys);  # the values for @keys
+    my @vals = $stat->netstats('eth0', @keys);  # the values for the passed device and @keys
+    my $val  = $stat->netstats('eth0', $key);   # the value for the passed device and key
 
-I was thinking about to return all keys sorted but if you need that you can call
+Sorted ...
 
     my @dev  = sort $stat->netstats;
     my @keys = sort $stat->netstats('eth0');
-
-LoadAVG example:
-
-    my $load = $stat->loadavg;                  # loadavg as a hash reference
-    my @keys = $stat->loadavg;                  # the statistic keys
-    my @vals = $stat->loadavg(@keys);           # the values for @keys
 
 =head2 pstop()
 
@@ -198,7 +193,7 @@ Please report all bugs to <jschulz.cpan(at)bloonix.de>.
 
 Jonny Schulz <jschulz.cpan(at)bloonix.de>.
 
-Thanks to Moritz Lenz for his suggestion for the name for this module.
+Thanks to Moritz Lenz for his suggestion for the name of this module.
 
 =head1 COPYRIGHT
 
@@ -209,7 +204,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Compilation;
-our $VERSION = '0.07';
+our $VERSION = '0.09';
 
 use strict;
 use warnings;
@@ -281,7 +276,6 @@ sub search {
 
         foreach my $x (keys %{$fref}) {
             if (ref($fref->{$x}) eq 'HASH') {
-
                 # if the key $proc->{eth0} doesn't exists
                 # then we continue with the next defined filter
                 next unless exists $proc->{$x};
@@ -296,7 +290,13 @@ sub search {
                 foreach my $key (keys %{$proc}) {
                     if (ref($proc->{$key}) eq 'HASH') {
                         $subref = $proc->{$key};
-                        if (defined $subref->{$x} && $self->_compare($subref->{$x}, $fref->{$x})) {
+                        if (ref $subref->{$x} eq 'HASH') {
+                            foreach my $y (keys %{$subref->{$x}}) {
+                                if ($self->_compare($subref->{$x}->{$y}, $fref->{$x})) {
+                                    $hits{$opt}{$key}{$x}{$y} = $subref->{$x}->{$y};
+                                }
+                            }
+                        } elsif (defined $subref->{$x} && $self->_compare($subref->{$x}, $fref->{$x})) {
                             $hits{$opt}{$key}{$x} = $subref->{$x};
                         }
                     } else { # must be a scalar now
@@ -309,6 +309,7 @@ sub search {
             }
         }
     }
+
     return wantarray ? %hits : \%hits;
 }
 
@@ -318,11 +319,21 @@ sub psfind {
     my $proc   = $self->{processes} or return undef;
     my @hits   = ();
 
-    foreach my $pid (keys %{$proc}) {
+    PID: foreach my $pid (keys %{$proc}) {
         my $proc = $proc->{$pid};
         while ( my ($key, $value) = each %{$filter} ) {
-            if (exists $proc->{$key} && $self->_compare($proc->{$key}, $value)) {
-                push @hits, $pid;
+            if (exists $proc->{$key}) {
+                if (ref $proc->{$key} eq 'HASH') {
+                    foreach my $v (values %{$proc->{$key}}) {
+                        if ($self->_compare($v, $value)) {
+                            push @hits, $pid;
+                            next PID;
+                        }
+                    }
+                } elsif ($self->_compare($proc->{$key}, $value)) {
+                    push @hits, $pid;
+                    next PID;
+                }
             }
         }
     }
