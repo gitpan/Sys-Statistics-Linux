@@ -133,7 +133,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -243,7 +243,7 @@ sub _load {
         closedir $pdir;
     }
 
-    foreach my $pid (@$pids) {
+    PID: foreach my $pid (@$pids) {
 
         # memory usage for each process
         if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_statm}") {
@@ -264,7 +264,7 @@ sub _load {
             close($fh);
         } else {
             delete $stats{$pid};
-            next;
+            next PID;
         }
 
         # different other informations for each process
@@ -278,7 +278,7 @@ sub _load {
             close($fh);
         } else {
             delete $stats{$pid};
-            next;
+            next PID;
         }
 
         # calculate the active time of each process
@@ -295,7 +295,7 @@ sub _load {
             close($fh);
         } else {
             delete $stats{$pid};
-            next;
+            next PID;
         }
 
         # command line for each process
@@ -311,7 +311,7 @@ sub _load {
             close($fh);
         } else {
             delete $stats{$pid};
-            next;
+            next PID;
         }
 
         if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_wchan}") {
@@ -319,18 +319,21 @@ sub _load {
             chomp($stats{$pid}{wchan});
         } else {
             delete $stats{$pid};
-            next;
+            next PID;
         }
 
         if (opendir my $dh, "$file->{basedir}/$pid/fd") {
             foreach my $link (grep !/^\.+\z/, readdir($dh)) {
-                my $target = readlink("$file->{basedir}/$pid/fd/$link")
-                    or do { delete $stats{$pid}; next; };
-                $stats{$pid}{fd}{$link} = $target;
+                if (my $target = readlink("$file->{basedir}/$pid/fd/$link")) {
+                    $stats{$pid}{fd}{$link} = $target;
+                } else {
+                    delete $stats{$pid};
+                    next PID;
+                }
             }
         } else {
             delete $stats{$pid};
-            next;
+            next PID;
         }
     }
 

@@ -27,7 +27,9 @@ my $foo = $stat->search({
    processes => { 1 => { ppid => 'eq:0' } },
 });
 
-ok(defined %{$foo->{$_}}, "checking $_") for keys %{$foo};
+foreach my $key (qw/cpustats procstats memstats diskusage processes/) {
+    ok(exists $foo->{$key} && ref($foo->{$key}) eq 'HASH', "checking $key");
+}
 
 my %filter = (
     cpustats => {

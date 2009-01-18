@@ -1,3 +1,8 @@
+0.44_02 Released at 2009-01-18.
+        - Fixed a bug: delete a process if the process doesn't exists
+          any more and jump to the next PID with "next PID;".
+        - Fixed some tests.
+
 0.44_01 Released at 2009-01-13.
         - Added "wchan" and "fd" to Processes.pm.
 
