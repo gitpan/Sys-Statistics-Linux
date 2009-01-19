@@ -17,6 +17,7 @@ $lxs->set(
 sleep 1;
 
 my $stat = $lxs->get();
+my $pid  = (keys %{$stat->{processes}})[0];
 
 # just some simple searches that should match every time
 my $foo = $stat->search({
@@ -24,7 +25,7 @@ my $foo = $stat->search({
    procstats => { count => 'ne:1' },
    memstats  => { memtotal => 'gt:1' },
    diskusage => { usageper => qr/\d+/ },
-   processes => { 1 => { ppid => 'eq:0' } },
+   processes => { $pid => { ppid => qr/\d+/ } },
 });
 
 foreach my $key (qw/cpustats procstats memstats diskusage processes/) {
