@@ -1,12 +1,12 @@
 ---
 name: Sys-Statistics-Linux
-version: 0.44_03
+version: 0.45
 author:
   - Jonny Schulz
 abstract: Front-end module to collect system statistics
 license: perl
 resources:
-  license: http://dev.perl.org/licenses/
+  license: ~
 requires:
   Carp: 0
   POSIX: 0
@@ -16,7 +16,7 @@ requires:
 provides:
   Sys::Statistics::Linux:
     file: lib/Sys/Statistics/Linux.pm
-    version: 0.44_03
+    version: 0.45
   Sys::Statistics::Linux::Compilation:
     file: lib/Sys/Statistics/Linux/Compilation.pm
     version: 0.09
@@ -56,7 +56,7 @@ provides:
   Sys::Statistics::Linux::SysInfo:
     file: lib/Sys/Statistics/Linux/SysInfo.pm
     version: 0.06
-generated_by: Module::Build version 0.3
+generated_by: Module::Build version 0.31012
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
