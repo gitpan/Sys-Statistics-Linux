@@ -1,3 +1,6 @@
+0.47    Released at 2009-02-10.
+        - GRML - forget to upgrade $VERSION in Processes.pm :)
+
 0.46    Released at 2009-02-10.
         - Fixed a bug in Processs.pm. If /proc/<pid>/fd is empty then
           t/120-processes.t returns an error.

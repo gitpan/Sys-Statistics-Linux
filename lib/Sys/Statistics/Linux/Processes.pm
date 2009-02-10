@@ -133,7 +133,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
