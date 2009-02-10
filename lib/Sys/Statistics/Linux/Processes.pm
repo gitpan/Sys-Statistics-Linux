@@ -323,6 +323,7 @@ sub _load {
         }
 
         if (opendir my $dh, "$file->{basedir}/$pid/fd") {
+            $stats{$pid}{fd} = { }; # maybe $dh is empty
             foreach my $link (grep !/^\.+\z/, readdir($dh)) {
                 if (my $target = readlink("$file->{basedir}/$pid/fd/$link")) {
                     $stats{$pid}{fd}{$link} = $target;

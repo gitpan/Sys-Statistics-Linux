@@ -1,3 +1,7 @@
+0.46    Released at 2009-02-10.
+        - Fixed a bug in Processs.pm. If /proc/<pid>/fd is empty then
+          t/120-processes.t returns an error.
+
 0.45    Released at 2009-02-02.
         - Just a full release.
 
