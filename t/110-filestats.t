@@ -16,7 +16,7 @@ my @filestats = qw(
    wantpages
 );
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(filestats => 1);
-my $stats = $lxs->get;
+my $sys = Sys::Statistics::Linux->new();
+$sys->set(filestats => 1);
+my $stats = $sys->get;
 ok(defined $stats->filestats->{$_}, "checking filestats $_") for @filestats;

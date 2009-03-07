@@ -87,11 +87,12 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::MemStats;
-our $VERSION = '0.13';
 
 use strict;
 use warnings;
 use Carp qw(croak);
+
+our $VERSION = '0.14';
 
 sub new {
     my $class = shift;
@@ -147,7 +148,7 @@ sub get {
 
     while (my $line = <$fh>) {
         if ($line =~ /^((?:Mem|Swap)(?:Total|Free)|Buffers|Cached|SwapCached|Active|Inactive|
-                        Dirty|Writeback|Mapped|Slab|Commit(?:Limit|ted_AS)):\s*(\d+)/) {
+                        Dirty|Writeback|Mapped|Slab|Commit(?:Limit|ted_AS)):\s*(\d+)/x) {
             my ($n, $v) = ($1, $2);
             $n =~ tr/A-Z/a-z/;
             $meminfo{$n} = $v;

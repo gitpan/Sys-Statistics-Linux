@@ -41,10 +41,10 @@ my @processes = qw(
     fd
 );
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(processes => 1);
+my $sys = Sys::Statistics::Linux->new();
+$sys->set(processes => 1);
 sleep(1);
-my $stats = $lxs->get;
+my $stats = $sys->get;
 
 for my $pid (keys %{$stats->processes}) {
    ok(defined $stats->processes->{$pid}->{$_}, "checking processes $_") for @processes;

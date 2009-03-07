@@ -16,7 +16,7 @@ my @sysinfo = qw(
    idletime
 );
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(sysinfo => 1);
-my $stats = $lxs->get;
-ok(defined $stats->sysinfo->{$_}, "checking sysinfo $_") for @sysinfo;
+my $sys = Sys::Statistics::Linux->new();
+$sys->set(sysinfo => 1);
+my $stat = $sys->get;
+ok(defined $stat->sysinfo->{$_}, "checking sysinfo $_") for @sysinfo;

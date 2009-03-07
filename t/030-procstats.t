@@ -9,8 +9,8 @@ my @procstats = qw(
    count
 );
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(procstats => 1);
+my $sys = Sys::Statistics::Linux->new();
+$sys->set(procstats => 1);
 sleep(1);
-my $stats = $lxs->get;
+my $stats = $sys->get;
 ok(defined $stats->procstats->{$_}, "checking procstats $_") for @procstats;

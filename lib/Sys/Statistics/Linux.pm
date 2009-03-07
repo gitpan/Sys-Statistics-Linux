@@ -6,7 +6,7 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
     use Sys::Statistics::Linux;
 
-    my %options = (
+    my $lxs = Sys::Statistics::Linux->new(
         sysinfo   => 1,
         cpustats  => 1,
         procstats => 1,
@@ -21,15 +21,8 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
         processes => 1,
     );
 
-    my $lxs = Sys::Statistics::Linux->new(\%options);
     sleep 1;
     my $stat = $lxs->get;
-
-Or
-
-    my $sleep = 1;
-    my $lxs   = Sys::Statistics::Linux->new(\%options);
-    my $stat  = $lxs->get($sleep);
 
 =head1 DESCRIPTION
 
@@ -100,13 +93,17 @@ The options must be set with one of the following values:
     1 - activate and init statistics
     2 - activate statistics but don't init
 
-In addition it's possible to pass a process list for option C<Processes>.
+In addition it's possible to pass a hash reference with optinos.
 
     my $lxs = Sys::Statistics::Linux->new(
         processes => {
             init => 1,
             pids => [ 1, 2, 3 ]
-        }
+        },
+        netstats => {
+            init => 1,
+            initfile => $file,
+        },
     );
 
 To get more informations about the statistics refer the different modules of the distribution.
@@ -367,7 +364,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.47';
+our $VERSION = '0.48';
 
 use strict;
 use warnings;
@@ -410,20 +407,18 @@ sub set {
     my $maps  = $self->{maps};
     my $pids  = ();
 
-    if (ref($args->{processes}) eq 'HASH') {
-        $pids = $args->{processes}->{pids};
-        $args->{processes} = $args->{processes}->{init};
-    }
-
-    foreach my $opt (keys %{$args}) {
-        unless (exists $opts->{$opt}) {
+    foreach my $opt (keys %$args) {
+        if (!exists $opts->{$opt}) {
             croak "$class: invalid option '$opt'";
         }
-        unless ($args->{$opt} =~ qr/^[012]\z/) {
-            croak "$class: invalid value for '$opt'";
-        }
 
-        $opts->{$opt} = $args->{$opt};
+        if (ref($args->{$opt})) {
+            $opts->{$opt} = delete $args->{$opt}->{init} || 1;
+        } elsif ($args->{$opt} !~ qr/^[012]\z/) {
+            croak "$class: invalid value for '$opt'";
+        } else {
+            $opts->{$opt} = $args->{$opt};
+        }
 
         if ($opts->{$opt}) {
             my $package = $class.'::'.$maps->{$opt};
@@ -435,12 +430,12 @@ sub set {
             $require .= '.pm';
             require $require;
 
-            # create a new object if the object doesn't exist
-            # or create a new process list object if $pids is set
-            if ($opt eq 'processes' && $pids) {
-                $obj->{$opt} = $package->new($pids);
-            } elsif (!$obj->{$opt}) {
-                $obj->{$opt} = $package->new;
+            if (!$obj->{$opt}) {
+                if (ref($args->{$opt})) {
+                    $obj->{$opt} = $package->new(%{$args->{$opt}});
+                } else {
+                    $obj->{$opt} = $package->new();
+                }
             }
 
             # get initial statistics if the function init() exists

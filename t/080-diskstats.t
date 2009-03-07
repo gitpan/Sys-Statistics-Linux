@@ -14,13 +14,18 @@ my @diskstats = qw(
     ttbyt
 );
 
-my $lxs = Sys::Statistics::Linux->new;
+my $sys = Sys::Statistics::Linux->new();
+
+if (!-r '/proc/diskstats' || !-r '/proc/partitions') {
+    plan skip_all => "your system seems to be a virtual machine that doesn't provide all statistics";
+    exit(0);
+}
 
 # I try to set this option in an eval box first because
 # it could be that this test fails if the linux kernel
 # version is <= 2.4 and if the kernel is not compiled with
 # CONFIG_BLK_STATS=y
-eval { $lxs->set(diskstats => 1) };
+eval { $sys->set(diskstats => 1) };
 
 if ($@) {
     if ($@ =~ /CONFIG_BLK_STATS/) {
@@ -31,9 +36,9 @@ if ($@) {
     }
 } else {
     plan tests => 8;
-    $lxs->set(diskstats => 1);
+    $sys->set(diskstats => 1);
     sleep(1);
-    my $stats = $lxs->get;
+    my $stats = $sys->get;
 
     for my $dev (keys %{$stats->diskstats}) {
         ok(defined $stats->diskstats->{$dev}->{$_}, "checking diskstats $_") for @diskstats;

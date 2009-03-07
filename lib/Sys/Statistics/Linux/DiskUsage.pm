@@ -81,22 +81,25 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::DiskUsage;
+
 use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 our $DF_PATH = undef;
 our $DF_CMD  = undef;
 
 sub new {
     my $class = shift;
+
     my %self = (
         cmd => {
             path => '/bin',
-            df => 'df -kP',
+            df   => 'df -kP',
         }
     );
+
     return bless \%self, $class;
 }
 
@@ -115,6 +118,7 @@ sub get {
 
     while (my $line = <$fh>) {
         next unless $line =~ /^(.+?)\s+(.+)$/ && !$disk_name;
+
         @{$disk_usage{$1}}{qw(
             total
             usage
@@ -122,6 +126,7 @@ sub get {
             usageper
             mountpoint
         )} = (split /\s+/, $2)[0..4];
+
         $disk_usage{$1}{usageper} =~ s/%//;
     }
 

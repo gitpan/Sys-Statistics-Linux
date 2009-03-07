@@ -147,9 +147,9 @@ my %wanted = (
 );
 
 my @options = keys %wanted;
-my $lxs = Sys::Statistics::Linux->new(map { $_ => 1 } keys %wanted);
+my $sys = Sys::Statistics::Linux->new(map { $_ => 1 } keys %wanted);
 sleep 1;
-my $stat = $lxs->get;
+my $stat = $sys->get;
 
 foreach my $opt (keys %wanted) {
     if ($opt =~ /^(?:CpuStats|NetStats|DiskStats|DiskUsage|Processes)\z/) {

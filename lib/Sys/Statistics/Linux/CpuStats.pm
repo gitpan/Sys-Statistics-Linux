@@ -11,6 +11,12 @@ Sys::Statistics::Linux::CpuStats - Collect linux cpu statistics.
     sleep 1;
     my $stats = $lxs->get;
 
+Or
+
+    my $lxs = Sys::Statistics::Linux::CpuStats->new(initfile => $file);
+    $lxs->init;
+    my $stats = $lxs->get;
+
 =head1 DESCRIPTION
 
 Sys::Statistics::Linux::CpuStats gathers cpu statistics from the virtual
@@ -46,6 +52,12 @@ Statistics with kernels >= 2.6.
 Call C<new()> to create a new object.
 
     my $lxs = Sys::Statistics::Linux::CpuStats->new;
+
+Maybe you want to store/load the initial statistics to/from a file:
+
+    my $lxs = Sys::Statistics::Linux::CpuStats->new(initfile => '/tmp/cpustats.yml');
+
+If you set C<initfile> it's not necessary to call sleep before C<get()>.
 
 =head2 init()
 
@@ -84,25 +96,38 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::CpuStats;
-our $VERSION = '0.15';
 
 use strict;
 use warnings;
 use Carp qw(croak);
 
+our $VERSION = '0.16';
+
 sub new {
-    my $class = shift;
+    my ($class, %opts) = @_;
+
     my %self = (
         files => {
             stat => '/proc/stat',
         }
     );
+
+    if (defined $opts{initfile}) {
+        require YAML::Syck;
+        $self{initfile} = $opts{initfile};
+    }
+
     return bless \%self, $class;
 }
 
 sub init {
     my $self = shift;
-    $self->{init} = $self->_load;
+
+    if ($self->{initfile} && -r $self->{initfile}) {
+        $self->{init} = YAML::Syck::LoadFile($self->{initfile});
+    } else {
+        $self->{init} = $self->_load;
+    }
 }
 
 sub get {
@@ -115,6 +140,11 @@ sub get {
 
     $self->{stats} = $self->_load;
     $self->_deltas;
+
+    if ($self->{initfile}) {
+        YAML::Syck::DumpFile($self->{initfile}, $self->{init});
+    }
+
     return $self->{stats};
 }
 

@@ -13,8 +13,10 @@ my $build = Module::Build->new(
     license       => 'perl',
     module_name   => 'Sys::Statistics::Linux',
     dist_author   => 'Jonny Schulz',
-    recommends    => { },
     sign          => 0,
+    recommends    => {
+        'YAML::Syck'  => 0,
+    },
     requires      => {
         'Carp'        => 0,
         'POSIX'       => 0,

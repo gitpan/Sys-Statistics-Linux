@@ -28,9 +28,9 @@ open my $fh, '<', '/proc/sys/kernel/osrelease' or die $!;
 my @rls = split /\./, <$fh>;
 close $fh;
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(memstats => 1);
-my $stats = $lxs->get;
+my $sys = Sys::Statistics::Linux->new();
+$sys->set(memstats => 1);
+my $stats = $sys->get;
 
 if ($rls[0] < 6) {
     plan tests => 15;

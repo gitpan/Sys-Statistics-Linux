@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More;
 use Sys::Statistics::Linux;
 
 my @sockstats = qw(
@@ -10,9 +10,17 @@ my @sockstats = qw(
    raw
 );
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(sockstats => 1);
-my $stats = $lxs->get;
+my $sys = Sys::Statistics::Linux->new();
+
+if (!-r '/proc/diskstats' || !-r '/proc/partitions') {
+    plan skip_all => "your system seems to be a virtual machine that doesn't provide all statistics";
+    exit(0);
+}
+
+plan tests => 5;
+
+$sys->set(sockstats => 1);
+my $stats = $sys->get;
 
 ok(defined $stats->sockstats->{$_}, "checking sockstats $_") for @sockstats;
 

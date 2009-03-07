@@ -11,9 +11,9 @@ my @diskusage = qw(
     mountpoint
 );
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(diskusage => 1);
-my $stats = $lxs->get;
+my $sys = Sys::Statistics::Linux->new();
+$sys->set(diskusage => 1);
+my $stats = $sys->get;
 
 for my $dev (keys %{$stats->diskusage}) {
    ok(defined $stats->diskusage->{$dev}->{$_}, "checking diskusage $_") for @diskusage;

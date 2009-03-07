@@ -24,10 +24,10 @@ my @netstats = qw(
    ttbyt
 );
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(netstats => 1);
+my $sys = Sys::Statistics::Linux->new();
+$sys->set(netstats => 1);
 sleep(1);
-my $stats = $lxs->get;
+my $stats = $sys->get;
 
 for my $dev (keys %{$stats->netstats}) {
    ok(defined $stats->netstats->{$dev}->{$_}, "checking netstats $_") for @netstats;

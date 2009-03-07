@@ -11,8 +11,8 @@ my @cpustats = qw(
    total
 );
 
-my $lxs = Sys::Statistics::Linux->new;
-$lxs->set(cpustats => 1);
+my $sys = Sys::Statistics::Linux->new();
+$sys->set(cpustats => 1);
 sleep(1);
-my $stats = $lxs->get;
+my $stats = $sys->get;
 ok(defined $stats->cpustats->{cpu}->{$_}, "checking cpustats $_") for @cpustats;

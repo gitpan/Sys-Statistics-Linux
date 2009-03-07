@@ -7,6 +7,8 @@ Sys::Statistics::Linux::Processes - Collect linux process statistics.
     use Sys::Statistics::Linux::Processes;
 
     my $lxs = Sys::Statistics::Linux::Processes->new;
+    # or Sys::Statistics::Linux::Processes->new(pids => \@pids)
+
     $lxs->init;
     sleep 1;
     my $stat = $lxs->get;
@@ -52,7 +54,8 @@ Note that if F</etc/passwd> isn't readable, the key owner is set to F<N/a>.
     cpu       -  The CPU number the process was last executed on.
     wchan     -  The "channel" in which the process is waiting.
     fd        -  This is a subhash containing each file which the process has open, named by its file descriptor.
-                 0 is standard input, 1 standard output, 2 standard error, etc.
+                 0 is standard input, 1 standard output, 2 standard error, etc. Because only the owner or root
+                 can read /proc/<pid>/fd this hash could be empty.
     cmd       -  Command of the process.
     cmdline   -  Command line of the process.
 
@@ -84,7 +87,7 @@ Call C<new()> to create a new object.
 
 It's possible to handoff an array reference with a PID list.
 
-    my $lxs = Sys::Statistics::Linux::Processes->new([ 1, 2, 3 ]);
+    my $lxs = Sys::Statistics::Linux::Processes->new(pids => [ 1, 2, 3 ]);
 
 =head2 init()
 
@@ -133,13 +136,13 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
-    my ($class, $pids) = @_;
+    my ($class, %opts) = @_;
 
-   my %self = (
+    my %self = (
         files => {
             basedir   => '/proc',
             p_stat    => 'stat',
@@ -150,18 +153,18 @@ sub new {
         },
     );
 
-    if ($pids) {
-        if (ref($pids) ne 'ARRAY') {
+    if (defined $opts{pids}) {
+        if (ref($opts{pids}) ne 'ARRAY') {
             croak "$class: not a array reference";
         }
 
-        foreach my $pid (@$pids) {
+        foreach my $pid (@{$opts{pids}}) {
             if ($pid !~ /^\d+\z/) {
                 croak "$class: pid '$pid' is not a number";
             }
         }
 
-        $self{pids} = $pids;
+        $self{pids} = $opts{pids};
     }
 
     return bless \%self, $class;
@@ -263,7 +266,6 @@ sub _load {
 
             close($fh);
         } else {
-            delete $stats{$pid};
             next PID;
         }
 
@@ -322,19 +324,14 @@ sub _load {
             next PID;
         }
 
+        $stats{$pid}{fd} = { };
+
         if (opendir my $dh, "$file->{basedir}/$pid/fd") {
-            $stats{$pid}{fd} = { }; # maybe $dh is empty
             foreach my $link (grep !/^\.+\z/, readdir($dh)) {
                 if (my $target = readlink("$file->{basedir}/$pid/fd/$link")) {
                     $stats{$pid}{fd}{$link} = $target;
-                } else {
-                    delete $stats{$pid};
-                    next PID;
                 }
             }
-        } else {
-            delete $stats{$pid};
-            next PID;
         }
     }
 

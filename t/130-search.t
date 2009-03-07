@@ -4,9 +4,9 @@ use Test::More tests => 11;
 use Sys::Statistics::Linux;
 use Data::Dumper;
 
-my $lxs = Sys::Statistics::Linux->new;
+my $sys = Sys::Statistics::Linux->new();
 
-$lxs->set(
+$sys->set(
    cpustats  => 1,
    procstats => 1,
    memstats  => 1,
@@ -16,7 +16,7 @@ $lxs->set(
 
 sleep 1;
 
-my $stat = $lxs->get();
+my $stat = $sys->get();
 my $pid  = (keys %{$stat->{processes}})[0];
 
 # just some simple searches that should match every time

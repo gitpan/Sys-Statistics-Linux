@@ -62,11 +62,12 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::LoadAVG;
-our $VERSION = '0.06';
 
 use strict;
 use warnings;
 use Carp qw(croak);
+
+our $VERSION = '0.07';
 
 sub new {
     my $class = shift;

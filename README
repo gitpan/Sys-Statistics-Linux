@@ -4,7 +4,7 @@ NAME
 SYNOPSIS
         use Sys::Statistics::Linux;
 
-        my %options = (
+        my $lxs = Sys::Statistics::Linux->new(
             sysinfo   => 1,
             cpustats  => 1,
             procstats => 1,
@@ -19,15 +19,8 @@ SYNOPSIS
             processes => 1,
         );
 
-        my $lxs = Sys::Statistics::Linux->new(\%options);
         sleep 1;
         my $stat = $lxs->get;
-
-    Or
-
-        my $sleep = 1;
-        my $lxs   = Sys::Statistics::Linux->new(\%options);
-        my $stat  = $lxs->get($sleep);
 
 DESCRIPTION
     Sys::Statistics::Linux is a front-end module and gather different linux
@@ -104,13 +97,17 @@ OPTIONS
         1 - activate and init statistics
         2 - activate statistics but don't init
 
-    In addition it's possible to pass a process list for option "Processes".
+    In addition it's possible to pass a hash reference with optinos.
 
         my $lxs = Sys::Statistics::Linux->new(
             processes => {
                 init => 1,
                 pids => [ 1, 2, 3 ]
-            }
+            },
+            netstats => {
+                init => 1,
+                initfile => $file,
+            },
         );
 
     To get more informations about the statistics refer the different

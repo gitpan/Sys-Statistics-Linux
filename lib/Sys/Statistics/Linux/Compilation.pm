@@ -204,11 +204,12 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux::Compilation;
-our $VERSION = '0.09';
 
 use strict;
 use warnings;
-use Carp;
+use Carp qw(croak);
+
+our $VERSION = '0.10';
 
 # Creating the statistics accessors
 BEGIN {

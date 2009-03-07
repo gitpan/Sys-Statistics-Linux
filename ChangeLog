@@ -1,3 +1,12 @@
+0.48    Released at 2009-03-07.
+        - Fixed tests 050-pgswstats.t, 070-sockstats.t, 080-diskstats.t.
+          If linux runs as a virtual machine than it's possible that the
+          statistics pgswstats, sockstats and diskstats are not available.
+        - Fixed regex in MemStats.pm - key "dirty" never matched.
+        - Fixed Processes.pm - now all processses will be collected.
+        - Added option initfile to PgSwStats, CpuStats, DiskStats, NetStats
+          and ProcStats - YAML::Syck as serializer.
+
 0.47    Released at 2009-02-10.
         - GRML - forget to upgrade $VERSION in Processes.pm :)
 
