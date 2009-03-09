@@ -89,7 +89,7 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 sub new {
     my ($class, %opts) = @_;
@@ -197,12 +197,13 @@ sub _deltas {
 
     my $new_init = $lstat->{new};
 
-    $lstat->{new} =
-        $lstat->{new} == $istat->{new}
-            ? sprintf('%.2f', 0)
-            : $delta > 0
-                ? sprintf('%.2f', ($new_init - $istat->{new}) / $delta )
-                : sprintf('%.2f', $new_init - $istat->{new});
+    if ($lstat->{new} == $istat->{new} || $istat->{new} > $lstat->{new}) {
+        $lstat->{new} = sprintf('%.2f', 0);
+    } elsif ($delta > 0) {
+        $lstat->{new} = sprintf('%.2f', ($new_init - $istat->{new}) / $delta );
+    } else {
+        $lstat->{new} = sprintf('%.2f', $new_init - $istat->{new});
+    }
 
     $istat->{new} = $new_init;
 }

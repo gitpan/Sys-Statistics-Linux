@@ -364,7 +364,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.48';
+our $VERSION = '0.48_01';
 
 use strict;
 use warnings;

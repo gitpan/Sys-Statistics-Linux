@@ -101,7 +101,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 sub new {
     my ($class, %opts) = @_;
@@ -194,9 +194,11 @@ sub _deltas {
             if (!defined $icpu->{$k}) {
                 croak "$class: not defined key found '$k'";
             }
+
             if ($v !~ /^\d+\z/ || $dcpu->{$k} !~ /^\d+\z/) {
                 croak "$class: invalid value for key '$k'";
             }
+
             $dcpu->{$k} -= $icpu->{$k};
             $icpu->{$k}  = $v;
             $uptime += $dcpu->{$k};
@@ -205,6 +207,8 @@ sub _deltas {
         foreach my $k (keys %{$dcpu}) {
             if ($dcpu->{$k} > 0) {
                 $dcpu->{$k} = sprintf('%.2f', 100 * $dcpu->{$k} / $uptime);
+            } elsif ($dcpu->{$k} < 0) {
+                $dcpu->{$k} = sprintf('%.2f', 0);
             } else {
                 $dcpu->{$k} = sprintf('%.2f', $dcpu->{$k});
             }

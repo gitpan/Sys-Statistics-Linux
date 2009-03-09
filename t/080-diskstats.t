@@ -17,7 +17,7 @@ my @diskstats = qw(
 my $sys = Sys::Statistics::Linux->new();
 
 if (!-r '/proc/diskstats' || !-r '/proc/partitions') {
-    plan skip_all => "your system seems to be a virtual machine that doesn't provide all statistics";
+    plan skip_all => "your system doesn't provide disk statistics - /proc/diskstats and /proc/partitions is not readable";
     exit(0);
 }
 

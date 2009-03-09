@@ -1,7 +1,14 @@
 use strict;
 use warnings;
-use Test::More tests => 35;
+use Test::More;
 use Sys::Statistics::Linux;
+
+if (-r "/proc/$$/stat") {
+    plan tests => 35;
+} else {
+    plan skip_all => "your system doesn't provide process statistics - /proc/<pid> is not readable";
+    exit(0);
+}
 
 my @processes = qw(
     ppid

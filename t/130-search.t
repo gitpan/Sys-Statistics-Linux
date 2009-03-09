@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 11;
+use Test::More tests => 10;
 use Sys::Statistics::Linux;
 use Data::Dumper;
 
@@ -11,13 +11,11 @@ $sys->set(
    procstats => 1,
    memstats  => 1,
    diskusage => 1,
-   processes => 1,
 );
 
 sleep 1;
 
 my $stat = $sys->get();
-my $pid  = (keys %{$stat->{processes}})[0];
 
 # just some simple searches that should match every time
 my $foo = $stat->search({
@@ -25,10 +23,9 @@ my $foo = $stat->search({
    procstats => { count => 'ne:1' },
    memstats  => { memtotal => 'gt:1' },
    diskusage => { usageper => qr/\d+/ },
-   processes => { $pid => { ppid => qr/\d+/ } },
 });
 
-foreach my $key (qw/cpustats procstats memstats diskusage processes/) {
+foreach my $key (qw/cpustats procstats memstats diskusage/) {
     ok(exists $foo->{$key} && ref($foo->{$key}) eq 'HASH', "checking $key");
 }
 

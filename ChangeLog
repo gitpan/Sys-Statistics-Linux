@@ -1,3 +1,9 @@
+0.48_01 Released at 2009-03-07.
+        - Fixed some tests.
+        - Fixed initfile in CpuStats, DiskStats, NetStats, PgSwStats and
+          ProcStats - if the machine was rebootet the deltas couldn't be
+          calculated.
+
 0.48    Released at 2009-03-07.
         - Fixed tests 050-pgswstats.t, 070-sockstats.t, 080-diskstats.t.
           If linux runs as a virtual machine than it's possible that the

@@ -93,7 +93,7 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 sub new {
     my ($class, %opts) = @_;
@@ -299,16 +299,18 @@ sub _deltas {
             if (!defined $idev->{$k}) {
                 croak "$class: not defined key found '$k'";
             }
+
             if ($v !~ /^\d+\z/ || $ldev->{$k} !~ /^\d+\z/) {
                 croak "$class: invalid value for key '$k'";
             }
 
-            $ldev->{$k} =
-                $ldev->{$k} == $idev->{$k}
-                    ? sprintf('%.2f', 0)
-                    : $delta > 0
-                        ? sprintf('%.2f', ($ldev->{$k} - $idev->{$k}) / $delta)
-                        : sprintf('%.2f', $ldev->{$k} - $idev->{$k});
+            if ($ldev->{$k} == $idev->{$k} || $idev->{$k} > $ldev->{$k}) {
+                $ldev->{$k} = sprintf('%.2f', 0);
+            } elsif ($delta > 0) {
+                $ldev->{$k} = sprintf('%.2f', ($ldev->{$k} - $idev->{$k}) / $delta);
+            } else {
+                $ldev->{$k} = sprintf('%.2f', $ldev->{$k} - $idev->{$k});
+            }
 
             $idev->{$k}  = $v;
         }
