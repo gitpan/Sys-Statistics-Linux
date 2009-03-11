@@ -1,3 +1,6 @@
+0.48_02 Released at 2009-03-11.
+        - Fixed some tests and updated the documentation.
+
 0.48_01 Released at 2009-03-07.
         - Fixed some tests.
         - Fixed initfile in CpuStats, DiskStats, NetStats, PgSwStats and

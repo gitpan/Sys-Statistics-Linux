@@ -136,7 +136,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -144,12 +144,13 @@ sub new {
 
     my %self = (
         files => {
-            basedir   => '/proc',
-            p_stat    => 'stat',
-            p_statm   => 'statm',
-            p_status  => 'status',
-            p_cmdline => 'cmdline',
-            p_wchan   => 'wchan',
+            basedir => '/proc',
+            stat    => 'stat',
+            statm   => 'statm',
+            status  => 'status',
+            cmdline => 'cmdline',
+            wchan   => 'wchan',
+            fd      => 'fd',
         },
     );
 
@@ -210,7 +211,7 @@ sub _init {
     }
 
     foreach my $pid (@$pids) {
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_stat}") {
+        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{stat}") {
             @{$stats{$pid}}{qw(
                 minflt cminflt mayflt cmayflt utime
                 stime cutime cstime sttime
@@ -249,7 +250,7 @@ sub _load {
     PID: foreach my $pid (@$pids) {
 
         # memory usage for each process
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_statm}") {
+        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{statm}") {
             #   size       total program size
             #   resident   resident set size
             #   share      shared pages
@@ -270,7 +271,7 @@ sub _load {
         }
 
         # different other informations for each process
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_stat}") {
+        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{stat}") {
             @{$stats{$pid}}{qw(
                 cmd     state   ppid    pgrp    session ttynr   minflt
                 cminflt mayflt  cmayflt utime   stime   cutime  cstime
@@ -288,7 +289,7 @@ sub _load {
         $stats{$pid}{actime} = "$d:".sprintf('%02d:%02d:%02d', $h, $m, $s);
 
         # determine the owner of the process
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_status}") {
+        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{status}") {
             while (my $line = <$fh>) {
                 next unless $line =~ /^Uid:(?:\s+|\t+)(\d+)/;
                 $stats{$pid}{owner} = getpwuid($1) || 'N/a';
@@ -301,7 +302,7 @@ sub _load {
         }
 
         # command line for each process
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_cmdline}") {
+        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{cmdline}") {
             $stats{$pid}{cmdline} = <$fh>;
             if ($stats{$pid}{cmdline}) {
                 $stats{$pid}{cmdline} =~ s/\0/ /g;
@@ -316,7 +317,7 @@ sub _load {
             next PID;
         }
 
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{p_wchan}") {
+        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{wchan}") {
             $stats{$pid}{wchan} = <$fh>;
             chomp($stats{$pid}{wchan});
         } else {
@@ -326,9 +327,9 @@ sub _load {
 
         $stats{$pid}{fd} = { };
 
-        if (opendir my $dh, "$file->{basedir}/$pid/fd") {
+        if (opendir my $dh, "$file->{basedir}/$pid/$file->{fd}") {
             foreach my $link (grep !/^\.+\z/, readdir($dh)) {
-                if (my $target = readlink("$file->{basedir}/$pid/fd/$link")) {
+                if (my $target = readlink("$file->{basedir}/$pid/$file->{fd}/$link")) {
                     $stats{$pid}{fd}{$link} = $target;
                 }
             }

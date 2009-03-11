@@ -53,6 +53,18 @@ on or off block statistics for devices.
 Don't give up if some of the modules doesn't run on your hardware! Tell me what's wrong
 and I will try to solve it! You just have to make the first move and to send me a mail. :-)
 
+=head1 VIRTUAL MACHINES
+
+Note that if you try to install or run C<Sys::Statistics::Linux> under virtual machines
+on guest systems that some statistics are not available, such as C<SockStats>, C<PgSwStats>
+and C<DiskStats>. The reason is that not all /proc data are passed to the guests.
+
+If the installation fails then try to force the installation with
+
+    cpan> force install Sys::Statistics::Linux
+
+and notice which tests fails, because this statistics maybe not available on your system - sorry.
+
 =head1 DELTAS
 
 The statistics for C<CpuStats>, C<ProcStats>, C<PgSwStats>, C<NetStats>, C<DiskStats> and C<Processes>
@@ -93,7 +105,7 @@ The options must be set with one of the following values:
     1 - activate and init statistics
     2 - activate statistics but don't init
 
-In addition it's possible to pass a hash reference with optinos.
+In addition it's possible to pass a hash reference with options.
 
     my $lxs = Sys::Statistics::Linux->new(
         processes => {
@@ -105,6 +117,63 @@ In addition it's possible to pass a hash reference with optinos.
             initfile => $file,
         },
     );
+
+Option C<initfile> is useful if you want to store initial statistics on the filesystem.
+
+    my $lxs = Sys::Statistics::Linux->new(
+        cpustats => {
+            init     => 1,
+            initfile => '/tmp/cpustats.yml',
+        },
+        diskstats => {
+            init     => 1,
+            initfile => '/tmp/diskstats.yml',
+        },
+        netstats => {
+            init     => 1,
+            initfile => '/tmp/netstats.yml',
+        },
+        pgswttats => {
+            init     => 1,
+            initfile => '/tmp/pgswstats.yml',
+        },
+        procstats => {
+            init     => 1,
+            initfile => '/tmp/procstats.yml',
+        },
+    );
+
+Example:
+
+    #!/usr/bin/perl
+    use strict;
+    use warnings;
+    use Sys::Statistics::Linux;
+
+    my $lxs = Sys::Statistics::Linux->new(
+        pgswstats => {
+            init => 1,
+            initfile => '/tmp/pgswstats.yml'
+        }
+    );
+
+    $lxs->get(); # without to sleep
+
+The initial statistics are stored to the temporary file:
+
+    #> cat /tmp/pgswstats.yml
+    --- 
+    pgfault: 397040955
+    pgmajfault: 4611
+    pgpgin: 21531693
+    pgpgout: 49511043
+    pswpin: 8
+    pswpout: 272
+    time: 1236783534.9328
+
+Every time you call the script the initial statistics are loaded/stored from/to the file.
+This could be helpful if you doesn't run it as daemon and if you want to calculate the
+average load of your system since the last call. Do you understand? I hope so :)
 
 To get more informations about the statistics refer the different modules of the distribution.
 
@@ -364,7 +433,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.48_01';
+our $VERSION = '0.48_02';
 
 use strict;
 use warnings;

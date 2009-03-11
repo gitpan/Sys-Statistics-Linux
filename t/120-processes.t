@@ -3,11 +3,11 @@ use warnings;
 use Test::More;
 use Sys::Statistics::Linux;
 
-if (-r "/proc/$$/stat") {
-    plan tests => 35;
-} else {
-    plan skip_all => "your system doesn't provide process statistics - /proc/<pid> is not readable";
-    exit(0);
+for my $f ("/proc/$$/stat","/proc/$$/statm","/proc/$$/status","/proc/$$/cmdline","/proc/$$/wchan") {
+    if (!-r $f) {
+        plan skip_all => "$f is not readable";
+        exit(0);
+    }
 }
 
 my @processes = qw(
@@ -52,6 +52,13 @@ my $sys = Sys::Statistics::Linux->new();
 $sys->set(processes => 1);
 sleep(1);
 my $stats = $sys->get;
+
+if (!scalar keys %{$stats->processes}) {
+    plan skip_all => "processlist is empty";
+    exit(0);
+}
+
+plan tests => 35;
 
 for my $pid (keys %{$stats->processes}) {
    ok(defined $stats->processes->{$pid}->{$_}, "checking processes $_") for @processes;
