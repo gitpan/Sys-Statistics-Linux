@@ -12,7 +12,7 @@ my @pgswstats = qw(
 
 my $sys = Sys::Statistics::Linux->new();
 
-if (!-r '/proc/diskstats' || !-r '/proc/partitions') {
+if (!-r '/proc/diskstats' || !-r '/proc/partitions' || !-r '/proc/stat' || !-r '/proc/vmstat') {
     plan skip_all => "it seems that your system doesn't provide paging/swapping statistics";
     exit(0);
 }

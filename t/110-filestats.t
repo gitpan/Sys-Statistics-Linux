@@ -1,7 +1,14 @@
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More;
 use Sys::Statistics::Linux;
+
+if (!-r '/proc/sys/fs/file-nr' || !-r '/proc/sys/fs/inode-nr' || !-r '/proc/sys/fs/dentry-state') {
+    plan skip_all => "it seems that your system doesn't provide file statistics";
+    exit(0);
+}
+
+plan tests => 10;
 
 my @filestats = qw(
    fhalloc

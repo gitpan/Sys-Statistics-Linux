@@ -12,7 +12,7 @@ my @sockstats = qw(
 
 my $sys = Sys::Statistics::Linux->new();
 
-if (!-r '/proc/diskstats' || !-r '/proc/partitions') {
+if (!-r '/proc/diskstats' || !-r '/proc/partitions' || !-r '/proc/net/sockstat') {
     plan skip_all => "it seems that your system doesn't provide socket statistics";
     exit(0);
 }

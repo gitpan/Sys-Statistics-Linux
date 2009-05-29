@@ -3,6 +3,11 @@ use warnings;
 use Test::More;
 use Sys::Statistics::Linux;
 
+if (!-r '/proc/meminfo') {
+    plan skip_all => "it seems that your system doesn't provide memory statistics";
+    exit(0);
+}
+
 my @memstats = qw(
     memused
     memfree

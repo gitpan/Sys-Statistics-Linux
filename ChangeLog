@@ -1,3 +1,10 @@
+0.51_01 Released at 2009-05-29.
+        - Fixed tests 060-netstats.t and 070-sockstats.t.
+        - Updated the most of the other test files.
+        - Fixed a bug in Processes.pm - actime wasn't calculated correct.
+        - Added $RAWTIME to SysInfo.pm to get the raw time with jiffies
+          for uptime and idletime.
+
 0.50    Released at 2009-05-17.
         - ProcStats: renamed stat "procs_blocked" to "blocked" and added
           stat "running".

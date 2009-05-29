@@ -1,7 +1,14 @@
 use strict;
 use warnings;
-use Test::More tests => 36;
+use Test::More;
 use Sys::Statistics::Linux;
+
+if (!-r '/proc/net/dev') {
+    plan skip_all => "it seems that your system doesn't provide net statistics";
+    exit(0);
+}
+
+plan tests => 36;
 
 my @netstats = qw(
    rxbyt

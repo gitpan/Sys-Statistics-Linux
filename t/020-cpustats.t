@@ -1,7 +1,14 @@
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More;
 use Sys::Statistics::Linux;
+
+if (!-r '/proc/stat') {
+    plan skip_all => "it seems that your system doesn't provide cpu statistics";
+    exit(0);
+}
+
+plan tests => 5;
 
 my @cpustats = qw(
    user

@@ -40,4 +40,3 @@ t/120-processes.t
 t/130-search.t
 t/140-psfind.t
 t/150-pstop.t
-t/200-backward_compatibility

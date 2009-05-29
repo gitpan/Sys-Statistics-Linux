@@ -31,6 +31,12 @@ and F</proc/cpuinfo>, F</proc/meminfo>, F</proc/uptime>.
     uptime     -  The uptime of the system.
     idletime   -  The idle time of the system.
 
+You can set
+
+    $Sys::Statistics::Linux::SysInfo::RAWTIME = 1;
+
+to get C<uptime> and C<idletime> as raw value.
+
 =head1 METHODS
 
 =head2 new()
@@ -75,7 +81,8 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
+our $RAWTIME = 0;
 
 sub new {
     my $class = shift;
@@ -148,13 +155,14 @@ sub get {
 
     {   # up- and idletime
         open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
-        foreach my $x (split /\s+/, <$fh>) {
-            my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $x));
-            unless (defined $stats->{uptime}) {
-                $stats->{uptime} = "${d}d ${h}h ${m}m ${s}s";
-                next;
+        ($stats->{uptime}, $stats->{idletime}) = split /\s+/, <$fh>;
+        close $fh;
+
+        if (!$RAWTIME) {
+            foreach my $x (qw/uptime idletime/) {
+                my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $stats->{$x}));
+                $stats->{$x} = "${d}d ${h}h ${m}m ${s}s";
             }
-            $stats->{idletime} = "${d}d ${h}h ${m}m ${s}s";
         }
         close($fh);
    }

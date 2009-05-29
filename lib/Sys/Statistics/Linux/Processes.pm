@@ -136,7 +136,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -144,6 +144,7 @@ sub new {
 
     my %self = (
         files => {
+            uptime  => '/proc/uptime',
             basedir => '/proc',
             stat    => 'stat',
             statm   => 'statm',
@@ -227,9 +228,10 @@ sub _init {
 }
 
 sub _load {
-    my $self  = shift;
-    my $class = ref $self;
-    my $file  = $self->{files};
+    my $self   = shift;
+    my $class  = ref $self;
+    my $file   = $self->{files};
+    my $uptime = $self->_uptime();
     my ($pids, %stats, %userids);
 
     $stats{time} = Time::HiRes::gettimeofday();
@@ -285,7 +287,7 @@ sub _load {
         }
 
         # calculate the active time of each process
-        my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $stats{time} - $stats{$pid}{sttime} / 100));
+        my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $uptime - $stats{$pid}{sttime} / 100));
         $stats{$pid}{actime} = "$d:".sprintf('%02d:%02d:%02d', $h, $m, $s);
 
         # determine the owner of the process
@@ -393,6 +395,16 @@ sub _deltas {
             }
         }
     }
+}
+
+sub _uptime {
+    my $self  = shift;
+    my $class = ref $self;
+    my $file  = $self->{files};
+    open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
+    my ($up, $idle) = split /\s+/, <$fh>;
+    close($fh);
+    return $up;
 }
 
 sub _calsec {

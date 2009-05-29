@@ -1,7 +1,27 @@
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More;
 use Sys::Statistics::Linux;
+
+my @pf = qw(
+    /proc/sys/kernel/hostname
+    /proc/sys/kernel/domainname
+    /proc/sys/kernel/ostype
+    /proc/sys/kernel/osrelease
+    /proc/sys/kernel/version
+    /proc/cpuinfo
+    /proc/meminfo
+    /proc/uptime
+);
+
+foreach my $f (@pf) {
+    if (!-r $f) {
+        plan skip_all => "$f is not readable";
+        exit(0);
+    }
+}
+
+plan tests => 10;
 
 my @sysinfo = qw(
    hostname

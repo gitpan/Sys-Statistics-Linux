@@ -1,7 +1,14 @@
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More;
 use Sys::Statistics::Linux;
+
+if (!-r '/proc/stat' || !-r '/proc/loadavg') {
+    plan skip_all => "it seems that your system doesn't provide process statistics";
+    exit(0);
+}
+
+plan tests => 3;
 
 my @procstats = qw(
    new

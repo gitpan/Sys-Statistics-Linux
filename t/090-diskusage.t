@@ -1,7 +1,14 @@
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More;
 use Sys::Statistics::Linux;
+
+if (!-x '/bin/df') {
+    plan skip_all => "it seems that your system doesn't provide /bin/df";
+    exit(0);
+}
+
+plan tests => 5;
 
 my @diskusage = qw(
     total
