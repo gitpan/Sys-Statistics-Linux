@@ -1,3 +1,6 @@
+0.52    Released at 2009-06-05.
+        - No changes, just a full release.
+
 0.51_01 Released at 2009-05-29.
         - Fixed tests 060-netstats.t and 070-sockstats.t.
         - Updated the most of the other test files.
