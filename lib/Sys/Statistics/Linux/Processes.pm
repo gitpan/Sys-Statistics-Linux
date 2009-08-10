@@ -136,7 +136,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -321,7 +321,12 @@ sub _load {
 
         if (open my $fh, '<', "$file->{basedir}/$pid/$file->{wchan}") {
             $stats{$pid}{wchan} = <$fh>;
-            chomp($stats{$pid}{wchan});
+
+            if (defined $stats{$pid}{wchan}) {
+                chomp($stats{$pid}{wchan});
+            } else {
+                $stats{$pid}{wchan} = defined;
+            }
         } else {
             delete $stats{$pid};
             next PID;

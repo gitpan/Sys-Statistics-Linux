@@ -1,3 +1,6 @@
+0.53_01 Released at 2009-08-10.
+        - Fixed wchan in Processes.pm - RT #48458
+
 0.52    Released at 2009-06-05.
         - No changes, just a full release.
 
