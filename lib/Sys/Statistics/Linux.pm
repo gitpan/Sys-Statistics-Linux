@@ -133,7 +133,7 @@ Option C<initfile> is useful if you want to store initial statistics on the file
             init     => 1,
             initfile => '/tmp/netstats.yml',
         },
-        pgswttats => {
+        pgswstats => {
             init     => 1,
             initfile => '/tmp/pgswstats.yml',
         },
@@ -433,7 +433,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.54';
+our $VERSION = '0.55_01';
 
 use strict;
 use warnings;

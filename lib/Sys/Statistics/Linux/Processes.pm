@@ -101,6 +101,12 @@ Call C<get()> to get the statistics. C<get()> returns the statistics as a hash r
 
     my $stat = $lxs->get;
 
+Note:
+
+Processes that were created between the call of init() and get() are returned as well,
+but the keys minflt, cminflt, mayflt, cmayflt, utime, stime, cutime, and cstime are set
+to the value 0.00 because there are no inititial values to calculate the deltas.
+
 =head1 EXPORTS
 
 No exports.
@@ -136,7 +142,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -394,9 +400,11 @@ sub _deltas {
             $lpid->{ttime} = sprintf('%.2f', $lpid->{stime} + $lpid->{utime});
         } else {
             # if the start time is not equal then it seems to be a new process
-            for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime sttime)) {
+            #for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime sttime)) {
+            for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime)) {
                 $istat->{$pid}->{$k} = $lpid->{$k};
-                delete $lstat->{$pid};
+                $lpid->{$k} = '0.00';
+                #delete $lstat->{$pid};
             }
         }
     }

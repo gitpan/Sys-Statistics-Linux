@@ -139,7 +139,7 @@ OPTIONS
                 init     => 1,
                 initfile => '/tmp/netstats.yml',
             },
-            pgswttats => {
+            pgswstats => {
                 init     => 1,
                 initfile => '/tmp/pgswstats.yml',
             },

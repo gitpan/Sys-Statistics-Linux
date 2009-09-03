@@ -1,3 +1,9 @@
+0.55_01 Released at 2009-09-03.
+        - Processes.pm: processes that are created between the call of
+          init() and get() are now returned. The keys minflt, cminflt,
+          mayflt, cmayflt, utime, stime, cutime, and cstime are set
+          to 0.00 - see RT #49363
+
 0.54    Released at 2009-08-17.
         - No changes, just a full release.
 
