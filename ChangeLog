@@ -1,3 +1,7 @@
+0.55_02 Released at 2009-09-28.
+        - Processes.pm: calculate the keys minflt, cminflt, mayflt, cmayflt,
+            utime, stime, cutime, and cstime with sttime and uptime.
+
 0.55_01 Released at 2009-09-03.
         - Processes.pm: processes that are created between the call of
           init() and get() are now returned. The keys minflt, cminflt,

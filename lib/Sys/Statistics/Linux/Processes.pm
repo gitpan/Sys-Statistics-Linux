@@ -142,7 +142,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -353,10 +353,11 @@ sub _load {
 }
 
 sub _deltas {
-    my $self  = shift;
-    my $class = ref $self;
-    my $istat = $self->{init};
-    my $lstat = $self->{stats};
+    my $self   = shift;
+    my $class  = ref $self;
+    my $istat  = $self->{init};
+    my $lstat  = $self->{stats};
+    my $uptime = $self->_uptime;
 
     if (!defined $istat->{time} || !defined $lstat->{time}) {
         croak "$class: not defined key found 'time'";
@@ -386,26 +387,30 @@ sub _deltas {
                     croak "$class: invalid value for key '$k'";
                 }
 
-                # $tmp is used for the next init stat
-                my $tmp      = $lpid->{$k};
                 $lpid->{$k} -= $ipid->{$k};
+                $ipid->{$k} += $lpid->{$k};
+
                 if ($lpid->{$k} > 0 && $time > 0) {
                     $lpid->{$k} = sprintf('%.2f', $lpid->{$k} / $time);
                 } else {
                     $lpid->{$k} = sprintf('%.2f', $lpid->{$k});
                 }
-                $ipid->{$k} = $tmp;
             }
-            # total workload
             $lpid->{ttime} = sprintf('%.2f', $lpid->{stime} + $lpid->{utime});
         } else {
-            # if the start time is not equal then it seems to be a new process
-            #for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime sttime)) {
+            # calculation the statistics since process creation
             for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime)) {
+                my $p_uptime = $uptime - $lpid->{sttime} / 100;
                 $istat->{$pid}->{$k} = $lpid->{$k};
-                $lpid->{$k} = '0.00';
-                #delete $lstat->{$pid};
+
+                if ($p_uptime > 0) {
+                    $lpid->{$k} = sprintf('%.2f', $lpid->{$k} / $p_uptime);
+                } else {
+                    $lpid->{$k} = sprintf('%.2f', $lpid->{$k});
+                }
             }
+            $lpid->{ttime} = sprintf('%.2f', $lpid->{stime} + $lpid->{utime});
+            $istat->{$pid}->{sttime} = $lpid->{sttime};
         }
     }
 }
