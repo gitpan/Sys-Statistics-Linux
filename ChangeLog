@@ -1,3 +1,6 @@
+0.56    Released at 2009-10-07.
+        - Just a full release.
+
 0.55_02 Released at 2009-09-28.
         - Processes.pm: calculate the keys minflt, cminflt, mayflt, cmayflt,
             utime, stime, cutime, and cstime with sttime and uptime.
