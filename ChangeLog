@@ -1,3 +1,9 @@
+0.57_01 Released at 2010-08-05.
+        - Added method raw() to CpuStats, DiskStats, NetStats, PgSwStats,
+          and ProcStats.
+        - Added niccount, pcpucount and tcpucount to SysInfo.
+        - Fixed issues from RT #60100 and #60098.
+
 0.56    Released at 2009-10-07.
         - Just a full release.
 

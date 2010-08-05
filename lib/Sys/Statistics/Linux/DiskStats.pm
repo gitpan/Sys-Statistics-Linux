@@ -21,7 +21,7 @@ Or
 
 Sys::Statistics::Linux::DiskStats gathers disk statistics from the virtual F</proc> filesystem (procfs).
 
-For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
+For more information read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 DISK STATISTICS
 
@@ -62,6 +62,10 @@ Call C<get()> to get the statistics. C<get()> returns the statistics as a hash r
 
     my $stat = $lxs->get;
 
+=head2 raw()
+
+Get raw values.
+
 =head1 EXPORTS
 
 No exports.
@@ -93,7 +97,7 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 sub new {
     my ($class, %opts) = @_;
@@ -148,6 +152,13 @@ sub get {
     }
 
     return $self->{stats};
+}
+
+sub raw {
+    my $self = shift;
+    my $raw  = $self->_load;
+
+    return $raw;
 }
 
 #

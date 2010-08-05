@@ -13,7 +13,7 @@ Sys::Statistics::Linux::DiskUsage - Collect linux disk usage.
 
 Sys::Statistics::Linux::DiskUsage gathers the disk usage with the command C<df>.
 
-For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
+For more information read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 DISK USAGE INFORMATIONS
 
@@ -86,7 +86,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 our $DF_PATH = undef;
 our $DF_CMD  = undef;
 
@@ -96,7 +96,7 @@ sub new {
     my %self = (
         cmd => {
             path => '/bin',
-            df   => 'df -kP',
+            df   => 'df -kP 2>/dev/null',
         }
     );
 
@@ -108,7 +108,7 @@ sub get {
     my $class  = ref $self;
     my $cmd    = $self->{cmd};
     my $df_cmd = $DF_CMD || $cmd->{df};
-    my (%disk_usage, $disk_name);
+    my (%disk_usage);
 
     local $ENV{PATH} = $DF_PATH || $cmd->{path};
     open my $fh, "$df_cmd|" or croak "$class: unable to execute '$df_cmd' ($!)";
@@ -117,7 +117,7 @@ sub get {
     {my $null = <$fh>;}
 
     while (my $line = <$fh>) {
-        next unless $line =~ /^(.+?)\s+(.+)$/ && !$disk_name;
+        next unless $line =~ /^(.+?)\s+(.+)$/;
 
         @{$disk_usage{$1}}{qw(
             total

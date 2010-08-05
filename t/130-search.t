@@ -25,8 +25,14 @@ my $foo = $stat->search({
    diskusage => { usageper => qr/\d+/ },
 });
 
-foreach my $key (qw/cpustats procstats memstats diskusage/) {
-    ok(exists $foo->{$key} && ref($foo->{$key}) eq 'HASH', "checking $key");
+foreach my $key (qw/cpustats procstats memstats/) {
+   ok(exists $foo->{$key} && ref($foo->{$key}) eq 'HASH', "checking $key");
+}
+SKIP: {
+   if (! %{ $stat->diskusage }) {
+      skip "df returned nothing.  Might be in a chroot.", 1;
+   }
+   ok(exists $foo->{diskusage} && ref($foo->{diskusage}) eq 'HASH', "checking diskusage");
 }
 
 my %filter = (

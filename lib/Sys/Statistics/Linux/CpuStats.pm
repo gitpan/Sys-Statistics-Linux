@@ -22,7 +22,7 @@ Or
 Sys::Statistics::Linux::CpuStats gathers cpu statistics from the virtual
 F</proc> filesystem (procfs).
 
-For more informations read the documentation of the front-end module
+For more information read the documentation of the front-end module
 L<Sys::Statistics::Linux>.
 
 =head1 CPU STATISTICS
@@ -71,6 +71,10 @@ Call C<get()> to get the statistics. C<get()> returns the statistics as a hash r
 
     my $stats = $lxs->get;
 
+=head2 raw()
+
+Get raw values.
+
 =head1 EXPORTS
 
 No exports.
@@ -101,7 +105,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 sub new {
     my ($class, %opts) = @_;
@@ -118,6 +122,12 @@ sub new {
     }
 
     return bless \%self, $class;
+}
+
+sub raw {
+    my $self = shift;
+    my $stat = $self->_load;
+    return $stat;
 }
 
 sub init {

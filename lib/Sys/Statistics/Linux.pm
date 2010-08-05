@@ -26,9 +26,9 @@ Sys::Statistics::Linux - Front-end module to collect system statistics
 
 =head1 DESCRIPTION
 
-Sys::Statistics::Linux is a front-end module and gather different linux system informations
+Sys::Statistics::Linux is a front-end module and gather different linux system information
 like processor workload, memory usage, network and disk statistics and a lot more. Refer the
-documentation of the distribution modules to get more informations about all possible statistics.
+documentation of the distribution modules to get more information about all possible statistics.
 
 =head1 MOTIVATION
 
@@ -63,7 +63,7 @@ If the installation fails then try to force the installation with
 
     cpan> force install Sys::Statistics::Linux
 
-and notice which tests fails, because this statistics maybe not available on your system - sorry.
+and notice which tests fails, because this statistics maybe not available on the virtual machine - sorry.
 
 =head1 DELTAS
 
@@ -73,12 +73,12 @@ prepared by C<get()>. These statistics can be initialized with the methods C<new
 C<init()>. For any option that is set to 1, the statistics will be initialized by the call of
 C<new()> or C<set()>. The call of init() re-initialize all statistics that are set to 1 or 2.
 By the call of C<get()> the initial statistics will be updated automatically. Please refer the
-section L</METHODS> to get more informations about the usage of C<new()>, C<set()>, C<init()>
+section L</METHODS> to get more information about the usage of C<new()>, C<set()>, C<init()>
 and C<get()>.
 
 Another exigence is to sleep for a while - at least for one second - before the call of C<get()>
 if you want to get useful statistics. The statistics for C<SysInfo>, C<MemStats>, C<SockStats>,
-C<DiskUsage>, C<LoadAVG> and C<FileStats> are no deltas. If you need only one of these informations
+C<DiskUsage>, C<LoadAVG> and C<FileStats> are no deltas. If you need only one of these information
 you don't need to sleep before the call of C<get()>.
 
 The method C<get()> prepares all requested statistics and returns the statistics as a
@@ -175,9 +175,9 @@ Every time you call the script the initial statistics are loaded/stored from/to 
 This could be helpful if you doesn't run it as daemon and if you want to calculate the
 average load of your system since the last call. Do you understand? I hope so :)
 
-To get more informations about the statistics refer the different modules of the distribution.
+To get more information about the statistics refer the different modules of the distribution.
 
-    sysinfo     -  Collect system informations             with Sys::Statistics::Linux::SysInfo.
+    sysinfo     -  Collect system information              with Sys::Statistics::Linux::SysInfo.
     cpustats    -  Collect cpu statistics                  with Sys::Statistics::Linux::CpuStats.
     procstats   -  Collect process statistics              with Sys::Statistics::Linux::ProcStats.
     memstats    -  Collect memory statistics               with Sys::Statistics::Linux::MemStats.
@@ -261,7 +261,7 @@ Now the statistcs are available with
 
     $stat->{cpustats}
 
-Take a look to the documentation of L<Sys::Statistics::Linux::Compilation> for more informations.
+Take a look to the documentation of L<Sys::Statistics::Linux::Compilation> for more information.
 
 =head2 init()
 
@@ -312,7 +312,7 @@ Call C<settime()> to define a POSIX formatted time stamp, generated with localti
 
     $lxs->settime('%Y/%m/%d %H:%M:%S');
 
-To get more informations about the formats take a look at C<strftime()> of POSIX.pm
+To get more information about the formats take a look at C<strftime()> of POSIX.pm
 or the manpage C<strftime(3)>.
 
 =head2 gettime()
@@ -433,7 +433,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.56';
+our $VERSION = '0.57_01';
 
 use strict;
 use warnings;

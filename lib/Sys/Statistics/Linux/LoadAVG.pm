@@ -13,7 +13,7 @@ Sys::Statistics::Linux::LoadAVG - Collect linux load average statistics.
 
 Sys::Statistics::Linux::LoadAVG gathers the load average from the virtual F</proc> filesystem (procfs).
 
-For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
+For more information read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 LOAD AVERAGE STATISTICS
 

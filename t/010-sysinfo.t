@@ -21,19 +21,22 @@ foreach my $f (@pf) {
     }
 }
 
-plan tests => 10;
+plan tests => 13;
 
 my @sysinfo = qw(
-   hostname
-   domain
-   kernel
-   release
-   version
-   memtotal
-   swaptotal
-   countcpus
-   uptime
-   idletime
+    hostname
+    domain
+    kernel
+    release
+    version
+    memtotal
+    swaptotal
+    countcpus
+    pcpucount
+    tcpucount
+    niccount
+    uptime
+    idletime
 );
 
 my $sys = Sys::Statistics::Linux->new();

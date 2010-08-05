@@ -13,7 +13,7 @@ Sys::Statistics::Linux::SockStats - Collect linux socket statistics.
 
 Sys::Statistics::Linux::SockStats gathers socket statistics from the virtual F</proc> filesystem (procfs).
 
-For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
+For more information read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 SOCKET STATISTICS
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-Sys::Statistics::Linux::SysInfo - Collect linux system informations.
+Sys::Statistics::Linux::SysInfo - Collect linux system information.
 
 =head1 SYNOPSIS
 
@@ -11,9 +11,9 @@ Sys::Statistics::Linux::SysInfo - Collect linux system informations.
 
 =head1 DESCRIPTION
 
-Sys::Statistics::Linux::SysInfo gathers system informations from the virtual F</proc> filesystem (procfs).
+Sys::Statistics::Linux::SysInfo gathers system information from the virtual F</proc> filesystem (procfs).
 
-For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
+For more information read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 SYSTEM INFOMATIONS
 
@@ -27,9 +27,19 @@ and F</proc/cpuinfo>, F</proc/meminfo>, F</proc/uptime>.
     version    -  The kernel version.
     memtotal   -  The total size of memory.
     swaptotal  -  The total size of swap space.
-    countcpus  -  The total (maybe logical) number of CPUs.
     uptime     -  The uptime of the system.
     idletime   -  The idle time of the system.
+    pcpucount  -  The total number of physical CPUs.
+    tcpucount  -  The total number of CPUs (cores, hyper threading).
+    niccount   -  The total number of NICs.
+
+    # countcpus is the same like tcpucount
+    countcpus  -  The total (maybe logical) number of CPUs.
+
+C<pcpucount> and C<tcpucount> are really easy to understand. Both values
+are collected from C</proc/cpuinfo>. C<pcpucount> is the number of physical
+CPUs, counted by C<physical id>. C<tcpucount> is just the total number 
+counted by C<processor>.
 
 You can set
 
@@ -81,34 +91,53 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 our $RAWTIME = 0;
 
 sub new {
     my $class = shift;
-    my %self = (
-        files => {
-            meminfo    => '/proc/meminfo',
-            sysinfo    => '/proc/sysinfo',
-            cpuinfo    => '/proc/cpuinfo',
-            uptime     => '/proc/uptime',
-            hostname   => '/proc/sys/kernel/hostname',
-            domain     => '/proc/sys/kernel/domainname',
-            kernel     => '/proc/sys/kernel/ostype',
-            release    => '/proc/sys/kernel/osrelease',
-            version    => '/proc/sys/kernel/version',
-            #sem        => '/proc/sys/kernel/sem',
-            #shmall     => '/proc/sys/kernel/shmall',
-            #shmmax     => '/proc/sys/kernel/shmmax',
-            #shmmni     => '/proc/sys/kernel/shmmni',
-        }
+
+    my %files = (
+        meminfo    => '/proc/meminfo',
+        sysinfo    => '/proc/sysinfo',
+        cpuinfo    => '/proc/cpuinfo',
+        uptime     => '/proc/uptime',
+        hostname   => '/proc/sys/kernel/hostname',
+        domain     => '/proc/sys/kernel/domainname',
+        kernel     => '/proc/sys/kernel/ostype',
+        release    => '/proc/sys/kernel/osrelease',
+        version    => '/proc/sys/kernel/version',
     );
-    return bless \%self, $class;
+
+    return bless { files => \%files }, $class;
 }
 
 sub get {
-    my $self = shift;
+    my $self  = shift;
     my $class = ref $self;
+    my $file  = $self->{files};
+    my $stats = { };
+
+    $self->{stats} = $stats;
+
+    $self->_get_beer;
+    $self->_get_meminfo;
+    $self->_get_cpuinfo;
+    $self->_get_uptime;
+    $self->_get_niccount;
+
+    foreach my $key (keys %$stats) {
+        chomp $stats->{$key};
+        $stats->{$key} =~ s/\t+/ /g;
+        $stats->{$key} =~ s/\s+/ /g;
+    }
+
+   return $stats;
+}
+
+sub _get_beer {
+    my $self  = shift;
+    my $class = ref($self);
     my $file  = $self->{files};
     my $stats = $self->{stats};
 
@@ -118,62 +147,86 @@ sub get {
         $stats->{$x} = <$fh>;
         close($fh);
     }
+}
 
-    #{  # read sem info
-    #   open my $fh, '<', $file->{sem} or croak "$class: unable to open $file->{sem} ($!)";
-    #   @{$stats}{qw/semmsl semmns semopm semmni/} = split /\s+/, <$fh>;
-    #   close $fh;
-    #}
+sub _get_meminfo {
+    my $self  = shift;
+    my $class = ref($self);
+    my $file  = $self->{files};
+    my $stats = $self->{stats};
 
+    open my $fh, '<', $file->{meminfo} or croak "$class: unable to open $file->{meminfo} ($!)";
 
-    {   # memory and swap info
-        open my $fh, '<', $file->{meminfo} or croak "$class: unable to open $file->{meminfo} ($!)";
-        while (my $line = <$fh>) {
-            if ($line =~ /^MemTotal:\s+(\d+ \w+)/) {
-                $stats->{memtotal} = $1;
-            } elsif ($line =~ /^SwapTotal:\s+(\d+ \w+)/) {
-                $stats->{swaptotal} = $1;
-            }
+    while (my $line = <$fh>) {
+        if ($line =~ /^MemTotal:\s+(\d+ \w+)/) {
+            $stats->{memtotal} = $1;
+        } elsif ($line =~ /^SwapTotal:\s+(\d+ \w+)/) {
+            $stats->{swaptotal} = $1;
         }
-        close($fh);
     }
 
-   {    # cpu info
-        $stats->{countcpus} = 0;
-        open my $fh, '<', $file->{cpuinfo} or croak "$class: unable to open $file->{cpuinfo} ($!)";
-        while (my $line = <$fh>) {
-            if ($line =~ /^processor\s*:\s*\d+/) {            # x86
-                $stats->{countcpus}++;
-            } elsif ($line =~ /^# processors\s*:\s*(\d+)/) {  # s390
-                $stats->{countcpus} = $1;
-                last;
-            }
+    close($fh);
+}
+
+sub _get_cpuinfo {
+    my $self  = shift;
+    my $class = ref($self);
+    my $file  = $self->{files};
+    my $stats = $self->{stats};
+    my (%pcpu, %ccpu);
+
+    $stats->{countcpus} = 0;
+
+    open my $fh, '<', $file->{cpuinfo} or croak "$class: unable to open $file->{cpuinfo} ($!)";
+
+    while (my $line = <$fh>) {
+        if ($line =~ /^physical\+id\s*:\s*(\d+)/) {
+            $pcpu{$1}++;
+        } elsif ($line =~ /^processor\s*:\s*\d+/) {       # x86
+            $stats->{countcpus}++;
+        } elsif ($line =~ /^# processors\s*:\s*(\d+)/) {  # s390
+            $stats->{countcpus} = $1;
+            last;
         }
-        close($fh);
-        $stats->{countcpus} ||= 1; # if it was not possible to match
-   }
-
-    {   # up- and idletime
-        open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
-        ($stats->{uptime}, $stats->{idletime}) = split /\s+/, <$fh>;
-        close $fh;
-
-        if (!$RAWTIME) {
-            foreach my $x (qw/uptime idletime/) {
-                my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $stats->{$x}));
-                $stats->{$x} = "${d}d ${h}h ${m}m ${s}s";
-            }
-        }
-        close($fh);
-   }
-
-    foreach my $key (keys %{$stats}) {
-        chomp $stats->{$key};
-        $stats->{$key} =~ s/\t+/ /g;
-        $stats->{$key} =~ s/\s+/ /g;
     }
 
-   return $stats;
+    close($fh);
+
+    $stats->{countcpus} ||= 1; # if it was not possible to match
+    $stats->{pcpucount} = scalar keys %pcpu || $stats->{countcpus};
+    $stats->{vcpucount} = scalar keys %ccpu || 0;
+    $stats->{tcpucount} = $stats->{countcpus};
+}
+
+sub _get_niccount {
+    my $self  = shift;
+    my $class = ref($self);
+    my $file  = $self->{files};
+    my $stats = $self->{stats};
+
+    open my $fh, '<', $file->{netinfo} or croak "$class: unable to open $file->{netinfo} ($!)";
+    my @lines = <$fh>;
+    close $fh;
+
+    $stats->{niccount} = scalar @lines - 1;
+}
+
+sub _get_uptime {
+    my $self  = shift;
+    my $class = ref($self);
+    my $file  = $self->{files};
+    my $stats = $self->{stats};
+
+    open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
+    ($stats->{uptime}, $stats->{idletime}) = split /\s+/, <$fh>;
+    close $fh;
+
+    if (!$RAWTIME) {
+        foreach my $x (qw/uptime idletime/) {
+            my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $stats->{$x}));
+            $stats->{$x} = "${d}d ${h}h ${m}m ${s}s";
+        }
+    }
 }
 
 sub _calsec {

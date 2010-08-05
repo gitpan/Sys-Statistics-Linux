@@ -21,7 +21,7 @@ Or
 
 Sys::Statistics::Linux::NetStats gathers net statistics from the virtual F</proc> filesystem (procfs).
 
-For more informations read the documentation of the front-end module L<Sys::Statistics::Linux>.
+For more information read the documentation of the front-end module L<Sys::Statistics::Linux>.
 
 =head1 NET STATISTICS
 
@@ -72,6 +72,10 @@ Call C<get()> to get the statistics. C<get()> returns the statistics as a hash r
 
     my $stat = $lxs->get;
 
+=head2 raw()
+
+The same as get_raw() but it's not necessary to call init() first.
+
 =head2 get_raw()
 
 Call C<get_raw()> to get the raw data - no deltas.
@@ -107,7 +111,7 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 sub new {
     my ($class, %opts) = @_;
@@ -155,6 +159,13 @@ sub get {
     }
 
     return $self->{stats};
+}
+
+sub raw {
+    my $self = shift;
+    my $stat = $self->_load;
+
+    return $stat;
 }
 
 sub get_raw {

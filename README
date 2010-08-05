@@ -24,9 +24,9 @@ SYNOPSIS
 
 DESCRIPTION
     Sys::Statistics::Linux is a front-end module and gather different linux
-    system informations like processor workload, memory usage, network and
+    system information like processor workload, memory usage, network and
     disk statistics and a lot more. Refer the documentation of the
-    distribution modules to get more informations about all possible
+    distribution modules to get more information about all possible
     statistics.
 
 MOTIVATION
@@ -66,7 +66,7 @@ VIRTUAL MACHINES
         cpan> force install Sys::Statistics::Linux
 
     and notice which tests fails, because this statistics maybe not
-    available on your system - sorry.
+    available on the virtual machine - sorry.
 
 DELTAS
     The statistics for "CpuStats", "ProcStats", "PgSwStats", "NetStats",
@@ -77,14 +77,14 @@ DELTAS
     initialized by the call of "new()" or "set()". The call of init()
     re-initialize all statistics that are set to 1 or 2. By the call of
     "get()" the initial statistics will be updated automatically. Please
-    refer the section "METHODS" to get more informations about the usage of
+    refer the section "METHODS" to get more information about the usage of
     "new()", "set()", "init()" and "get()".
 
     Another exigence is to sleep for a while - at least for one second -
     before the call of "get()" if you want to get useful statistics. The
     statistics for "SysInfo", "MemStats", "SockStats", "DiskUsage",
     "LoadAVG" and "FileStats" are no deltas. If you need only one of these
-    informations you don't need to sleep before the call of "get()".
+    information you don't need to sleep before the call of "get()".
 
     The method "get()" prepares all requested statistics and returns the
     statistics as a Sys::Statistics::Linux::Compilation object. The inital
@@ -182,10 +182,10 @@ OPTIONS
     and if you want to calculate the average load of your system since the
     last call. Do you understand? I hope so :)
 
-    To get more informations about the statistics refer the different
-    modules of the distribution.
+    To get more information about the statistics refer the different modules
+    of the distribution.
 
-        sysinfo     -  Collect system informations             with Sys::Statistics::Linux::SysInfo.
+        sysinfo     -  Collect system information              with Sys::Statistics::Linux::SysInfo.
         cpustats    -  Collect cpu statistics                  with Sys::Statistics::Linux::CpuStats.
         procstats   -  Collect process statistics              with Sys::Statistics::Linux::ProcStats.
         memstats    -  Collect memory statistics               with Sys::Statistics::Linux::MemStats.
@@ -268,7 +268,7 @@ METHODS
         $stat->{cpustats}
 
     Take a look to the documentation of Sys::Statistics::Linux::Compilation
-    for more informations.
+    for more information.
 
   init()
     The call of "init()" initiate all activated statistics that are
@@ -320,8 +320,8 @@ METHODS
 
         $lxs->settime('%Y/%m/%d %H:%M:%S');
 
-    To get more informations about the formats take a look at "strftime()"
-    of POSIX.pm or the manpage strftime(3).
+    To get more information about the formats take a look at "strftime()" of
+    POSIX.pm or the manpage strftime(3).
 
   gettime()
     "gettime()" returns a POSIX formatted time stamp, @foo in list and $bar
