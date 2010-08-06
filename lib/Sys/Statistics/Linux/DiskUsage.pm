@@ -50,6 +50,16 @@ Call C<new()> to create a new object.
 
     my $lxs = Sys::Statistics::Linux::DiskUsage->new;
 
+It's possible to set the path to df.
+
+     Sys::Statistics::Linux::DiskUsage->new(
+        cmd => {
+            # This is the default
+            path => '/bin',
+            df   => 'df -kP 2>/dev/null',
+        }
+    );
+
 =head2 get()
 
 Call C<get()> to get the statistics. C<get()> returns the statistics as a hash reference.
@@ -86,12 +96,12 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our $DF_PATH = undef;
 our $DF_CMD  = undef;
 
 sub new {
-    my $class = shift;
+    my ($class, %opts) = @_;
 
     my %self = (
         cmd => {
@@ -99,6 +109,10 @@ sub new {
             df   => 'df -kP 2>/dev/null',
         }
     );
+
+    foreach my $p (keys %{ $opts{cmd} }) {
+        $self{cmd}{$p} = $opts{cmd}{$p};
+    }
 
     return bless \%self, $class;
 }

@@ -89,6 +89,22 @@ It's possible to handoff an array reference with a PID list.
 
     my $lxs = Sys::Statistics::Linux::Processes->new(pids => [ 1, 2, 3 ]);
 
+It's also possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::Processes->new(
+        files => {
+            # This is the default
+            path    => '/proc',
+            uptime  => 'uptime',
+            stat    => 'stat',
+            statm   => 'statm',
+            status  => 'status',
+            cmdline => 'cmdline',
+            wchan   => 'wchan',
+            fd      => 'fd',
+        }
+    );
+
 =head2 init()
 
 Call C<init()> to initialize the statistics.
@@ -146,7 +162,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -154,8 +170,8 @@ sub new {
 
     my %self = (
         files => {
-            uptime  => '/proc/uptime',
-            basedir => '/proc',
+            path    => '/proc',
+            uptime  => 'uptime',
             stat    => 'stat',
             statm   => 'statm',
             status  => 'status',
@@ -177,6 +193,10 @@ sub new {
         }
 
         $self{pids} = $opts{pids};
+    }
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
     }
 
     return bless \%self, $class;
@@ -222,14 +242,14 @@ sub _init {
     if ($self->{pids}) {
         $pids = $self->{pids};
     } else {
-        opendir my $pdir, $file->{basedir}
-            or croak "$class: unable to open directory $file->{basedir} ($!)";
+        opendir my $pdir, $file->{path}
+            or croak "$class: unable to open directory $file->{path} ($!)";
         $pids = [(grep /^\d+\z/, readdir $pdir)];
         closedir $pdir;
     }
 
     foreach my $pid (@$pids) {
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{stat}") {
+        if (open my $fh, '<', "$file->{path}/$pid/$file->{stat}") {
             @{$stats{$pid}}{qw(
                 minflt cminflt mayflt cmayflt utime
                 stime cutime cstime sttime
@@ -260,8 +280,8 @@ sub _load {
     if ($self->{pids}) {
         $pids = $self->{pids};
     } else {
-        opendir my $pdir, $file->{basedir}
-            or croak "$class: unable to open directory $file->{basedir} ($!)";
+        opendir my $pdir, $file->{path}
+            or croak "$class: unable to open directory $file->{path} ($!)";
         $pids = [(grep /^\d+\z/, readdir $pdir)];
         closedir $pdir;
     }
@@ -269,7 +289,7 @@ sub _load {
     PID: foreach my $pid (@$pids) {
 
         # memory usage for each process
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{statm}") {
+        if (open my $fh, '<', "$file->{path}/$pid/$file->{statm}") {
             #   size       total program size
             #   resident   resident set size
             #   share      shared pages
@@ -290,7 +310,7 @@ sub _load {
         }
 
         # different other information for each process
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{stat}") {
+        if (open my $fh, '<', "$file->{path}/$pid/$file->{stat}") {
             @{$stats{$pid}}{qw(
                 cmd     state   ppid    pgrp    session ttynr   minflt
                 cminflt mayflt  cmayflt utime   stime   cutime  cstime
@@ -308,7 +328,7 @@ sub _load {
         $stats{$pid}{actime} = "$d:".sprintf('%02d:%02d:%02d', $h, $m, $s);
 
         # determine the owner of the process
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{status}") {
+        if (open my $fh, '<', "$file->{path}/$pid/$file->{status}") {
             while (my $line = <$fh>) {
                 next unless $line =~ /^Uid:(?:\s+|\t+)(\d+)/;
                 $stats{$pid}{owner} = getpwuid($1) || 'N/a';
@@ -321,7 +341,7 @@ sub _load {
         }
 
         # command line for each process
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{cmdline}") {
+        if (open my $fh, '<', "$file->{path}/$pid/$file->{cmdline}") {
             $stats{$pid}{cmdline} = <$fh>;
             if ($stats{$pid}{cmdline}) {
                 $stats{$pid}{cmdline} =~ s/\0/ /g;
@@ -336,7 +356,7 @@ sub _load {
             next PID;
         }
 
-        if (open my $fh, '<', "$file->{basedir}/$pid/$file->{wchan}") {
+        if (open my $fh, '<', "$file->{path}/$pid/$file->{wchan}") {
             $stats{$pid}{wchan} = <$fh>;
 
             if (defined $stats{$pid}{wchan}) {
@@ -351,9 +371,9 @@ sub _load {
 
         $stats{$pid}{fd} = { };
 
-        if (opendir my $dh, "$file->{basedir}/$pid/$file->{fd}") {
+        if (opendir my $dh, "$file->{path}/$pid/$file->{fd}") {
             foreach my $link (grep !/^\.+\z/, readdir($dh)) {
-                if (my $target = readlink("$file->{basedir}/$pid/$file->{fd}/$link")) {
+                if (my $target = readlink("$file->{path}/$pid/$file->{fd}/$link")) {
                     $stats{$pid}{fd}{$link} = $target;
                 }
             }
@@ -430,7 +450,9 @@ sub _uptime {
     my $self  = shift;
     my $class = ref $self;
     my $file  = $self->{files};
-    open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
+
+    my $filename = $file->{path} ? "$file->{path}/$file->{uptime}" : $file->{uptime};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
     my ($up, $idle) = split /\s+/, <$fh>;
     close($fh);
     return $up;

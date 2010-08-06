@@ -56,6 +56,16 @@ Call C<new()> to create a new object.
 
     my $lxs = Sys::Statistics::Linux::MemStats->new;
 
+It's possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::MemStats->new(
+        files => {
+            # This is the default
+            path    => '/proc',
+            meminfo => 'meminfo',
+        }
+    );
+
 =head2 get()
 
 Call C<get()> to get the statistics. C<get()> returns the statistics as a hash reference.
@@ -92,15 +102,22 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 sub new {
-    my $class = shift;
+    my ($class, %opts) = @_;
+
     my %self = (
         files => {
-            meminfo => '/proc/meminfo',
+            path    => '/proc',
+            meminfo => 'meminfo',
         }
     );
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
+    }
+
     return bless \%self, $class;
 }
 
@@ -110,7 +127,8 @@ sub get {
     my $file    = $self->{files};
     my %meminfo = ();
 
-    open my $fh, '<', $file->{meminfo} or croak "$class: unable to open $file->{meminfo} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{meminfo}" : $file->{meminfo};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     # MemTotal:      1035648 kB
     # MemFree:         15220 kB

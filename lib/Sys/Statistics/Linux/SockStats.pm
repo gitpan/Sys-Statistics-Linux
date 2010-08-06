@@ -33,6 +33,16 @@ Call C<new()> to create a new object.
 
     my $lxs = Sys::Statistics::Linux::SockStats->new;
 
+It's possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::SockStats->new(
+        files => {
+            # This is the default
+            path => '/proc',
+            sockstat => 'net/sockstat',
+        }
+    );
+
 =head2 get()
 
 Call C<get()> to get the statistics. C<get()> returns the statistics as a hash reference.
@@ -69,15 +79,22 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 sub new {
-    my $class = shift;
+    my ($class, %opts) = @_;
+
     my %self = (
         files => {
-            sockstats  => '/proc/net/sockstat',
+            path => '/proc',
+            sockstat => 'net/sockstat',
         }
     );
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
+    }
+
     return bless \%self, $class;
 }
 
@@ -87,7 +104,8 @@ sub get {
     my $file  = $self->{files};
     my %socks = ();
 
-    open my $fh, '<', $file->{sockstats} or croak "$class: unable to open $file->{sockstats} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{sockstat}" : $file->{sockstat};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     while (my $line = <$fh>) {
         if ($line =~ /sockets: used (\d+)/) {

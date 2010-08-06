@@ -15,7 +15,6 @@ lib/Sys/Statistics/Linux/MemStats.pm
 lib/Sys/Statistics/Linux/NetStats.pm
 lib/Sys/Statistics/Linux/PgSwStats.pm
 lib/Sys/Statistics/Linux/Processes.pm
-lib/Sys/Statistics/Linux/Processes.pm.orig
 lib/Sys/Statistics/Linux/ProcStats.pm
 lib/Sys/Statistics/Linux/SockStats.pm
 lib/Sys/Statistics/Linux/SysInfo.pm
@@ -41,3 +40,8 @@ t/120-processes.t
 t/130-search.t
 t/140-psfind.t
 t/150-pstop.t
+t/examples/cpuinfo0
+t/examples/cpuinfo1
+t/examples/cpuinfo2
+t/examples/cpuinfo3
+t/examples/cpuinfo4

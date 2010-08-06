@@ -50,6 +50,17 @@ Maybe you want to store/load the initial statistics to/from a file:
 
 If you set C<initfile> it's not necessary to call sleep before C<get()>.
 
+It's also possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::DiskStats->new(
+        files => {
+            # This is the default
+            path       => '/proc',
+            diskstats  => 'diskstats',
+            partitions => 'partitions',
+        }
+    );
+
 =head2 init()
 
 Call C<init()> to initialize the statistics.
@@ -97,15 +108,16 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 sub new {
     my ($class, %opts) = @_;
 
     my %self = (
         files => {
-            diskstats  => '/proc/diskstats',
-            partitions => '/proc/partitions',
+            path       => '/proc',
+            diskstats  => 'diskstats',
+            partitions => 'partitions',
         },
         # --------------------------------------------------------------
         # The sectors are equivalent with blocks and have a size of 512
@@ -118,6 +130,14 @@ sub new {
     if (defined $opts{initfile}) {
         require YAML::Syck;
         $self{initfile} = $opts{initfile};
+    }
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
+    }
+
+    if ($opts{blocksize}) {
+        $self{blocksize} = $opts{blocksize};
     }
 
     return bless \%self, $class;
@@ -213,7 +233,10 @@ sub _load {
     #     I/O completion time and the backlog that may be accumulating.
     # -----------------------------------------------------------------------------
 
-    if (open $fh, '<', $file->{diskstats}) {
+    my $file_diskstats  = $file->{path} ? "$file->{path}/$file->{diskstats}"  : $file->{diskstats};
+    my $file_partitions = $file->{path} ? "$file->{path}/$file->{partitions}" : $file->{partitions};
+
+    if (open $fh, '<', $file_diskstats) {
         while (my $line = <$fh>) {
             #                   --      --      --      F1     F2     F3     F4     F5     F6     F7     F8    F9    F10   F11
             #                   $1      $2      $3      $4     --     $5     --     $6     --     $7     --    --    --    --
@@ -258,7 +281,7 @@ sub _load {
             }
         }
         close($fh);
-    } elsif (open $fh, '<', $file->{partitions}) {
+    } elsif (open $fh, '<', $file_partitions) {
         while (my $line = <$fh>) {
             #                           --      --     --     --      F1     F2     F3     F4     F5     F6     F7     F8    F9    F10   F11
             #                           $1      $2     --     $3      $4     --     $5     --     $6     --     $7     --    --    --    --
@@ -276,10 +299,10 @@ sub _load {
         }
         close($fh);
     } else {
-        croak "$class: unable to open $file->{diskstats} or $file->{partitions} ($!)";
+        croak "$class: unable to open $file_diskstats or $file_partitions ($!)";
     }
 
-    if (!-e $file->{diskstats} || !scalar %stats) {
+    if (!-e $file_diskstats || !scalar %stats) {
         croak "$class: no diskstats found! your system seems not to be compiled with CONFIG_BLK_STATS=y";
     }
 

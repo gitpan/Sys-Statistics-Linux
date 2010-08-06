@@ -60,6 +60,16 @@ Maybe you want to store/load the initial statistics to/from a file:
 
 If you set C<initfile> it's not necessary to call sleep before C<get()>.
 
+It's also possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::NetStats->new(
+        files => {
+            # This is the default
+            path   => '/proc',
+            netdev => 'net/dev',
+        }
+    );
+
 =head2 init()
 
 Call C<init()> to initialize the statistics.
@@ -111,20 +121,25 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 sub new {
     my ($class, %opts) = @_;
 
     my %self = (
         files => {
-            netstats => '/proc/net/dev',
+            path   => '/proc',
+            netdev => 'net/dev',
         }
     );
 
     if (defined $opts{initfile}) {
         require YAML::Syck;
         $self{initfile} = $opts{initfile};
+    }
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
     }
 
     return bless \%self, $class;
@@ -185,7 +200,8 @@ sub _load {
     my $file  = $self->{files};
     my %stats = ();
 
-    open my $fh, '<', $file->{netstats} or croak "$class: unable to open $file->{netstats} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{netdev}" : $file->{netdev};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     while (my $line = <$fh>) {
         next unless $line =~ /^\s*(\w+):\s*(.*)/;

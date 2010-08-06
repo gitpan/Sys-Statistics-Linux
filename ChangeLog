@@ -1,3 +1,9 @@
+0.57_02 Released at 2010-08-06.
+        - Fixed some bugs in SysInfo for keys pcpucount and niccount.
+        - Added key cpuinfo.
+        - It's now possible to add %opts to the call of new() of
+          each statistic module to set the path to proc.
+
 0.57_01 Released at 2010-08-05.
         - Added method raw() to CpuStats, DiskStats, NetStats, PgSwStats,
           and ProcStats.

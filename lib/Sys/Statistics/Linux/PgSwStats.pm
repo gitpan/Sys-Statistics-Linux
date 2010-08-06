@@ -51,6 +51,17 @@ Maybe you want to store/load the initial statistics to/from a file:
 
 If you set C<initfile> it's not necessary to call sleep before C<get()>.
 
+It's also possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::PgSwStats->new(
+        files => {
+            # This is the default
+            path   => '/proc',
+            stat   => 'stat',
+            vmstat => 'vmstat',
+        }
+    );
+
 =head2 init()
 
 Call C<init()> to initialize the statistics.
@@ -98,21 +109,26 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 sub new {
     my ($class, %opts) = @_;
 
     my %self = (
         files => {
-            stat   => '/proc/stat',
-            vmstat => '/proc/vmstat',
+            path   => '/proc',
+            stat   => 'stat',
+            vmstat => 'vmstat',
         }
     );
 
     if (defined $opts{initfile}) {
         require YAML::Syck;
         $self{initfile} = $opts{initfile};
+    }
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
     }
 
     return bless \%self, $class;
@@ -166,7 +182,8 @@ sub _load {
     my $file  = $self->{files};
     my %stats = ();
 
-    open my $fh, '<', $file->{stat} or croak "$class: unable to open $file->{stat} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{stat}" : $file->{stat};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     while (my $line = <$fh>) {
         if ($line =~ /^page\s+(\d+)\s+(\d+)$/) {
@@ -182,7 +199,8 @@ sub _load {
     # then let's try a look into /proc/vmstat (since 2.6)
 
     if (!defined $stats{pswpout}) {
-        open my $fh, '<', $file->{vmstat} or croak "$class: unable to open $file->{vmstat} ($!)";
+        my $filename = $file->{path} ? "$file->{path}/$file->{vmstat}" : $file->{vmstat};
+        open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
         while (my $line = <$fh>) {
             next unless $line =~ /^(pgpgin|pgpgout|pswpin|pswpout|pgfault|pgmajfault)\s+(\d+)/;
             $stats{$1} = $2;

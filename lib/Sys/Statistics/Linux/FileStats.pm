@@ -38,6 +38,18 @@ Call C<new()> to create a new object.
 
     my $lxs = Sys::Statistics::Linux::FileStats->new;
 
+It's possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::FileStats->new(
+        files => {
+            # This is the default
+            path     => '/proc',
+            file_nr  => 'sys/fs/file-nr',
+            inode_nr => 'sys/fs/inode-nr',
+            dentries => 'sys/fs/dentry-state',
+        }
+    );
+
 =head2 get()
 
 Call C<get()> to get the statistics. C<get()> returns the statistics as a hash reference.
@@ -74,17 +86,24 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 sub new {
-    my $class = shift;
+    my ($class, %opts) = @_;
+
     my %self = (
         files => {
-            file_nr  => '/proc/sys/fs/file-nr',
-            inode_nr => '/proc/sys/fs/inode-nr',
-            dentries => '/proc/sys/fs/dentry-state',
+            path     => '/proc',
+            file_nr  => 'sys/fs/file-nr',
+            inode_nr => 'sys/fs/inode-nr',
+            dentries => 'sys/fs/dentry-state',
         }
     );
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
+    }
+
     return bless \%self, $class;
 }
 
@@ -92,28 +111,51 @@ sub get {
     my $self  = shift;
     my $class = ref $self;
     my $file  = $self->{files};
-    my %stats = ();
+    my $stats = { };
 
-    {
-        open my $fh, '<', $file->{file_nr} or croak "$class: unable to open $file->{file_nr} ($!)";
-        @stats{qw(fhalloc fhfree fhmax)} = (split /\s+/, <$fh>)[0..2];
-        close($fh);
-    }
+    $self->{stats} = $stats;
+    $self->_get_file_nr;
+    $self->_get_inode_nr;
+    $self->_get_dentries;
 
-    {
-        open my $fh, '<', $file->{inode_nr} or croak "$class: unable to open $file->{inode_nr} ($!)";
-        @stats{qw(inalloc infree)} = (split /\s+/, <$fh>)[0..1];
-        $stats{inmax} = $stats{inalloc} + $stats{infree};
-        close($fh);
-    }
+    return $stats;
+}
 
-    {
-        open my $fh, '<', $file->{dentries} or croak "$class: unable to open $file->{dentries} ($!)";
-        @stats{qw(dentries unused agelimit wantpages)} = (split /\s+/, <$fh>)[0..3];
-        close($fh);
-    }
+sub _get_file_nr {
+    my $self  = shift;
+    my $class = ref $self;
+    my $file  = $self->{files};
+    my $stats = $self->{stats};
 
-    return \%stats;
+    my $filename = $file->{path} ? "$file->{path}/$file->{file_nr}" : $file->{file_nr};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
+    @$stats{qw(fhalloc fhfree fhmax)} = (split /\s+/, <$fh>)[0..2];
+    close($fh);
+}
+
+sub _get_inode_nr {
+    my $self  = shift;
+    my $class = ref $self;
+    my $file  = $self->{files};
+    my $stats = $self->{stats};
+
+    my $filename = $file->{path} ? "$file->{path}/$file->{inode_nr}" : $file->{inode_nr};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
+    @$stats{qw(inalloc infree)} = (split /\s+/, <$fh>)[0..1];
+    $stats->{inmax} = $stats->{inalloc} + $stats->{infree};
+    close($fh);
+}
+
+sub _get_dentries {
+    my $self  = shift;
+    my $class = ref $self;
+    my $file  = $self->{files};
+    my $stats = $self->{stats};
+
+    my $filename = $file->{path} ? "$file->{path}/$file->{dentries}" : $file->{dentries};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
+    @$stats{qw(dentries unused agelimit wantpages)} = (split /\s+/, <$fh>)[0..3];
+    close($fh);
 }
 
 1;

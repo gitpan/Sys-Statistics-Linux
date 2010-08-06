@@ -33,6 +33,9 @@ and F</proc/cpuinfo>, F</proc/meminfo>, F</proc/uptime>.
     tcpucount  -  The total number of CPUs (cores, hyper threading).
     niccount   -  The total number of NICs.
 
+    # In testing...
+    cpuinfo    -  Infomation about the CPUs.
+
     # countcpus is the same like tcpucount
     countcpus  -  The total (maybe logical) number of CPUs.
 
@@ -95,19 +98,25 @@ our $VERSION = '0.09';
 our $RAWTIME = 0;
 
 sub new {
-    my $class = shift;
+    my ($class, %opts) = @_;
 
     my %files = (
-        meminfo    => '/proc/meminfo',
-        sysinfo    => '/proc/sysinfo',
-        cpuinfo    => '/proc/cpuinfo',
-        uptime     => '/proc/uptime',
-        hostname   => '/proc/sys/kernel/hostname',
-        domain     => '/proc/sys/kernel/domainname',
-        kernel     => '/proc/sys/kernel/ostype',
-        release    => '/proc/sys/kernel/osrelease',
-        version    => '/proc/sys/kernel/version',
+        path     => "/proc",
+        meminfo  => "meminfo",
+        sysinfo  => "sysinfo",
+        cpuinfo  => "cpuinfo",
+        uptime   => "uptime",
+        hostname => "sys/kernel/hostname",
+        domain   => "sys/kernel/domainname",
+        kernel   => "sys/kernel/ostype",
+        release  => "sys/kernel/osrelease",
+        version  => "sys/kernel/version",
+        netdev   => "net/dev",
     );
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $files{$file} = $opts{files}{$file};
+    }
 
     return bless { files => \%files }, $class;
 }
@@ -143,7 +152,8 @@ sub _get_beer {
 
     #for my $x (qw(hostname domain kernel release version shmmax shmall shmmni)) {
     for my $x (qw(hostname domain kernel release version)) {
-        open my $fh, '<', $file->{$x} or croak "$class: unable to open $file->{$x} ($!)";
+        my $filename = $file->{path} ? "$file->{path}/$file->{$x}" : $file->{$x};
+        open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
         $stats->{$x} = <$fh>;
         close($fh);
     }
@@ -155,7 +165,8 @@ sub _get_meminfo {
     my $file  = $self->{files};
     my $stats = $self->{stats};
 
-    open my $fh, '<', $file->{meminfo} or croak "$class: unable to open $file->{meminfo} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{meminfo}" : $file->{meminfo};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     while (my $line = <$fh>) {
         if ($line =~ /^MemTotal:\s+(\d+ \w+)/) {
@@ -173,15 +184,19 @@ sub _get_cpuinfo {
     my $class = ref($self);
     my $file  = $self->{files};
     my $stats = $self->{stats};
-    my (%pcpu, %ccpu);
+    my (%cpu, $phyid);
 
     $stats->{countcpus} = 0;
 
-    open my $fh, '<', $file->{cpuinfo} or croak "$class: unable to open $file->{cpuinfo} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{cpuinfo}" : $file->{cpuinfo};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     while (my $line = <$fh>) {
-        if ($line =~ /^physical\+id\s*:\s*(\d+)/) {
-            $pcpu{$1}++;
+        if ($line =~ /^physical\s+id\s*:\s*(\d+)/) {
+            $phyid = $1;
+            $cpu{$phyid}{count}++;
+        } elsif ($line =~ /^core\s+id\s*:\s*(\d+)/) {
+            $cpu{$phyid}{cores}{$1}++;
         } elsif ($line =~ /^processor\s*:\s*\d+/) {       # x86
             $stats->{countcpus}++;
         } elsif ($line =~ /^# processors\s*:\s*(\d+)/) {  # s390
@@ -193,9 +208,36 @@ sub _get_cpuinfo {
     close($fh);
 
     $stats->{countcpus} ||= 1; # if it was not possible to match
-    $stats->{pcpucount} = scalar keys %pcpu || $stats->{countcpus};
-    $stats->{vcpucount} = scalar keys %ccpu || 0;
     $stats->{tcpucount} = $stats->{countcpus};
+    $stats->{pcpucount} = scalar keys %cpu || $stats->{countcpus};
+
+    if (scalar keys %cpu) {
+        my @cpuinfo;
+
+        foreach my $cpu (sort keys %cpu) {
+            my $pcpu = $cpu{$cpu};
+            my $text = "cpu$cpu";
+
+            if (scalar keys %{$pcpu->{cores}}) {
+                my $cores = scalar keys %{$pcpu->{cores}};
+                $text .= " has $cores cores";
+
+                if ($pcpu->{cores}->{0} > 1) {
+                    $text .= " with hyper threading";
+                }
+            } elsif ($pcpu->{count} > 1) {
+                $text .= " has hyper threading";
+            }
+
+            push @cpuinfo, $text;
+        }
+
+        $stats->{cpuinfo} = join(", ", @cpuinfo);
+    } elsif ($stats->{countcpus} > 1) {
+        $stats->{cpuinfo} = "$stats->{countcpus} CPUs";
+    } else {
+        $stats->{cpuinfo} = "$stats->{countcpus} CPU";
+    }
 }
 
 sub _get_niccount {
@@ -204,11 +246,12 @@ sub _get_niccount {
     my $file  = $self->{files};
     my $stats = $self->{stats};
 
-    open my $fh, '<', $file->{netinfo} or croak "$class: unable to open $file->{netinfo} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{netdev}" : $file->{netdev};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
     my @lines = <$fh>;
     close $fh;
 
-    $stats->{niccount} = scalar @lines - 1;
+    $stats->{niccount} = @lines > 1 ? scalar @lines - 1 : 0;
 }
 
 sub _get_uptime {
@@ -217,7 +260,8 @@ sub _get_uptime {
     my $file  = $self->{files};
     my $stats = $self->{stats};
 
-    open my $fh, '<', $file->{uptime} or croak "$class: unable to open $file->{uptime} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{uptime}" : $file->{uptime};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
     ($stats->{uptime}, $stats->{idletime}) = split /\s+/, <$fh>;
     close $fh;
 

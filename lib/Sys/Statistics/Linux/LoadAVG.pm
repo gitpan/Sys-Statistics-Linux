@@ -31,6 +31,16 @@ Call C<new()> to create a new object.
 
     my $lxs = Sys::Statistics::Linux::LoadAVG->new;
 
+It's possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::LoadAVG->new(
+        files => {
+            # This is the default
+            path    => '/proc',
+            loadavg => 'loadavg',
+        }
+    );
+
 =head2 get()
 
 Call C<get()> to get the statistics. C<get()> returns the statistics as a hash reference.
@@ -67,15 +77,22 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 sub new {
-    my $class = shift;
+    my ($class, %opts) = @_;
+
     my %self = (
         files => {
-            loadavg => '/proc/loadavg',
+            path    => '/proc',
+            loadavg => 'loadavg',
         }
     );
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
+    }
+
     return bless \%self, $class;
 }
 
@@ -85,7 +102,8 @@ sub get {
     my $file  = $self->{files};
     my %lavg  = ();
 
-    open my $fh, '<', $file->{loadavg} or croak "$class: unable to open $file->{loadavg} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{loadavg}" : $file->{loadavg};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     ( $lavg{avg_1}
     , $lavg{avg_5}

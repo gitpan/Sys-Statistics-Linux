@@ -51,6 +51,17 @@ Maybe you want to store/load the initial statistics to/from a file:
 
 If you set C<initfile> it's not necessary to call sleep before C<get()>.
 
+It's also possible to set the path to the proc filesystem.
+
+     Sys::Statistics::Linux::ProcStats->new(
+        files => {
+            # This is the default
+            path    => '/proc',
+            loadavg => 'loadavg',
+            stat    => 'stat',
+        }
+    );
+
 =head2 init()
 
 Call C<init()> to initialize the statistics.
@@ -98,21 +109,26 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 sub new {
     my ($class, %opts) = @_;
 
     my %self = (
         files => {
-            loadavg => '/proc/loadavg',
-            stat    => '/proc/stat',
+            path    => '/proc',
+            loadavg => 'loadavg',
+            stat    => 'stat',
         }
     );
 
     if (defined $opts{initfile}) {
         require YAML::Syck;
         $self{initfile} = $opts{initfile};
+    }
+
+    foreach my $file (keys %{ $opts{files} }) {
+        $self{files}{$file} = $opts{files}{$file};
     }
 
     return bless \%self, $class;
@@ -166,7 +182,8 @@ sub _load {
     my $file  = $self->{files};
     my $lavg  = $self->_procs;
 
-    open my $fh, '<', $file->{loadavg} or croak "$class: unable to open $file->{loadavg} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{loadavg}" : $file->{loadavg};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
     ($lavg->{runqueue}, $lavg->{count}) = (split m@/@, (split /\s+/, <$fh>)[3]);
     close($fh);
 
@@ -179,7 +196,8 @@ sub _procs {
     my $file  = $self->{files};
     my %stat  = ();
 
-    open my $fh, '<', $file->{stat} or croak "$class: unable to open $file->{stat} ($!)";
+    my $filename = $file->{path} ? "$file->{path}/$file->{stat}" : $file->{stat};
+    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     while (my $line = <$fh>) {
         if ($line =~ /^processes\s+(\d+)/) {
