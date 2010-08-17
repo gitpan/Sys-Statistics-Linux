@@ -25,17 +25,17 @@ foreach my $f (@pf) {
 }
 
 if ($ostest) {
-    plan tests => 18;
+    plan tests => 20;
 
     my @sysinfo = qw(
         hostname domain kernel release
         version memtotal swaptotal countcpus
-        pcpucount cpuinfo tcpucount niccount
+        pcpucount cpuinfo tcpucount interfaces
         uptime idletime
     );
 
     my $sys = Sys::Statistics::Linux->new();
-    $sys->set(sysinfo => 1);
+    $sys->set(sysinfo => { init => 1, cpuinfo => 1 });
     my $stat = $sys->get;
     ok(defined $stat->sysinfo->{$_}, "checking sysinfo $_") for @sysinfo;
 } else {
@@ -47,10 +47,13 @@ my %t_cpuinfo = (
     cpuinfo1 => 'cpu0 has 4 cores with hyper threading',
     cpuinfo2 => 'cpu0 has 6 cores with hyper threading, cpu1 has 6 cores with hyper threading',
     cpuinfo3 => 'cpu0 has 6 cores, cpu1 has 6 cores, cpu2 has 6 cores, cpu3 has 6 cores',
+    cpuinfo4 => 'cpu0 has 1 core with hyper threading',
+    cpuinfo5 => 'cpu0 has 1 core with hyper threading',
 );
 
 foreach my $file (keys %t_cpuinfo) {
     my $sys = Sys::Statistics::Linux::SysInfo->new(
+        cpuinfo => 1,
         files => {
             path => "",
             meminfo  => "/proc/meminfo",

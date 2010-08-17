@@ -96,12 +96,13 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.12';
+our $VERSION = '0.14';
 our $DF_PATH = undef;
 our $DF_CMD  = undef;
 
 sub new {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my $opts  = ref($_[0]) ? shift : {@_};
 
     my %self = (
         cmd => {
@@ -110,8 +111,8 @@ sub new {
         }
     );
 
-    foreach my $p (keys %{ $opts{cmd} }) {
-        $self{cmd}{$p} = $opts{cmd}{$p};
+    foreach my $p (keys %{ $opts->{cmd} }) {
+        $self{cmd}{$p} = $opts->{cmd}->{$p};
     }
 
     return bless \%self, $class;

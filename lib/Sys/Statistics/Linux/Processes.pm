@@ -77,6 +77,9 @@ system is 4kb:
     $Sys::Statistics::Linux::Processes::PAGES_TO_BYTES =    4; # convert to kilobytes
     $Sys::Statistics::Linux::Processes::PAGES_TO_BYTES = 4096; # convert to bytes
 
+    # or with
+    Sys::Statistics::Linux::Processes->new(pages_to_bytes => 4096);
+
 =head1 METHODS
 
 =head2 new()
@@ -162,11 +165,12 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my $opts  = ref($_[0]) ? shift : {@_};
 
     my %self = (
         files => {
@@ -181,22 +185,26 @@ sub new {
         },
     );
 
-    if (defined $opts{pids}) {
-        if (ref($opts{pids}) ne 'ARRAY') {
+    if (defined $opts->{pids}) {
+        if (ref($opts->{pids}) ne 'ARRAY') {
             croak "$class: not a array reference";
         }
 
-        foreach my $pid (@{$opts{pids}}) {
+        foreach my $pid (@{$opts->{pids}}) {
             if ($pid !~ /^\d+\z/) {
                 croak "$class: pid '$pid' is not a number";
             }
         }
 
-        $self{pids} = $opts{pids};
+        $self{pids} = $opts->{pids};
     }
 
-    foreach my $file (keys %{ $opts{files} }) {
-        $self{files}{$file} = $opts{files}{$file};
+    foreach my $file (keys %{ $opts->{files} }) {
+        $self{files}{$file} = $opts->{files}->{$file};
+    }
+
+    if ($opts->{pages_to_bytes}) {
+        $self{pages_to_bytes} = $opts->{pages_to_bytes};
     }
 
     return bless \%self, $class;
@@ -297,7 +305,10 @@ sub _load {
             #   lib        library
             #   data       data/stack
             #   dt         dirty pages (unused in Linux 2.6)
-            if ($PAGES_TO_BYTES) {
+            if ($self->{pages_to_bytes}) {
+                @{$stats{$pid}}{qw(size resident share trs lrs drs dtp)}
+                    = map { $_ * $self->{pages_to_bytes} } split /\s+/, <$fh>;
+            } elsif ($PAGES_TO_BYTES) {
                 @{$stats{$pid}}{qw(size resident share trs lrs drs dtp)}
                     = map { $_ * $PAGES_TO_BYTES } split /\s+/, <$fh>;
             } else {

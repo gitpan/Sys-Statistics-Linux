@@ -121,10 +121,11 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 sub new {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my $opts  = ref($_[0]) ? shift : {@_};
 
     my %self = (
         files => {
@@ -133,13 +134,13 @@ sub new {
         }
     );
 
-    if (defined $opts{initfile}) {
+    if (defined $opts->{initfile}) {
         require YAML::Syck;
-        $self{initfile} = $opts{initfile};
+        $self{initfile} = $opts->{initfile};
     }
 
-    foreach my $file (keys %{ $opts{files} }) {
-        $self{files}{$file} = $opts{files}{$file};
+    foreach my $file (keys %{ $opts->{files} }) {
+        $self{files}{$file} = $opts->{files}->{$file};
     }
 
     return bless \%self, $class;

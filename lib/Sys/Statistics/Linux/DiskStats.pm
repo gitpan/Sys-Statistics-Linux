@@ -108,10 +108,11 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 sub new {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my $opts  = ref($_[0]) ? shift : {@_};
 
     my %self = (
         files => {
@@ -127,17 +128,17 @@ sub new {
         blocksize => 512,
     );
 
-    if (defined $opts{initfile}) {
+    if (defined $opts->{initfile}) {
         require YAML::Syck;
-        $self{initfile} = $opts{initfile};
+        $self{initfile} = $opts->{initfile};
     }
 
-    foreach my $file (keys %{ $opts{files} }) {
-        $self{files}{$file} = $opts{files}{$file};
+    foreach my $file (keys %{ $opts->{files} }) {
+        $self{files}{$file} = $opts->{files}->{$file};
     }
 
-    if ($opts{blocksize}) {
-        $self{blocksize} = $opts{blocksize};
+    if ($opts->{blocksize}) {
+        $self{blocksize} = $opts->{blocksize};
     }
 
     return bless \%self, $class;

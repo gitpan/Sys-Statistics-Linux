@@ -80,7 +80,8 @@ use Carp qw(croak);
 our $VERSION = '0.08';
 
 sub new {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my $opts  = ref($_[0]) ? shift : {@_};
 
     my %self = (
         files => {
@@ -89,8 +90,8 @@ sub new {
         }
     );
 
-    foreach my $file (keys %{ $opts{files} }) {
-        $self{files}{$file} = $opts{files}{$file};
+    foreach my $file (keys %{ $opts->{files} }) {
+        $self{files}{$file} = $opts->{files}->{$file};
     }
 
     return bless \%self, $class;
