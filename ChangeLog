@@ -1,3 +1,6 @@
+0.58    Released at 2010-09-27.
+        - Kicked cpuinfo from SysInfo.pm.
+
 0.57_04 Released at 2010-08-27.
         - Fixed pcpucount and tcpucount in SysInfo.pm.
 

@@ -91,9 +91,8 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our $RAWTIME = 0;
-our $CPUINFO = 0;
 
 sub new {
     my $class = shift;
@@ -136,7 +135,7 @@ sub get {
 
     $self->{stats} = $stats;
 
-    $self->_get_beer;
+    $self->_get_common;
     $self->_get_meminfo;
     $self->_get_uptime;
     $self->_get_interfaces;
@@ -151,13 +150,12 @@ sub get {
    return $stats;
 }
 
-sub _get_beer {
+sub _get_common {
     my $self  = shift;
     my $class = ref($self);
     my $file  = $self->{files};
     my $stats = $self->{stats};
 
-    #for my $x (qw(hostname domain kernel release version shmmax shmall shmmni)) {
     for my $x (qw(hostname domain kernel release version)) {
         my $filename = $file->{path} ? "$file->{path}/$file->{$x}" : $file->{$x};
         open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
@@ -217,37 +215,6 @@ sub _get_cpuinfo {
     $stats->{countcpus} ||= 1; # if it was not possible to match
     $stats->{tcpucount} = $stats->{countcpus};
     $stats->{pcpucount} = scalar keys %cpu || $stats->{countcpus};
-
-    if ($CPUINFO || $self->{cpuinfo}) {
-        if (scalar keys %cpu) {
-            my @cpuinfo;
-
-            foreach my $cpu (sort keys %cpu) {
-                my $pcpu = $cpu{$cpu};
-                my $text = "cpu$cpu";
-
-                if (scalar keys %{$pcpu->{cores}}) {
-                    my $cores = scalar keys %{$pcpu->{cores}};
-                    $text .= " has $cores ";
-                    $text .= $cores > 1 ? "cores" : "core";
-
-                    if ($pcpu->{cores}->{0} > 1) {
-                        $text .= " with hyper threading";
-                    }
-                } elsif ($pcpu->{count} > 1) {
-                    $text .= " has hyper threading";
-                }
-
-                push @cpuinfo, $text;
-            }
-
-            $stats->{cpuinfo} = join(", ", @cpuinfo);
-        } elsif ($stats->{countcpus} > 1) {
-            $stats->{cpuinfo} = "$stats->{countcpus} CPUs";
-        } else {
-            $stats->{cpuinfo} = "$stats->{countcpus} CPU";
-        }
-    }
 }
 
 sub _get_interfaces {
