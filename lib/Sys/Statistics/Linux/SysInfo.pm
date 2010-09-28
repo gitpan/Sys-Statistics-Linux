@@ -32,6 +32,7 @@ and F</proc/cpuinfo>, F</proc/meminfo>, F</proc/uptime>, F</proc/net/dev>.
     pcpucount  -  The total number of physical CPUs.
     tcpucount  -  The total number of CPUs (cores, hyper threading).
     interfaces -  The interfaces of the system.
+    arch       -  The machine hardware name (uname -m).
 
     # countcpus is the same like tcpucount
     countcpus  -  The total (maybe logical) number of CPUs.
@@ -91,7 +92,7 @@ use strict;
 use warnings;
 use Carp qw(croak);
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 our $RAWTIME = 0;
 
 sub new {
@@ -111,6 +112,7 @@ sub new {
             release  => "sys/kernel/osrelease",
             version  => "sys/kernel/version",
             netdev   => "net/dev",
+            arch     => [ "/bin/uname", "-m" ],
         }
     );
 
@@ -161,6 +163,11 @@ sub _get_common {
         open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
         $stats->{$x} = <$fh>;
         close($fh);
+    }
+
+    if (-x $file->{arch}->[0] ) {
+        my $cmd = join(" ", @{$file->{arch}});
+        $stats->{arch} = `$cmd`;
     }
 }
 

@@ -12,6 +12,7 @@ my @pf = qw(
     /proc/cpuinfo
     /proc/meminfo
     /proc/uptime
+    /bin/uname
 );
 
 foreach my $f (@pf) {
