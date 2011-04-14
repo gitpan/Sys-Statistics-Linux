@@ -1,3 +1,6 @@
+0.59_01 Released at 2011-04-14.
+        - Added statistics from /proc/pid/io to Processes.pm. See RT #67459.
+
 0.59    Released at 2010-09-28.
         - Added key "arch" to SysInfo.pm.
 

@@ -1,24 +1,19 @@
 ---
-name: Sys-Statistics-Linux
-version: 0.59
+abstract: 'Front-end module to collect system statistics'
 author:
-  - Jonny Schulz
-abstract: Front-end module to collect system statistics
+  - 'Jonny Schulz'
+configure_requires:
+  Module::Build: 0.36
+generated_by: 'Module::Build version 0.3607'
 license: perl
-resources:
-  license: http://dev.perl.org/licenses/
-requires:
-  Carp: 0
-  POSIX: 0
-  Test::More: 0
-  Time::HiRes: 0
-  UNIVERSAL: 0
-recommends:
-  YAML::Syck: 0
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Sys-Statistics-Linux
 provides:
   Sys::Statistics::Linux:
     file: lib/Sys/Statistics/Linux.pm
-    version: 0.59
+    version: 0.59_01
   Sys::Statistics::Linux::Compilation:
     file: lib/Sys/Statistics/Linux/Compilation.pm
     version: 0.10
@@ -51,14 +46,21 @@ provides:
     version: 0.20
   Sys::Statistics::Linux::Processes:
     file: lib/Sys/Statistics/Linux/Processes.pm
-    version: 0.32
+    version: 0.33
   Sys::Statistics::Linux::SockStats:
     file: lib/Sys/Statistics/Linux/SockStats.pm
     version: 0.09
   Sys::Statistics::Linux::SysInfo:
     file: lib/Sys/Statistics/Linux/SysInfo.pm
     version: 0.13
-generated_by: Module::Build version 0.280801
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+recommends:
+  YAML::Syck: 0
+requires:
+  Carp: 0
+  POSIX: 0
+  Test::More: 0
+  Time::HiRes: 0
+  UNIVERSAL: 0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.59_01

@@ -48,7 +48,7 @@ TECHNICAL NOTE
     long time ago) on kernel versions 2.4 and/or 2.6. It's possible that it
     doesn't run on all linux distributions if some procfs features are
     deactivated or too much modified. As example the linux kernel 2.4 can
-    compiled with the option "CONFIG_BLK_STATS" what turn on or off block
+    compiled with the option `CONFIG_BLK_STATS' what turn on or off block
     statistics for devices.
 
     Don't give up if some of the modules doesn't run on your hardware! Tell
@@ -56,9 +56,9 @@ TECHNICAL NOTE
     first move and to send me a mail. :-)
 
 VIRTUAL MACHINES
-    Note that if you try to install or run "Sys::Statistics::Linux" under
+    Note that if you try to install or run `Sys::Statistics::Linux' under
     virtual machines on guest systems that some statistics are not
-    available, such as "SockStats", "PgSwStats" and "DiskStats". The reason
+    available, such as `SockStats', `PgSwStats' and `DiskStats'. The reason
     is that not all /proc data are passed to the guests.
 
     If the installation fails then try to force the installation with
@@ -69,24 +69,24 @@ VIRTUAL MACHINES
     available on the virtual machine - sorry.
 
 DELTAS
-    The statistics for "CpuStats", "ProcStats", "PgSwStats", "NetStats",
-    "DiskStats" and "Processes" are deltas, for this reason it's necessary
-    to initialize the statistics before the data can be prepared by "get()".
-    These statistics can be initialized with the methods "new()", "set()"
-    and "init()". For any option that is set to 1, the statistics will be
-    initialized by the call of "new()" or "set()". The call of init()
+    The statistics for `CpuStats', `ProcStats', `PgSwStats', `NetStats',
+    `DiskStats' and `Processes' are deltas, for this reason it's necessary
+    to initialize the statistics before the data can be prepared by `get()'.
+    These statistics can be initialized with the methods `new()', `set()'
+    and `init()'. For any option that is set to 1, the statistics will be
+    initialized by the call of `new()' or `set()'. The call of init()
     re-initialize all statistics that are set to 1 or 2. By the call of
-    "get()" the initial statistics will be updated automatically. Please
-    refer the section "METHODS" to get more information about the usage of
-    "new()", "set()", "init()" and "get()".
+    `get()' the initial statistics will be updated automatically. Please
+    refer the section METHODS to get more information about the usage of
+    `new()', `set()', `init()' and `get()'.
 
     Another exigence is to sleep for a while - at least for one second -
-    before the call of "get()" if you want to get useful statistics. The
-    statistics for "SysInfo", "MemStats", "SockStats", "DiskUsage",
-    "LoadAVG" and "FileStats" are no deltas. If you need only one of these
-    information you don't need to sleep before the call of "get()".
+    before the call of `get()' if you want to get useful statistics. The
+    statistics for `SysInfo', `MemStats', `SockStats', `DiskUsage',
+    `LoadAVG' and `FileStats' are no deltas. If you need only one of these
+    information you don't need to sleep before the call of `get()'.
 
-    The method "get()" prepares all requested statistics and returns the
+    The method `get()' prepares all requested statistics and returns the
     statistics as a Sys::Statistics::Linux::Compilation object. The inital
     statistics will be updated.
 
@@ -101,8 +101,8 @@ MANUAL PROC(5)
 OPTIONS
     All options are identical with the package names of the distribution in
     lowercase. To activate the gathering of statistics you have to set the
-    options by the call of "new()" or "set()". In addition you can
-    deactivate statistics with "set()".
+    options by the call of `new()' or `set()'. In addition you can
+    deactivate statistics with `set()'.
 
     The options must be set with one of the following values:
 
@@ -123,7 +123,7 @@ OPTIONS
             },
         );
 
-    Option "initfile" is useful if you want to store initial statistics on
+    Option `initfile' is useful if you want to store initial statistics on
     the filesystem.
 
         my $lxs = Sys::Statistics::Linux->new(
@@ -200,9 +200,9 @@ OPTIONS
 
 METHODS
   new()
-    Call "new()" to create a new Sys::Statistics::Linux object. You can call
-    "new()" with options. This options would be passed to the method
-    "set()".
+    Call `new()' to create a new Sys::Statistics::Linux object. You can call
+    `new()' with options. This options would be passed to the method
+    `set()'.
 
     Without options
 
@@ -216,7 +216,7 @@ METHODS
 
         my $lxs = Sys::Statistics::Linux->new( cpustats => 0 );
 
-    It's possible to call "new()" with a hash reference of options.
+    It's possible to call `new()' with a hash reference of options.
 
         my %options = (
             cpustats => 1,
@@ -226,11 +226,11 @@ METHODS
         my $lxs = Sys::Statistics::Linux->new(\%options);
 
   set()
-    Call "set()" to activate or deactivate options.
+    Call `set()' to activate or deactivate options.
 
-    The following example would call "new()" and initialize
-    "Sys::Statistics::Linux::CpuStats" and delete the object of
-    "Sys::Statistics::Linux::SysInfo".
+    The following example would call `new()' and initialize
+    `Sys::Statistics::Linux::CpuStats' and delete the object of
+    `Sys::Statistics::Linux::SysInfo'.
 
         $lxs->set(
             processes =>  0, # deactivate this statistic
@@ -238,7 +238,7 @@ METHODS
             netstats  =>  2, # activate the statistic and call new() if necessary but not init()
         );
 
-    It's possible to call "set()" with a hash reference of options.
+    It's possible to call `set()' with a hash reference of options.
 
         my %options = (
             cpustats => 2,
@@ -248,14 +248,14 @@ METHODS
         $lxs->set(\%options);
 
   get()
-    Call "get()" to get the collected statistics. "get()" returns a
+    Call `get()' to get the collected statistics. `get()' returns a
     Sys::Statistics::Linux::Compilation object.
 
         my $lxs  = Sys::Statistics::Linux->new(\%options);
         sleep(1);
         my $stat = $lxs->get();
 
-    Or you can pass the time to sleep with the call of "get()".
+    Or you can pass the time to sleep with the call of `get()'.
 
         my $stat = $lxs->get($time_to_sleep);
 
@@ -271,10 +271,10 @@ METHODS
     for more information.
 
   init()
-    The call of "init()" initiate all activated statistics that are
+    The call of `init()' initiate all activated statistics that are
     necessary for deltas. That could be helpful if your script runs in a
     endless loop with a high sleep interval. Don't forget that if you call
-    "get()" that the statistics are deltas since the last time they were
+    `get()' that the statistics are deltas since the last time they were
     initiated.
 
     The following example would calculate average statistics for 30 minutes:
@@ -315,19 +315,19 @@ METHODS
         }
 
   settime()
-    Call "settime()" to define a POSIX formatted time stamp, generated with
+    Call `settime()' to define a POSIX formatted time stamp, generated with
     localtime().
 
         $lxs->settime('%Y/%m/%d %H:%M:%S');
 
-    To get more information about the formats take a look at "strftime()" of
-    POSIX.pm or the manpage strftime(3).
+    To get more information about the formats take a look at `strftime()' of
+    POSIX.pm or the manpage `strftime(3)'.
 
   gettime()
-    "gettime()" returns a POSIX formatted time stamp, @foo in list and $bar
+    `gettime()' returns a POSIX formatted time stamp, @foo in list and $bar
     in scalar context. If the time format isn't set then the default format
     "%Y-%m-%d %H:%M:%S" will be set automatically. You can also set a time
-    format with "gettime()".
+    format with `gettime()'.
 
         my $date_time = $lxs->gettime;
 
@@ -370,7 +370,7 @@ EXAMPLES
         print $lxs->gettime, "\n";
 
     If you want to know how the data structure looks like you can use
-    "Data::Dumper" to check it:
+    `Data::Dumper' to check it:
 
         use strict;
         use warnings;
@@ -398,7 +398,7 @@ BACKWARD COMPATIBILITY
     The old options and keys - CpuStats, NetStats, etc - are still available
     but deprecated! It's not possible to access the statistics via
     Sys::Statistics::Linux::Compilation and it's not possible to call
-    "search()" and "psfind()" if you use the old options.
+    `search()' and `psfind()' if you use the old options.
 
     You should use the new options and access the statistics over the
     accessors
