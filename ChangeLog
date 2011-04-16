@@ -1,3 +1,6 @@
+0.59_02 Released at 2011-04-16.
+        - Fixed a little bug in Processes.pm (_init).
+
 0.59_01 Released at 2011-04-14.
         - Added statistics from /proc/pid/io to Processes.pm. See RT #67459.
 

@@ -178,7 +178,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -280,6 +280,13 @@ sub _init {
         } else {
             delete $stats{$pid};
             next;
+        }
+        if (open my $fh, '<', "$file->{path}/$pid/$file->{io}") {
+            while (my $line = <$fh>) {
+                next unless $line =~ /^([a-z_]+): (\d+)/;
+                $stats{$pid}{io}{$1} = $2;
+            }
+            close($fh);
         }
     }
 
