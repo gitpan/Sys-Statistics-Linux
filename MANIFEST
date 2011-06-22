@@ -2,7 +2,8 @@ Build.PL
 ChangeLog
 examples/diskusage.pl
 examples/loadavg.pl
-examples/processes.pm
+examples/processes.pl
+examples/pstop.pl
 INSTALL
 lib/Sys/Statistics/Linux.pm
 lib/Sys/Statistics/Linux/Compilation.pm
