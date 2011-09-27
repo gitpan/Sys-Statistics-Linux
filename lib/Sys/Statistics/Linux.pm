@@ -433,7 +433,7 @@ This program is free software; you can redistribute it and/or modify it under th
 =cut
 
 package Sys::Statistics::Linux;
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 use strict;
 use warnings;

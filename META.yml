@@ -13,7 +13,7 @@ name: Sys-Statistics-Linux
 provides:
   Sys::Statistics::Linux:
     file: lib/Sys/Statistics/Linux.pm
-    version: 0.60
+    version: 0.61
   Sys::Statistics::Linux::Compilation:
     file: lib/Sys/Statistics/Linux/Compilation.pm
     version: 0.10
@@ -37,7 +37,7 @@ provides:
     version: 0.16
   Sys::Statistics::Linux::NetStats:
     file: lib/Sys/Statistics/Linux/NetStats.pm
-    version: 0.20
+    version: 0.21
   Sys::Statistics::Linux::PgSwStats:
     file: lib/Sys/Statistics/Linux/PgSwStats.pm
     version: 0.18
@@ -63,4 +63,4 @@ requires:
   UNIVERSAL: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.60
+version: 0.61

@@ -121,7 +121,7 @@ use warnings;
 use Carp qw(croak);
 use Time::HiRes;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 sub new {
     my $class = shift;
@@ -205,7 +205,7 @@ sub _load {
     open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
 
     while (my $line = <$fh>) {
-        next unless $line =~ /^\s*(\w+):\s*(.*)/;
+        next unless $line =~ /^\s*(.+?):\s*(.*)/;
         @{$stats{$1}}{qw(
             rxbyt rxpcks rxerrs rxdrop rxfifo rxframe rxcompr rxmulti
             txbyt txpcks txerrs txdrop txfifo txcolls txcarr txcompr

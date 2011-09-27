@@ -1,3 +1,8 @@
+0.61    Released at 2011-09-27.
+        - Fixed a bug in NetStats.pm. The interface name was
+          matched with \w, what is really bad if the name of
+          a interface contains other signs like a dot.
+
 0.60    Released at 2011-06-22.
         - Just a full release. Have fun :-)
 
