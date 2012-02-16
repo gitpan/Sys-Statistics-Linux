@@ -178,7 +178,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -287,8 +287,6 @@ sub _init {
                 $stats{$pid}{io}{$1} = $2;
             }
             close($fh);
-        } else {
-            delete $stats{$pid};
         }
     }
 
@@ -501,6 +499,7 @@ sub _deltas {
 
             for my $k (qw(rchar wchar syscr syscw read_bytes write_bytes cancelled_write_bytes)) {
                 my $p_uptime = $uptime - $lpid->{sttime} / 100;
+                $lpid->{io}->{$k} ||= 0;
                 $istat->{$pid}->{io}->{$k} = $lpid->{io}->{$k};
 
                 if ($p_uptime > 0) {

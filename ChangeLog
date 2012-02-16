@@ -1,3 +1,8 @@
+0.63    Released at 2012-02-16.
+        - Big sorry! The deletion of the PID was no good idea.
+          Fixed it and check if proc->pid->io exists instead
+          to delete the PID.
+
 0.62    Released at 2012-02-16.
         - Fixed a bug in Processes.pm. Delete a PID if it's not
           possible to open /proc/pid/io, otherwise the warning
