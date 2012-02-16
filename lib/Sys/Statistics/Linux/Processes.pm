@@ -178,7 +178,7 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.34';
+our $VERSION = '0.35';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -287,6 +287,8 @@ sub _init {
                 $stats{$pid}{io}{$1} = $2;
             }
             close($fh);
+        } else {
+            delete $stats{$pid};
         }
     }
 

@@ -1,3 +1,9 @@
+0.62    Released at 2012-02-16.
+        - Fixed a bug in Processes.pm. Delete a PID if it's not
+          possible to open /proc/pid/io, otherwise the warning
+          "Use of uninitialized value in division (/) at Processes.pm line 505"
+          is printed.
+
 0.61    Released at 2011-09-27.
         - Fixed a bug in NetStats.pm. The interface name was
           matched with \w, what is really bad if the name of
