@@ -174,7 +174,6 @@ package Sys::Statistics::Linux::Processes;
 
 use strict;
 use warnings;
-use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
@@ -182,7 +181,7 @@ use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 use Data::Dumper;
 # ------------------------------------------------------------------
 
-our $VERSION = '0.37_1';
+our $VERSION = "0.37_2";
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -205,12 +204,12 @@ sub new {
 
     if (defined $opts->{pids}) {
         if (ref($opts->{pids}) ne 'ARRAY') {
-            croak "$class: not a array reference";
+            die "the PIDs must be passed as a array reference to new()";
         }
 
         foreach my $pid (@{$opts->{pids}}) {
             if ($pid !~ /^\d+\z/) {
-                croak "$class: pid '$pid' is not a number";
+                die "PID '$pid' is not a number";
             }
         }
 
@@ -234,11 +233,10 @@ sub init {
 }
 
 sub get {
-    my $self  = shift;
-    my $class = ref $self;
+    my $self = shift;
 
     if (!exists $self->{init}) {
-        croak "$class: there are no initial statistics defined";
+        die "there are no initial statistics defined";
     }
 
     $self->{stats} = $self->_load;
@@ -259,207 +257,70 @@ sub raw {
 
 sub _init {
     my $self  = shift;
-    my $class = ref $self;
     my $file  = $self->{files};
-    my ($pids, %stats);
+    my $pids  = $self->_get_pids;
+    my $stats = { };
 
-    $stats{time} = Time::HiRes::gettimeofday();
-
-    if ($self->{pids}) {
-        $pids = $self->{pids};
-    } else {
-        opendir my $pdir, $file->{path}
-            or croak "$class: unable to open directory $file->{path} ($!)";
-        $pids = [(grep /^\d+\z/, readdir $pdir)];
-        closedir $pdir;
-    }
+    $stats->{time} = Time::HiRes::gettimeofday();
 
     foreach my $pid (@$pids) {
-        if (open my $fh, '<', "$file->{path}/$pid/$file->{stat}") {
-            @{$stats{$pid}}{qw(
-                minflt cminflt mayflt cmayflt utime
-                stime cutime cstime sttime
-            )} = (split /\s+/, <$fh>)[9..16,21];
-            close($fh);
-        } else {
-            delete $stats{$pid};
-            next;
-        }
-        if (open my $fh, '<', "$file->{path}/$pid/$file->{io}") {
-            while (my $line = <$fh>) {
-                next unless $line =~ /^([a-z_]+): (\d+)/;
-                $stats{$pid}{io}{$1} = $2;
+        my $stat = $self->_get_stat($pid);
+
+        if (defined $stat) {
+            foreach my $key (qw/minflt cminflt mayflt cmayflt utime stime cutime cstime sttime/) {
+                $stats->{$pid}->{$key} = $stat->{$key};
             }
-            close($fh);
+            $stats->{$pid}->{io} = $self->_get_io($pid);
         }
-
-# DEBUGGING --------------------------------------------------------
-if (!defined $stats{$pid}{sttime}) {
-    warn Dumper(["init->sttime is not defined", $stats{$pid}]);
-}
-# ------------------------------------------------------------------
-
     }
 
-    return \%stats;
+    return $stats;
 }
 
 sub _load {
     my $self   = shift;
-    my $class  = ref $self;
     my $file   = $self->{files};
-    my $uptime = $self->_uptime();
-    my ($pids, %stats, %userids);
+    my $uptime = $self->_uptime;
+    my $pids   = $self->_get_pids;
+    my $stats  = { };
 
-    $stats{time} = Time::HiRes::gettimeofday();
-
-    # All PIDs are fetched from the /proc filesystem. If a file cannot be opened
-    # of a process, then it can be that the process doesn't exist any more and
-    # the hash key will be deleted.
-
-    if ($self->{pids}) {
-        $pids = $self->{pids};
-    } else {
-        opendir my $pdir, $file->{path}
-            or croak "$class: unable to open directory $file->{path} ($!)";
-        $pids = [(grep /^\d+\z/, readdir $pdir)];
-        closedir $pdir;
-    }
+    $stats->{time} = Time::HiRes::gettimeofday();
 
     PID: foreach my $pid (@$pids) {
+        foreach my $key (qw/statm stat io owner cmdline wchan fd/) {
+            my $method = "_get_$key";
+            my $data = $self->$method($pid);
 
-        if (open my $fh, '<', "$file->{path}/$pid/$file->{io}") {
-            while (my $line = <$fh>) {
-                next unless $line =~ /^([a-z_]+):\s+(\d+)/;
-                $stats{$pid}{io}{$1} = $2;
-            }
-            close($fh);
-        }
-
-        # memory usage for each process
-        if (open my $fh, '<', "$file->{path}/$pid/$file->{statm}") {
-            #   size       total program size
-            #   resident   resident set size
-            #   share      shared pages
-            #   text       text (code)
-            #   lib        library
-            #   data       data/stack
-            #   dt         dirty pages (unused in Linux 2.6)
-            if ($self->{pages_to_bytes}) {
-                @{$stats{$pid}}{qw(size resident share trs lrs drs dtp)}
-                    = map { $_ * $self->{pages_to_bytes} } split /\s+/, <$fh>;
-            } elsif ($PAGES_TO_BYTES) {
-                @{$stats{$pid}}{qw(size resident share trs lrs drs dtp)}
-                    = map { $_ * $PAGES_TO_BYTES } split /\s+/, <$fh>;
-            } else {
-                @{$stats{$pid}}{qw(size resident share trs lrs drs dtp)} = split /\s+/, <$fh>;
+            if (!defined $data) {
+                delete $stats->{$pid};
+                next PID;
             }
 
-            close($fh);
-        } else {
-            next PID;
-        }
-
-        # different other information for each process
-        if (open my $fh, '<', "$file->{path}/$pid/$file->{stat}") {
-            @{$stats{$pid}}{qw(
-                cmd     state   ppid    pgrp    session ttynr   minflt
-                cminflt mayflt  cmayflt utime   stime   cutime  cstime
-                prior   nice    nlwp    sttime  vsize   nswap   cnswap
-                cpu
-            )} = (split /\s+/, <$fh>)[1..6,9..19,21..22,35..36,38];
-            close($fh);
-        } else {
-            delete $stats{$pid};
-            next PID;
-        }
-
-        # calculate the active time of each process
-        my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $uptime - $stats{$pid}{sttime} / 100));
-        $stats{$pid}{actime} = "$d:".sprintf('%02d:%02d:%02d', $h, $m, $s);
-
-        # determine the owner of the process
-        if (open my $fh, '<', "$file->{path}/$pid/$file->{status}") {
-            while (my $line = <$fh>) {
-                next unless $line =~ /^Uid:(?:\s+|\t+)(\d+)/;
-                $stats{$pid}{owner} = getpwuid($1) || 'N/a';
-                last;
-            }
-            close($fh);
-        } else {
-            delete $stats{$pid};
-            next PID;
-        }
-
-        # command line for each process
-        if (open my $fh, '<', "$file->{path}/$pid/$file->{cmdline}") {
-            $stats{$pid}{cmdline} = <$fh>;
-            if ($stats{$pid}{cmdline}) {
-                $stats{$pid}{cmdline} =~ s/\0/ /g;
-                $stats{$pid}{cmdline} =~ s/^\s+//;
-                $stats{$pid}{cmdline} =~ s/\s+$//;
-                chomp $stats{$pid}{cmdline};
-            }
-            $stats{$pid}{cmdline} = 'N/a' unless $stats{$pid}{cmdline};
-            close($fh);
-        } else {
-            delete $stats{$pid};
-            next PID;
-        }
-
-        if (open my $fh, '<', "$file->{path}/$pid/$file->{wchan}") {
-            $stats{$pid}{wchan} = <$fh>;
-
-            if (defined $stats{$pid}{wchan}) {
-                chomp($stats{$pid}{wchan});
-            } else {
-                $stats{$pid}{wchan} = defined;
-            }
-        } else {
-            delete $stats{$pid};
-            next PID;
-        }
-
-        $stats{$pid}{fd} = { };
-
-        if (opendir my $dh, "$file->{path}/$pid/$file->{fd}") {
-            foreach my $link (grep !/^\.+\z/, readdir($dh)) {
-                if (my $target = readlink("$file->{path}/$pid/$file->{fd}/$link")) {
-                    $stats{$pid}{fd}{$link} = $target;
+            if ($key eq "statm" || $key eq "stat") {
+                for my $x (keys %$data) {
+                    $stats->{$pid}->{$x} = $data->{$x};
                 }
+            } else {
+                $stats->{$pid}->{$key} = $data;
             }
         }
-
-# DEBUGGING --------------------------------------------------------
-if (!defined $stats{$pid}{sttime}) {
-    warn Dumper(["load->sttime is not defined", $stats{$pid}]);
-}
-# ------------------------------------------------------------------
-
     }
 
-    return \%stats;
+    return $stats;
 }
 
 sub _deltas {
     my $self   = shift;
-    my $class  = ref $self;
     my $istat  = $self->{init};
     my $lstat  = $self->{stats};
     my $uptime = $self->_uptime;
 
-# DEBUGGING --------------------------------------------------------
-if (!defined $uptime) {
-    warn "uptime is not defined";
-}
-# ------------------------------------------------------------------
-
     if (!defined $istat->{time} || !defined $lstat->{time}) {
-        croak "$class: not defined key found 'time'";
+        die "not defined key found 'time'";
     }
 
     if ($istat->{time} !~ NUMBER || $lstat->{time} !~ NUMBER) {
-        croak "$class: invalid value for key 'time'";
+        die "invalid value for key 'time'";
     }
 
     my $time = $lstat->{time} - $istat->{time};
@@ -470,25 +331,16 @@ if (!defined $uptime) {
         my $ipid = $istat->{$pid};
         my $lpid = $lstat->{$pid};
 
-# DEBUGGING --------------------------------------------------------
-if (!defined $lpid->{sttime}) {
-    warn Dumper(["lpid->sttime is not defined", $lpid]);
-}
-if (!defined $ipid && !defined $ipid->{sttime}) {
-    warn Dumper(["ipid->sttime is not defined", $ipid]);
-}
-# ------------------------------------------------------------------
-
         # yeah, what happends if the start time is different... it seems that a new
         # process with the same process-id were created... for this reason I have to
         # check if the start time is equal!
         if ($ipid && $ipid->{sttime} == $lpid->{sttime}) {
             for my $k (qw(minflt cminflt mayflt cmayflt utime stime cutime cstime)) {
                 if (!defined $ipid->{$k}) {
-                    croak "$class: not defined key found '$k'";
+                    die "not defined key found '$k'";
                 }
                 if ($ipid->{$k} !~ NUMBER || $lpid->{$k} !~ NUMBER) {
-                    croak "$class: invalid value for key '$k'";
+                    die "invalid value for key '$k'";
                 }
 
                 $lpid->{$k} -= $ipid->{$k};
@@ -506,7 +358,7 @@ if (!defined $ipid && !defined $ipid->{sttime}) {
             for my $k (qw(rchar wchar syscr syscw read_bytes write_bytes cancelled_write_bytes)) {
                 if(defined $ipid->{io}->{$k} && defined $lpid->{io}->{$k}){
                     if($ipid->{io}->{$k} !~ NUMBER || $lpid->{io}->{$k} !~ NUMBER){
-                        croak "$class: invalid value for io key '$k'";
+                        die "invalid value for io key '$k'";
                     }
                     $lpid->{io}->{$k} -= $ipid->{io}->{$k};
                     $ipid->{io}->{$k} += $lpid->{io}->{$k};
@@ -548,13 +400,166 @@ if (!defined $ipid && !defined $ipid->{sttime}) {
     }
 }
 
+sub _get_statm {
+    my ($self, $pid) = @_;
+    my $file = $self->{files};
+    my %stat = ();
+
+    open my $fh, '<', "$file->{path}/$pid/$file->{statm}"
+        or return undef;
+
+    my @line = split /\s+/, <$fh>;
+
+    if (@line < 7) {
+        return undef;
+    }
+
+    my $ptb = $self->{pages_to_bytes} || $PAGES_TO_BYTES;
+
+    if ($ptb) {
+        @stat{qw(size resident share trs lrs drs dtp)} = map { $_ * $ptb } @line;
+    } else {
+        @stat{qw(size resident share trs lrs drs dtp)} = @line;
+    }
+
+    close($fh);
+    return \%stat;
+}
+
+sub _get_stat {
+    my ($self, $pid) = @_;
+    my $file = $self->{files};
+    my %stat = ();
+
+    open my $fh, '<', "$file->{path}/$pid/$file->{stat}"
+        or return undef;
+
+    my @line = split /\s+/, <$fh>;
+
+    if (@line < 38) {
+        return undef;
+    }
+
+    @stat{qw(
+        cmd     state   ppid    pgrp    session ttynr   minflt
+        cminflt mayflt  cmayflt utime   stime   cutime  cstime
+        prior   nice    nlwp    sttime  vsize   nswap   cnswap
+        cpu
+    )} = @line[1..6,9..19,21..22,35..36,38];
+
+    my $uptime = $self->_uptime;
+    my ($d, $h, $m, $s) = $self->_calsec(sprintf('%li', $uptime - $stat{sttime} / 100));
+    $stat{actime} = "$d:".sprintf('%02d:%02d:%02d', $h, $m, $s);
+
+    close($fh);
+    return \%stat;
+}
+
+sub _get_owner {
+    my ($self, $pid) = @_;
+    my $file = $self->{files};
+    my $owner = "N/a";
+
+    open my $fh, '<', "$file->{path}/$pid/$file->{status}"
+        or return undef;
+
+    while (my $line = <$fh>) {
+        if ($line =~ /^Uid:(?:\s+|\t+)(\d+)/) {
+            $owner = getpwuid($1) || "N/a";
+            last;
+        }
+    }
+
+    close($fh);
+    return $owner;
+}
+
+sub _get_cmdline {
+    my ($self, $pid) = @_;
+    my $file = $self->{files};
+
+    open my $fh, '<', "$file->{path}/$pid/$file->{cmdline}"
+        or return undef;
+
+    my $cmdline = <$fh> // "N/a";
+    close $fh;
+
+    $cmdline =~ s/\0/ /g;
+    $cmdline =~ s/^\s+//;
+    $cmdline =~ s/\s+$//;
+    chomp $cmdline;
+    return $cmdline;
+}
+
+sub _get_wchan {
+    my ($self, $pid) = @_;
+    my $file = $self->{files};
+
+    open my $fh, '<', "$file->{path}/$pid/$file->{wchan}"
+        or return undef;
+
+    my $wchan = <$fh>;
+    $wchan //= defined;
+    close $fh;
+    chomp $wchan;
+    return $wchan;
+}
+
+sub _get_io {
+    my ($self, $pid) = @_;
+    my $file = $self->{files};
+    my %stat = ();
+
+    if (open my $fh, '<', "$file->{path}/$pid/$file->{io}") {
+        while (my $line = <$fh>) {
+            if ($line =~ /^([a-z_]+):\s+(\d+)/) {
+                $stat{$1} = $2;
+            }
+        }
+
+        close($fh);
+    }
+
+    return \%stat;
+}
+
+sub _get_fd {
+    my ($self, $pid) = @_;
+    my $file = $self->{files};
+    my %stat = ();
+
+    if (opendir my $dh, "$file->{path}/$pid/$file->{fd}") {
+        foreach my $link (grep !/^\.+\z/, readdir($dh)) {
+            if (my $target = readlink("$file->{path}/$pid/$file->{fd}/$link")) {
+                $stat{$pid}{fd}{$link} = $target;
+            }
+        }
+    }
+
+    return \%stat;
+}
+
+sub _get_pids {
+    my $self = shift;
+    my $file = $self->{files};
+
+    if ($self->{pids}) {
+        return $self->{pids};
+    }
+
+    opendir my $dh, $file->{path}
+        or die "unable to open directory $file->{path} ($!)";
+    my @pids = grep /^\d+\z/, readdir $dh;
+    closedir $dh;
+    return \@pids;
+}
+
 sub _uptime {
-    my $self  = shift;
-    my $class = ref $self;
-    my $file  = $self->{files};
+    my $self = shift;
+    my $file = $self->{files};
 
     my $filename = $file->{path} ? "$file->{path}/$file->{uptime}" : $file->{uptime};
-    open my $fh, '<', $filename or croak "$class: unable to open $filename ($!)";
+    open my $fh, '<', $filename or die "unable to open $filename ($!)";
     my ($up, $idle) = split /\s+/, <$fh>;
     close($fh);
     return $up;

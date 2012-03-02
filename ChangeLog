@@ -1,3 +1,6 @@
+0.64_2  Released at 2012-03-02.
+        - Redesign of init() and load() of Processes.pm.
+
 0.64_1  Released at 2012-03-02.
         - Debugging undef warnings from version 0.63 on lines 452,
           490, 494, 501, 502. Thanks for helping!
