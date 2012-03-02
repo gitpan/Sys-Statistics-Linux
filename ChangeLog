@@ -1,3 +1,7 @@
+0.64_1  Released at 2012-03-02.
+        - Debugging undef warnings from version 0.63 on lines 452,
+          490, 494, 501, 502. Thanks for helping!
+
 0.63    Released at 2012-02-16.
         - Big sorry! The deletion of the PID was no good idea.
           Fixed it and check if proc->pid->io exists instead

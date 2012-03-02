@@ -178,7 +178,11 @@ use Carp qw(croak);
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = '0.36';
+# DEBUGGING --------------------------------------------------------
+use Data::Dumper;
+# ------------------------------------------------------------------
+
+our $VERSION = '0.37_1';
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -288,6 +292,13 @@ sub _init {
             }
             close($fh);
         }
+
+# DEBUGGING --------------------------------------------------------
+if (!defined $stats{$pid}{sttime}) {
+    warn Dumper(["init->sttime is not defined", $stats{$pid}]);
+}
+# ------------------------------------------------------------------
+
     }
 
     return \%stats;
@@ -418,6 +429,13 @@ sub _load {
                 }
             }
         }
+
+# DEBUGGING --------------------------------------------------------
+if (!defined $stats{$pid}{sttime}) {
+    warn Dumper(["load->sttime is not defined", $stats{$pid}]);
+}
+# ------------------------------------------------------------------
+
     }
 
     return \%stats;
@@ -429,6 +447,12 @@ sub _deltas {
     my $istat  = $self->{init};
     my $lstat  = $self->{stats};
     my $uptime = $self->_uptime;
+
+# DEBUGGING --------------------------------------------------------
+if (!defined $uptime) {
+    warn "uptime is not defined";
+}
+# ------------------------------------------------------------------
 
     if (!defined $istat->{time} || !defined $lstat->{time}) {
         croak "$class: not defined key found 'time'";
@@ -445,6 +469,15 @@ sub _deltas {
     for my $pid (keys %{$lstat}) {
         my $ipid = $istat->{$pid};
         my $lpid = $lstat->{$pid};
+
+# DEBUGGING --------------------------------------------------------
+if (!defined $lpid->{sttime}) {
+    warn Dumper(["lpid->sttime is not defined", $lpid]);
+}
+if (!defined $ipid && !defined $ipid->{sttime}) {
+    warn Dumper(["ipid->sttime is not defined", $ipid]);
+}
+# ------------------------------------------------------------------
 
         # yeah, what happends if the start time is different... it seems that a new
         # process with the same process-id were created... for this reason I have to
