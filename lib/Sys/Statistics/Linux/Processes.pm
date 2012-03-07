@@ -177,10 +177,6 @@ use warnings;
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-# DEBUGGING --------------------------------------------------------
-use Data::Dumper;
-# ------------------------------------------------------------------
-
 our $VERSION = "0.37_2";
 our $PAGES_TO_BYTES = 0;
 
