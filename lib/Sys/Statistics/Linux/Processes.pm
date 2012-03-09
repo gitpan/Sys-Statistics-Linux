@@ -177,7 +177,7 @@ use warnings;
 use Time::HiRes;
 use constant NUMBER => qr/^-{0,1}\d+(?:\.\d+){0,1}\z/;
 
-our $VERSION = "0.37_2";
+our $VERSION = "0.38";
 our $PAGES_TO_BYTES = 0;
 
 sub new {
@@ -477,8 +477,12 @@ sub _get_cmdline {
     open my $fh, '<', "$file->{path}/$pid/$file->{cmdline}"
         or return undef;
 
-    my $cmdline = <$fh> // "N/a";
+    my $cmdline = <$fh>;
     close $fh;
+
+    if (!defined $cmdline) {
+        $cmdline = "N/a";
+    }
 
     $cmdline =~ s/\0/ /g;
     $cmdline =~ s/^\s+//;
@@ -495,8 +499,12 @@ sub _get_wchan {
         or return undef;
 
     my $wchan = <$fh>;
-    $wchan //= defined;
     close $fh;
+
+    if (!defined $wchan) {
+        $wchan = defined;
+    }
+
     chomp $wchan;
     return $wchan;
 }
